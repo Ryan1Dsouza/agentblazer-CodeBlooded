@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, lazy, Suspense, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './hooks/useTheme'
 import MainLayout from './layouts/MainLayout'
@@ -11,6 +11,10 @@ const Join = lazy(() => import('./pages/Join'))
 
 function App() {
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    (window as any).isAppLoading = loading;
+  }, [loading])
 
   return (
     <ThemeProvider>

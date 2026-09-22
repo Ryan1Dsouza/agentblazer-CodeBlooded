@@ -36,13 +36,13 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const mouseRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2, normX: 0, normY: 0 });
   const exitProgressRef = useRef(0);
 
-  // Determine actual Club Logo path based on active theme
+  // Dynamically select the logo based on the active theme
   const clubLogoPath =
     theme === 'inferno'
-      ? '/assets/logos/AgentBlazer_Inferno.png'
+      ? '/logos/AgentBlazer_Inferno.png'
       : theme === 'frost'
-      ? '/assets/logos/AgentBlazer_Frost.png'
-      : '/assets/logos/AgentBlazer_Violet.png';
+      ? '/logos/AgentBlazer_Frost.png'
+      : '/AgentBlazer_Logo_Ready (1).png'; // Use high-quality transparent one for default/violet
 
   const themeColors = {
     violet: {
@@ -80,11 +80,11 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
     const criticalAssetUrls = [
       clubLogoPath,
-      '/assets/AgentBlazer_Logo_Transparent.png',
-      '/assets/logos/logo_clean.png',
-      '/assets/logos/AgentBlazer_Violet.png',
-      '/assets/logos/AgentBlazer_Inferno.png',
-      '/assets/logos/AgentBlazer_Frost.png'
+      '/AgentBlazer_Logo_Transparent.png',
+      '/logos/logo_clean.png',
+      '/logos/AgentBlazer_Violet.png',
+      '/logos/AgentBlazer_Inferno.png',
+      '/logos/AgentBlazer_Frost.png'
     ];
 
     let loadedCount = 1;
@@ -514,6 +514,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
               width: '100%',
               height: '100%',
               objectFit: 'contain',
+              mixBlendMode: 'screen', // This instantly removes the black background from the themed logos!
               filter: 'drop-shadow(0 0 12px rgba(255,255,255,0.35))',
               animation: 'pulse 3s ease-in-out infinite'
             }}

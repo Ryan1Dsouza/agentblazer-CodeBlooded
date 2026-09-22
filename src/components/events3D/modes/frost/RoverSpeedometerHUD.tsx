@@ -24,7 +24,10 @@ export default function RoverSpeedometerHUD({
       fullscreen
       style={{ pointerEvents: 'none', zIndex: 35 }}
     >
-      <div className="absolute right-6 bottom-6 flex flex-col items-end gap-1.5 select-none animate-fade-in font-mono">
+      <div 
+        style={{ position: 'absolute', right: '24px', bottom: '24px' }}
+        className="flex flex-col items-end gap-1.5 select-none animate-fade-in font-mono"
+      >
         <div
           className={`backdrop-blur-md px-4 py-3 rounded-2xl border shadow-2xl flex flex-col items-end gap-1 transition-all ${
             isBoosting

@@ -1,11 +1,25 @@
+import { useTheme } from '../hooks/useTheme';
 import { siteConfig } from '../data/config';
+import ParticleLogo from '../components/ParticleLogo';
+import OrbitingSocials from '../components/OrbitingSocials';
 
 export default function Join() {
+  const { theme } = useTheme();
+  const logoPath = '/AgentBlazer_Logo_Ready (1).png';
+
   return (
     <section className="join-page">
       <div className="container">
         <div className="join-cta">
-          <img src={siteConfig.club.logoPath} alt="AgentBlazer" className="join-logo" />
+          {/* Centered Particle Logo & Orbiting Socials Container */}
+          <div className="join-logo-wrapper">
+            <div className="logo-container join-logo-box" style={{ background: "transparent", border: "none" }}>
+              <ParticleLogo logoPath={logoPath} alt="AgentBlazer Logo" theme={theme} />
+              <div className={`logo-glow-${theme === "inferno" ? "inferno" : theme === "frost" ? "frost" : "violet"}`} />
+              <OrbitingSocials theme={theme} />
+            </div>
+          </div>
+
           <span className="join-badge">Become a Member</span>
           <h2 className="join-title">Join AgentBlazer</h2>
           <p className="join-description">

@@ -411,11 +411,13 @@ button {
 .logo-glow-inferno {
   position: absolute; width: 280px; height: 280px; top: 35px; left: 35px;
   border-radius: 50%; background: rgba(255,107,53,0.35); filter: blur(60px); z-index: 0; animation: pulse 4s ease infinite;
+  pointer-events: none;
 }
 
 .logo-glow-frost {
   position: absolute; width: 280px; height: 280px; top: 35px; left: 35px;
   border-radius: 50%; background: rgba(7,182,214,0.35); filter: blur(60px); z-index: 0; animation: pulse 4s ease infinite;
+  pointer-events: none;
 }
 
 .hero-logo {
@@ -454,6 +456,106 @@ button {
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-top: 1rem;
+}
+
+/* ==========================================================================
+   Orbiting Social Media Icons
+   ========================================================================== */
+.orbit-system-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.orbit-track-ring {
+  position: absolute;
+  width: 410px;
+  height: 410px;
+  border-radius: 50%;
+  border: 1px dashed var(--border);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.orbit-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  margin-left: -22px;
+  pointer-events: auto;
+  animation: orbit-rotate 22s linear infinite;
+  animation-delay: 0s;
+}
+
+.orbit-system-wrapper:hover .orbit-item {
+  animation-play-state: paused;
+}
+
+.orbit-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface-elevated);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid var(--border);
+  color: var(--accent-primary);
+  box-shadow: 0 0 15px var(--glow), 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: orbit-counter 22s linear infinite;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.orbit-system-wrapper:hover .orbit-icon-btn {
+  animation-play-state: paused;
+}
+
+.orbit-icon-btn:hover {
+  transform: scale(1.22);
+  color: #ffffff;
+  background: var(--button-background);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 25px var(--glow-strong), 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="frost"] .orbit-icon-btn {
+  background: rgba(240, 248, 255, 0.9);
+  color: #07b6d6;
+  border-color: rgba(7, 182, 214, 0.5);
+  box-shadow: 0 0 15px rgba(7, 182, 214, 0.3);
+}
+
+[data-theme="frost"] .orbit-icon-btn:hover {
+  color: #ffffff;
+}
+
+@keyframes orbit-rotate {
+  from {
+    transform: rotate(var(--start-angle, 0deg)) translateX(205px) rotate(calc(-1 * var(--start-angle, 0deg)));
+  }
+  to {
+    transform: rotate(calc(var(--start-angle, 0deg) + 360deg)) translateX(205px) rotate(calc(-1 * (var(--start-angle, 0deg) + 360deg)));
+  }
+}
+
+@keyframes orbit-counter {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
 }
 
 .stat-item {
@@ -2050,14 +2152,22 @@ button {
   text-align: center;
   max-width: 700px;
   margin: 0 auto 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.join-logo {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  margin-bottom: 1.5rem;
-  filter: drop-shadow(0 0 20px var(--glow));
+.join-logo-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.join-logo-box {
+  width: 260px;
+  height: 260px;
 }
 
 .join-badge {
@@ -2333,6 +2443,25 @@ button {
   .logo-container {
     width: 250px;
     height: 250px;
+  }
+
+  .orbit-track-ring {
+    width: 290px;
+    height: 290px;
+  }
+
+  @keyframes orbit-rotate {
+    from {
+      transform: rotate(var(--start-angle, 0deg)) translateX(145px) rotate(calc(-1 * var(--start-angle, 0deg)));
+    }
+    to {
+      transform: rotate(calc(var(--start-angle, 0deg) + 360deg)) translateX(145px) rotate(calc(-1 * (var(--start-angle, 0deg) + 360deg)));
+    }
+  }
+
+  .orbit-icon-btn {
+    width: 38px;
+    height: 38px;
   }
 
   .hero-buttons {
