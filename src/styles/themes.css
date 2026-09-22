@@ -1,0 +1,48 @@
+:root,
+[data-theme="violet"] {
+  --background: #0a0a1a;
+  --surface: rgba(20, 20, 40, 0.7);
+  --surface-elevated: rgba(30, 30, 60, 0.85);
+  --text-primary: #e8e8f0;
+  --text-secondary: #a0a0b8;
+  --accent-primary: #00d4ff;
+  --accent-secondary: #8b5cf6;
+  --accent-tertiary: #d946ef;
+  --border: rgba(139, 92, 246, 0.3);
+  --glow: rgba(0, 212, 255, 0.4);
+  --glow-strong: rgba(0, 212, 255, 0.7);
+  --button-background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+  --button-hover: linear-gradient(135deg, #a78bfa 0%, #e879f9 100%);
+}
+
+[data-theme="inferno"] {
+  --background: #1a0a0a;
+  --surface: rgba(40, 20, 20, 0.7);
+  --surface-elevated: rgba(60, 30, 20, 0.85);
+  --text-primary: #f5f0e8;
+  --text-secondary: #b8a090;
+  --accent-primary: #ff6b35;
+  --accent-secondary: #ff3d00;
+  --accent-tertiary: #ffd700;
+  --border: rgba(255, 107, 53, 0.3);
+  --glow: rgba(255, 107, 53, 0.4);
+  --glow-strong: rgba(255, 107, 53, 0.7);
+  --button-background: linear-gradient(135deg, #ff6b35 0%, #ff3d00 100%);
+  --button-hover: linear-gradient(135deg, #ff8a5c 0%, #ff5722 100%);
+}
+
+[data-theme="frost"] {
+  --background: #f0f4f8;
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface-elevated: rgba(255, 255, 255, 0.9);
+  --text-primary: #1a2a3a;
+  --text-secondary: #5a6a7a;
+  --accent-primary: #0ea5e9;
+  --accent-secondary: #3b82f6;
+  --accent-tertiary: #06b6d4;
+  --border: rgba(14, 165, 233, 0.3);
+  --glow: rgba(14, 165, 233, 0.4);
+  --glow-strong: rgba(14, 165, 233, 0.7);
+  --button-background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+  --button-hover: linear-gradient(135deg, #38bdf8 0%, #60a5fa 100%);
+}
