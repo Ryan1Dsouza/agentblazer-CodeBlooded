@@ -9,7 +9,6 @@ export function useTheme() {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('agentblazer-theme', theme);
   }, [theme]);
 
   const switchTheme = (newTheme: Theme) => {

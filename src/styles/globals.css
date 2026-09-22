@@ -59,6 +59,64 @@ button {
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  animation: ambient-glow 6s ease-in-out infinite alternate;
+  box-shadow: 0 0 15px rgba(7,182,214,0.15);
+}
+
+[data-theme="frost"] .glass-panel {
+  background: rgba(230,245,255,0.85);
+  border-color: rgba(7,182,214,0.45);
+  box-shadow: 0 0 20px rgba(7,182,214,0.25), 0 4px 20px rgba(7,182,214,0.15);
+}
+
+[data-theme="frost"] .glass-panel-elevated {
+  background: rgba(240,250,255,0.95);
+  border-color: rgba(7,182,214,0.5);
+}
+
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(0,212,255,0.08) 0%, transparent 60%);
+  animation: ambient-shift 10s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass-panel-elevated {
+  background: var(--surface-elevated);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  animation: ambient-glow 6s ease-in-out infinite alternate;
+}
+
+.glass-panel-elevated::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at 70% 70%, rgba(139,92,246,0.08) 0%, transparent 60%);
+  animation: ambient-shift 10s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes ambient-glow {
+  from { box-shadow: 0 0 15px rgba(0,212,255,0.15), 0 0 30px rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.3); }
+  to { box-shadow: 0 0 25px rgba(0,212,255,0.25), 0 0 50px rgba(139,92,246,0.12); border-color: rgba(0,212,255,0.4); }
+}
+
+@keyframes ambient-shift {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to { transform: translate(10%, 5%) rotate(3deg); }
 }
 
 .glass-panel-elevated {
@@ -168,6 +226,7 @@ button {
   font-size: 0.9rem;
   transition: all 0.3s ease;
   border: 1px solid transparent;
+  animation: border-glow 3s ease-in-out infinite alternate;
 }
 
 .nav-pill:hover {
@@ -180,6 +239,7 @@ button {
   background: var(--surface-elevated);
   border-color: var(--border);
   box-shadow: 0 0 15px var(--glow);
+  animation: border-glow 2s ease-in-out infinite alternate;
 }
 
 .header-themes {
@@ -302,12 +362,25 @@ button {
 }
 
 .logo-container {
-  position: relative;
-  width: 350px;
-  height: 350px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative; width: 350px; height: 350px;
+  display: flex; justify-content: center; align-items: center;
+  background: transparent;
+}
+
+.logo-glow-violet {
+  position: absolute; width: 320px; height: 320px; top: 30px; left: 30px;
+  border-radius: 50%; background: radial-gradient(circle at center, rgba(139,92,246,0.5), rgba(0,212,255,0.15), transparent 70%); filter: blur(50px); z-index: 0; animation: pulse 4s ease infinite;
+  pointer-events: none;
+}
+
+.logo-glow-inferno {
+  position: absolute; width: 280px; height: 280px; top: 35px; left: 35px;
+  border-radius: 50%; background: rgba(255,107,53,0.35); filter: blur(60px); z-index: 0; animation: pulse 4s ease infinite;
+}
+
+.logo-glow-frost {
+  position: absolute; width: 280px; height: 280px; top: 35px; left: 35px;
+  border-radius: 50%; background: rgba(7,182,214,0.35); filter: blur(60px); z-index: 0; animation: pulse 4s ease infinite;
 }
 
 .hero-logo {
@@ -315,6 +388,8 @@ button {
   height: 100%;
   object-fit: contain;
   border-radius: 20px;
+  background: transparent;
+  mix-blend-mode: screen;
   position: relative;
   z-index: 2;
   filter: drop-shadow(0 0 30px var(--glow));
@@ -322,13 +397,20 @@ button {
 
 .logo-glow {
   position: absolute;
-  width: 300px;
-  height: 300px;
+  width: 300px; height: 300px;
   border-radius: 50%;
   background: var(--glow);
   filter: blur(80px);
   z-index: 1;
   animation: pulse 3s ease-in-out infinite;
+}
+
+[data-theme="frost"] .logo-glow {
+  background: rgba(7,182,214,0.4);
+  filter: blur(60px);
+}
+[data-theme="frost"] .hero-logo {
+  mix-blend-mode: normal;
 }
 
 /* Stat Panel */
@@ -2290,3 +2372,24 @@ button {
     font-size: 0.75rem;
   }
 }
+
+@keyframes border-glow {
+  from { border-color: rgba(139,92,246,0.2); }
+  to { border-color: rgba(0,212,255,0.4); }
+}
+
+@keyframes theme-violet-glow {
+  from { box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+  to { box-shadow: 0 0 50px rgba(0,212,255,0.25); }
+}
+
+@keyframes theme-inferno-glow {
+  from { box-shadow: 0 0 30px rgba(255,107,53,0.3); }
+  to { box-shadow: 0 0 50px rgba(255,140,0,0.25); }
+}
+
+@keyframes theme-blaze-glow {
+  from { box-shadow: 0 0 30px rgba(7,182,214,0.3); }
+  to { box-shadow: 0 0 50px rgba(7,182,214,0.25); }
+}
+

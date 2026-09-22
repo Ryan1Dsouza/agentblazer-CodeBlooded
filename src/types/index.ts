@@ -36,6 +36,9 @@ export interface SiteConfig {
     tagline: string;
     description: string;
     logoPath: string;
+    logoViolet?: string;
+    logoInferno?: string;
+    logoFrost?: string;
   };
   department: {
     name: string;

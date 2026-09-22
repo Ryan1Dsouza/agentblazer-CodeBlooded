@@ -32,17 +32,17 @@
 }
 
 [data-theme="frost"] {
-  --background: #f0f4f8;
-  --surface: rgba(255, 255, 255, 0.7);
-  --surface-elevated: rgba(255, 255, 255, 0.9);
-  --text-primary: #1a2a3a;
-  --text-secondary: #5a6a7a;
-  --accent-primary: #0ea5e9;
-  --accent-secondary: #3b82f6;
-  --accent-tertiary: #06b6d4;
-  --border: rgba(14, 165, 233, 0.3);
-  --glow: rgba(14, 165, 233, 0.4);
-  --glow-strong: rgba(14, 165, 233, 0.7);
-  --button-background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
-  --button-hover: linear-gradient(135deg, #38bdf8 0%, #60a5fa 100%);
+  --background: #f0f6fa;
+  --surface: rgba(230, 240, 250, 0.75);
+  --surface-elevated: rgba(240, 248, 255, 0.9);
+  --text-primary: #0a2540;
+  --text-secondary: #3a6085;
+  --accent-primary: #07b6d6;
+  --accent-secondary: #4aa3df;
+  --accent-tertiary: #8bc4e5;
+  --border: rgba(7, 182, 214, 0.35);
+  --glow: rgba(7, 182, 214, 0.5);
+  --glow-strong: rgba(7, 182, 214, 0.8);
+  --button-background: linear-gradient(135deg, #07b6d6 0%, #4aa3df 100%);
+  --button-hover: linear-gradient(135deg, #5bc0e8 0%, #8bc4e5 100%);
 }

@@ -18,12 +18,13 @@ const themes: { id: Theme; label: string }[] = [
 
 export default function Header() {
   const { theme, switchTheme } = useTheme();
+  const logoPath = '/assets/logos/logo_clean.png';
 
   return (
     <header className="header">
       <div className="header-left">
         <img 
-          src={siteConfig.club.logoPath} 
+          src={logoPath || '/assets/AgentBlazer_Logo_Transparent.png'} 
           alt="AgentBlazer" 
           className="header-logo"
         />

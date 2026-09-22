@@ -6,7 +6,10 @@ export const siteConfig: SiteConfig = {
     badge: 'Collegiate AI Initiative • St Joseph Engineering College',
     tagline: 'Pioneering Autonomous & Agentic AI Systems',
     description: 'AgentBlazer is a dynamic student-led initiative dedicated to exploring the frontiers of autonomous and agentic AI systems. We bring together bright minds from engineering backgrounds to learn, build, and innovate in the rapidly evolving field of artificial intelligence.',
-    logoPath: '/assets/AgentBlazer_Logo.jpg'
+    logoPath: '/assets/logos/voilet mode.png',
+    logoViolet: '/assets/logos/voilet mode.png',
+    logoInferno: '/assets/logos/inferno mode.png',
+    logoFrost: '/assets/logos/frost mode.png',
   },
   department: {
     name: 'Department of Computer Science & Engineering',

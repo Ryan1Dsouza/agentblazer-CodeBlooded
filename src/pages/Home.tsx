@@ -1,9 +1,13 @@
 import { Link } from 'react-router-dom';
+import { useTheme } from '../hooks/useTheme';
 import { siteConfig } from '../data/config';
 import StatPanel from '../components/StatPanel';
 import Badge from '../components/Badge';
 
 export default function Home() {
+  const { theme } = useTheme();
+  const logoPath = theme === 'violet' ? '/assets/logos/AgentBlazer_Violet.png' : theme === 'inferno' ? '/assets/logos/AgentBlazer_Inferno.png' : '/assets/logos/AgentBlazer_Frost.png';
+
   return (
     <section className="home-hero">
       <div className="container">
@@ -38,13 +42,13 @@ export default function Home() {
           </div>
           
           <div className="hero-visual">
-            <div className="logo-container">
+            <div className="logo-container" style={{ background: "transparent", borderRadius: "24px", padding: "1rem" }}>
               <img 
-                src={siteConfig.club.logoPath} 
+                src={logoPath} 
                 alt="AgentBlazer Logo" 
                 className="hero-logo"
               />
-              <div className="logo-glow" />
+              <div className={`logo-glow-${theme === "inferno" ? "inferno" : theme === "frost" ? "frost" : "violet"}`} />
             </div>
           </div>
         </div>
