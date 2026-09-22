@@ -1,6 +1,5 @@
-import * as THREE from 'three';
+import { Html } from '@react-three/drei';
 import { Event } from '../../../../types';
-import StationDisplayPanel from '../../shared/StationDisplayPanel';
 
 interface OutpostProps {
   event: Event;
@@ -85,18 +84,38 @@ export default function ArcticResearchOutpost({
         distance={20}
       />
 
-      {/* 
-        === 3D HOLOGRAPHIC WORKSHOP DISPLAY PANEL ===
-        Transparent glassmorphic panel with scrollable workshop images
-      */}
-      <StationDisplayPanel
-        event={event}
-        index={index}
-        position={[0, 5.0, 0]}
-        isActive={isActive}
-        theme="frost"
-        onInspect={onInspect}
-      />
+      {/* Compact In-World Outpost Beacon Marker */}
+      <Html position={[0, 5.0, 0]} center distanceFactor={18} zIndexRange={[50, 0]}>
+        <div
+          onClick={onInspect}
+          className={`px-3 py-2 rounded-xl backdrop-blur-md border text-center transition-all cursor-pointer select-none shadow-xl flex flex-col items-center gap-1 ${
+            isActive ? 'scale-105 ring-1 ring-cyan-400' : 'hover:scale-105 opacity-90'
+          }`}
+          style={{
+            backgroundColor: 'rgba(8, 20, 36, 0.9)',
+            borderColor: accentColor,
+            boxShadow: `0 0 20px rgba(14, 165, 233, 0.35)`,
+            color: '#fff',
+            minWidth: '170px'
+          }}
+        >
+          <div className="flex items-center gap-1">
+            <span className="text-[9px] font-bold font-mono px-2 py-0.5 rounded-full bg-cyan-900/60 text-cyan-300 border border-cyan-500/40 uppercase">
+              OUTPOST 0{index + 1} • {event.category}
+            </span>
+          </div>
+          <h3 className="text-xs font-bold text-white tracking-wide truncate max-w-[160px]">
+            {event.title}
+          </h3>
+          <span className="text-[9px] text-cyan-200/80 font-mono">{event.date}</span>
+          <span
+            className="text-[8px] font-mono font-bold mt-0.5 uppercase tracking-wider animate-pulse"
+            style={{ color: accentColor }}
+          >
+            Approach Outpost ➔
+          </span>
+        </div>
+      </Html>
     </group>
   );
 }

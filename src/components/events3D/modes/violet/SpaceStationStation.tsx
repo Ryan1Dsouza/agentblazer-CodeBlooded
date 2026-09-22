@@ -1,8 +1,8 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { Event } from '../../../../types';
-import StationDisplayPanel from '../../shared/StationDisplayPanel';
 
 interface StationProps {
   event: Event;
@@ -113,19 +113,41 @@ export default function SpaceStationStation({
       {/* Station Omnidirectional Lighting */}
       <pointLight color={categoryColor} intensity={isActive ? 12 : 5} distance={25} />
 
-      {/* 
-        === 3D HOLOGRAPHIC WORKSHOP DISPLAY PANEL ===
-        Transparent glassmorphic panel with scrollable workshop images
-      */}
-      <StationDisplayPanel
-        event={event}
-        index={index}
-        position={[0, 4.2, 0]}
-        isActive={isActive}
-        isDocking={isDocking}
-        theme="violet"
-        onInspect={onInspect}
-      />
+      {/* Compact In-World Station Beacon Marker */}
+      <Html position={[0, 4.8, 0]} center distanceFactor={20} zIndexRange={[50, 0]}>
+        <div
+          onClick={onInspect}
+          className={`px-3 py-2 rounded-xl backdrop-blur-md border text-center transition-all cursor-pointer select-none shadow-xl flex flex-col items-center gap-1 ${
+            isActive ? 'scale-105 ring-1 ring-white' : 'hover:scale-105 opacity-90'
+          }`}
+          style={{
+            backgroundColor: 'rgba(10, 8, 22, 0.88)',
+            borderColor: categoryColor,
+            boxShadow: `0 0 20px ${categoryColor}66`,
+            color: '#fff',
+            minWidth: '170px'
+          }}
+        >
+          <div className="flex items-center gap-1">
+            <span
+              className="text-[9px] font-bold font-mono px-2 py-0.5 rounded-full uppercase"
+              style={{ backgroundColor: `${categoryColor}44`, color: '#fff' }}
+            >
+              STATION 0{index + 1} • {event.category}
+            </span>
+          </div>
+          <h3 className="text-xs font-bold text-white tracking-wide truncate max-w-[160px]">
+            {event.title}
+          </h3>
+          <span className="text-[9px] text-gray-300 font-mono">{event.date}</span>
+          <span
+            className="text-[8px] font-mono font-bold mt-0.5 uppercase tracking-wider animate-pulse"
+            style={{ color: categoryColor }}
+          >
+            {isDocking ? 'AUTOPILOT DOCKING...' : 'Approach to Dock ➔'}
+          </span>
+        </div>
+      </Html>
     </group>
   );
 }

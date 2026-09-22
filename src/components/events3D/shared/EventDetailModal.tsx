@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Event } from '../../../types';
+import './EventDetailModal.css';
 
 interface EventModalProps {
   event: Event | null;
@@ -9,8 +10,16 @@ interface EventModalProps {
 
 export default function EventDetailModal({ event, onClose, theme = 'violet' }: EventModalProps) {
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const lastInteractionTime = useRef(Date.now());
+  const thumbnailScrollRef = useRef<HTMLDivElement>(null);
 
-  const gallery = event?.gallery || [];
+  // Filter gallery to ensure only valid displayable image files
+  const gallery = (event?.gallery || []).filter((url) => {
+    const lower = url.toLowerCase();
+    return lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp');
+  });
   const totalPhotos = gallery.length;
 
   const nextPhoto = useCallback(() => {
@@ -25,13 +34,17 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
     }
   }, [totalPhotos]);
 
-  // Handle keyboard inputs: Arrow Left/Right, A/D, Escape
+  // Reset states on open
   useEffect(() => {
     if (!event) return;
     document.body.style.overflow = 'hidden';
     setActivePhotoIdx(0);
+    setIsZoomed(false);
+    setIsPaused(false);
+    lastInteractionTime.current = Date.now();
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      lastInteractionTime.current = Date.now();
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
         e.preventDefault();
         nextPhoto();
@@ -44,144 +57,247 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
       }
     };
 
-    // Block wheel events from reaching gameplay while HUD is open
-    const handleNativeWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.deltaY > 20) {
-        nextPhoto();
-      } else if (e.deltaY < -20) {
-        prevPhoto();
-      }
-    };
-
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('wheel', handleNativeWheel, { passive: false, capture: true });
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('wheel', handleNativeWheel, { capture: true } as EventListenerOptions);
     };
   }, [event, nextPhoto, prevPhoto, onClose]);
 
-  // Mouse wheel listener for rapid gallery traversal
-  const handleWheel = (e: React.WheelEvent) => {
+  // Auto-play slideshow timer (advances every 3.5s unless hovered/paused)
+  useEffect(() => {
+    if (!event || totalPhotos <= 1) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      // Only auto-advance if not paused and at least 2.5s since last manual interaction
+      if (!isPaused && now - lastInteractionTime.current >= 2500) {
+        nextPhoto();
+      }
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [event, totalPhotos, isPaused, nextPhoto]);
+
+  // Wheel listener to smoothly step through the image sequence on scroll
+  const handlePhotoWheel = (e: React.WheelEvent) => {
     e.stopPropagation();
-    if (e.deltaY > 20) {
-      nextPhoto();
-    } else if (e.deltaY < -20) {
-      prevPhoto();
+    const now = Date.now();
+    if (now - lastInteractionTime.current > 120) {
+      lastInteractionTime.current = now;
+      if (e.deltaY > 15 || e.deltaX > 15) {
+        nextPhoto();
+      } else if (e.deltaY < -15 || e.deltaX < -15) {
+        prevPhoto();
+      }
     }
   };
+
+  // Keep active thumbnail in view
+  useEffect(() => {
+    if (thumbnailScrollRef.current) {
+      const activeThumb = thumbnailScrollRef.current.children[activePhotoIdx] as HTMLElement;
+      if (activeThumb) {
+        activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  }, [activePhotoIdx]);
 
   if (!event) return null;
 
   const themeConfig = {
     violet: {
-      accent: '#8b5cf6',
-      borderGlow: 'rgba(139, 92, 246, 0.45)',
-      hudBadge: 'ORBITAL STATION TERMINAL',
-      categoryBg: 'rgba(139, 92, 246, 0.2)'
+      accent: '#a855f7',
+      accentLight: '#c084fc',
+      accentGlow: 'rgba(168, 85, 247, 0.45)',
+      hudBadge: 'ORBITAL DOCK TERMINAL',
+      panelBg: 'rgba(9, 7, 24, 0.75)',
+      tagBg: 'rgba(147, 51, 234, 0.25)',
+      tagBorder: 'rgba(168, 85, 247, 0.4)'
     },
     inferno: {
-      accent: '#ff6b35',
-      borderGlow: 'rgba(255, 107, 53, 0.45)',
+      accent: '#f97316',
+      accentLight: '#fb923c',
+      accentGlow: 'rgba(249, 115, 22, 0.45)',
       hudBadge: 'MAGMA DEPOT TERMINAL',
-      categoryBg: 'rgba(255, 107, 53, 0.2)'
+      panelBg: 'rgba(22, 11, 7, 0.75)',
+      tagBg: 'rgba(234, 88, 12, 0.25)',
+      tagBorder: 'rgba(249, 115, 22, 0.4)'
     },
     frost: {
       accent: '#0ea5e9',
-      borderGlow: 'rgba(14, 165, 233, 0.45)',
+      accentLight: '#38bdf8',
+      accentGlow: 'rgba(14, 165, 233, 0.45)',
       hudBadge: 'ARCTIC OUTPOST TERMINAL',
-      categoryBg: 'rgba(14, 165, 233, 0.2)'
+      panelBg: 'rgba(6, 17, 30, 0.75)',
+      tagBg: 'rgba(2, 132, 199, 0.25)',
+      tagBorder: 'rgba(14, 165, 233, 0.4)'
     }
   }[theme as 'violet' | 'inferno' | 'frost'] || {
-    accent: '#8b5cf6',
-    borderGlow: 'rgba(139, 92, 246, 0.45)',
+    accent: '#a855f7',
+    accentLight: '#c084fc',
+    accentGlow: 'rgba(168, 85, 247, 0.45)',
     hudBadge: 'EVENT TERMINAL',
-    categoryBg: 'rgba(139, 92, 246, 0.2)'
+    panelBg: 'rgba(9, 7, 24, 0.75)',
+    tagBg: 'rgba(147, 51, 234, 0.25)',
+    tagBorder: 'rgba(168, 85, 247, 0.4)'
   };
 
-  const currentPhotoUrl = gallery[activePhotoIdx];
+  const currentPhotoUrl = gallery[activePhotoIdx] || gallery[0];
+
+  const hudClipPath = 'polygon(40px 0, calc(100% - 80px) 0, 100% 80px, 100% 100%, 0 100%, 0 40px)';
+  const innerClipPath = 'polygon(39px 0, calc(100% - 79px) 0, 100% 79px, 100% 100%, 0 100%, 0 39px)';
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-black/85 backdrop-blur-md animate-fade-in select-none"
-      onClick={onClose}
-      onWheel={handleWheel}
-      style={{ zIndex: 9999 }}
-    >
-      <div
-        className="relative w-full max-w-4xl max-h-[92vh] overflow-hidden rounded-3xl border bg-[#080812]/95 p-5 md:p-6 shadow-2xl transition-all flex flex-col"
-        style={{
-          borderColor: themeConfig.accent,
-          boxShadow: `0 0 45px ${themeConfig.borderGlow}`,
-          color: '#fff'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Terminal Header */}
-        <div className="flex items-start justify-between border-b pb-3.5 border-white/10">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span
-                className="px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider rounded-full border"
-                style={{
-                  backgroundColor: themeConfig.categoryBg,
-                  borderColor: themeConfig.accent,
-                  color: themeConfig.accent
-                }}
-              >
-                {themeConfig.hudBadge} • {event.category}
-              </span>
-              <span className="text-xs text-gray-400 font-mono">{event.date}</span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">{event.title}</h2>
-          </div>
-
-          {/* Prominent X Close Button */}
-          <button
-            className="rounded-full w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white bg-white/5 hover:bg-white/15 border border-white/10 transition-all text-lg font-bold leading-none cursor-pointer"
-            onClick={onClose}
-            aria-label="Close Terminal"
+    <div className="event-modal-overlay" onClick={onClose}>
+      <div className="event-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+        {/* Floating Data Node (Top-Left Branch) */}
+        <div className="event-modal-telemetry-node">
+          <div
+            className="event-modal-telemetry-card"
+            style={{ borderColor: themeConfig.accent, boxShadow: `-10px 10px 20px ${themeConfig.accentGlow}` }}
           >
-            ✕
-          </button>
+            <div className="event-modal-telemetry-title">
+              {themeConfig.hudBadge}
+            </div>
+            <div className="event-modal-telemetry-body">
+              SYS.SYNC: {new Date().toLocaleTimeString()} <br />
+              COORD: {event.location.substring(0, 15)}... <br />
+              STATUS: <span className="event-modal-telemetry-status">SECURE DOCK</span>
+            </div>
+            <div
+              className="event-modal-telemetry-dot"
+              style={{ backgroundColor: themeConfig.accent }}
+            />
+          </div>
+          {/* Angled Connecting Line */}
+          <div
+            className="event-modal-telemetry-connector"
+            style={{ borderColor: themeConfig.accent }}
+          />
         </div>
 
-        {/* Terminal Body */}
-        <div className="overflow-y-auto pr-1 py-3 flex-1 space-y-4 scrollbar-thin">
-          <p className="text-xs md:text-sm text-gray-300 leading-relaxed">{event.description}</p>
+        {/* 
+          === MAIN HOLOGRAPHIC HUD PANEL === 
+        */}
+        <div className="event-modal-main-panel">
+          {/* Layer 1: Glowing Angular Border */}
+          <div
+            className="event-modal-hud-border"
+            style={{
+              backgroundColor: themeConfig.accent,
+              clipPath: hudClipPath,
+              boxShadow: `0 0 30px ${themeConfig.accentGlow}`
+            }}
+          >
+            {/* Layer 2: Transparent Inner Glass + Dotted Grid */}
+            <div
+              className="event-modal-hud-glass"
+              style={{
+                backgroundColor: themeConfig.panelBg,
+                clipPath: innerClipPath
+              }}
+            />
+          </div>
 
-          <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 text-xs font-mono">
-            <div>
-              <span className="text-gray-400 block text-[10px]">VENUE / LOCATION</span>
-              <span className="font-semibold text-white truncate block">{event.location}</span>
+          {/* Top/Bottom Horizontal Glow Flares */}
+          <div className="event-modal-top-flare" />
+          <div className="event-modal-bottom-flare" />
+
+          {/* ========================================================================= */}
+          {/* LEFT COLUMN: Dedicated Content Space */}
+          {/* ========================================================================= */}
+          <div className="event-modal-left-column">
+            {/* Event Title */}
+            <h2 className="event-modal-title">
+              {event.title}
+            </h2>
+
+            {/* Key Metrics Chips */}
+            <div className="event-modal-metrics-grid">
+              <div className="event-modal-metric-chip">
+                <span className="event-modal-metric-label">Date & Time</span>
+                <span className="event-modal-metric-value">{event.date}</span>
+              </div>
+              <div className="event-modal-metric-chip">
+                <span className="event-modal-metric-label">Attendance</span>
+                <span className="event-modal-metric-value">{event.metric}</span>
+              </div>
             </div>
-            <div>
-              <span className="text-gray-400 block text-[10px]">PARTICIPATION METRIC</span>
-              <span className="font-semibold text-white">{event.metric}</span>
+
+            {/* Main Description */}
+            <div className="event-modal-desc-section">
+              <span className="event-modal-desc-label">
+                Log Description
+              </span>
+              <p className="event-modal-desc-box">
+                {event.description}
+              </p>
+            </div>
+
+            {/* Bottom Left Action Button */}
+            <div className="event-modal-left-footer">
+              <button
+                onClick={onClose}
+                className="event-modal-terminate-btn"
+                style={{
+                  backgroundColor: themeConfig.accent,
+                  boxShadow: `0 0 20px ${themeConfig.accentGlow}`
+                }}
+              >
+                <span>Terminate Link</span>
+                <span className="event-modal-close-x">✕</span>
+              </button>
             </div>
           </div>
 
-          {/* Full Photo Slideshow Viewer */}
-          {totalPhotos > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-[11px] font-mono text-gray-400">
-                <span className="font-semibold text-gray-300">
-                  IMAGE {String(activePhotoIdx + 1).padStart(2, '0')} OF {String(totalPhotos).padStart(2, '0')}
+          {/* ========================================================================= */}
+          {/* RIGHT COLUMN: Sized Workshop Images with Auto-Play & Scroll Sequence      */}
+          {/* ========================================================================= */}
+          <div
+            className="event-modal-right-column"
+            onWheel={handlePhotoWheel}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
+            {/* Top Image HUD Bar */}
+            <div className="event-modal-feed-header">
+              <div className="event-modal-feed-status-group">
+                <span className="event-modal-feed-title">
+                  VISUAL FEED
                 </span>
-                <span className="text-[10px] text-gray-500 hidden sm:inline">
-                  (Use ← → Arrow Keys or Mouse Wheel)
+                <span
+                  className="event-modal-counter-badge"
+                  style={{
+                    borderColor: themeConfig.tagBorder,
+                    color: themeConfig.accentLight
+                  }}
+                >
+                  {String(activePhotoIdx + 1).padStart(2, '0')} / {String(totalPhotos).padStart(2, '0')}
                 </span>
+                {isPaused ? (
+                  <span className="event-modal-status-badge paused">
+                    PAUSED
+                  </span>
+                ) : (
+                  <span className="event-modal-status-badge autoplay">
+                    <span className="event-modal-pulse-dot" />
+                    AUTO-PLAY
+                  </span>
+                )}
               </div>
+            </div>
 
-              {/* Main Photo Display Area */}
-              <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-black/80 border border-white/15 flex items-center justify-center group">
+            {/* Main Sized Image Viewport */}
+            <div className="event-modal-image-viewport">
+              {totalPhotos > 0 ? (
                 <img
                   src={currentPhotoUrl}
-                  alt={`${event.title} photograph ${activePhotoIdx + 1}`}
-                  className="w-full h-full object-contain select-none"
+                  alt={`${event.title} capture ${activePhotoIdx + 1}`}
+                  className="event-modal-main-img"
+                  style={{
+                    objectFit: isZoomed ? 'cover' : 'contain'
+                  }}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (target.src.endsWith('.HEIC') || target.src.endsWith('.heic')) {
@@ -189,66 +305,95 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
                     }
                   }}
                 />
-
-                {totalPhotos > 1 && (
-                  <>
-                    <button
-                      className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/75 hover:bg-black text-white rounded-full w-10 h-10 flex items-center justify-center border border-white/20 transition-all cursor-pointer opacity-80 group-hover:opacity-100 shadow-xl"
-                      onClick={prevPhoto}
-                    >
-                      ❮
-                    </button>
-                    <button
-                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/75 hover:bg-black text-white rounded-full w-10 h-10 flex items-center justify-center border border-white/20 transition-all cursor-pointer opacity-80 group-hover:opacity-100 shadow-xl"
-                      onClick={nextPhoto}
-                    >
-                      ❯
-                    </button>
-                  </>
-                )}
-              </div>
-
-              {/* Thumbnail Strip */}
-              {totalPhotos > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-                  {gallery.map((photo: string, i: number) => (
-                    <button
-                      key={i}
-                      onClick={() => setActivePhotoIdx(i)}
-                      className={`relative flex-shrink-0 w-16 h-12 rounded-xl overflow-hidden border transition-all cursor-pointer ${
-                        activePhotoIdx === i
-                          ? 'ring-2 border-white scale-105 opacity-100'
-                          : 'opacity-50 hover:opacity-100 border-white/20'
-                      }`}
-                      style={{
-                        outlineColor: themeConfig.accent
-                      }}
-                    >
-                      <img src={photo} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
+              ) : (
+                <div className="event-modal-empty-feed">No visual feed found</div>
               )}
+
+              {/* Navigation Chevrons */}
+              {totalPhotos > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      lastInteractionTime.current = Date.now();
+                      prevPhoto();
+                    }}
+                    className="event-modal-nav-btn prev"
+                    aria-label="Previous image"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      lastInteractionTime.current = Date.now();
+                      nextPhoto();
+                    }}
+                    className="event-modal-nav-btn next"
+                    aria-label="Next image"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+
+              {/* Zoom Toggle */}
+              <button
+                onClick={() => setIsZoomed((z) => !z)}
+                className="event-modal-zoom-btn"
+              >
+                {isZoomed ? 'FIT' : 'FILL'}
+              </button>
+
+              {/* Scanline Overlay */}
+              <div className="event-modal-scanlines" />
             </div>
-          )}
+
+            {/* Horizontal Thumbnail Sequence Strip */}
+            {totalPhotos > 1 && (
+              <div ref={thumbnailScrollRef} className="event-modal-thumbnails-strip">
+                {gallery.map((photo, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      lastInteractionTime.current = Date.now();
+                      setActivePhotoIdx(idx);
+                    }}
+                    className={`event-modal-thumb-btn ${activePhotoIdx === idx ? 'active' : 'inactive'}`}
+                    style={{
+                      borderColor: activePhotoIdx === idx ? themeConfig.accent : undefined
+                    }}
+                  >
+                    <img src={photo} alt="" className="event-modal-thumb-img" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Terminal Footer */}
-        <div className="border-t border-white/10 pt-3 flex items-center justify-between">
-          <span className="text-[10px] font-mono text-gray-500">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-gray-300 font-bold">ESC</kbd> or click Back to resume
-          </span>
-
-          <button
-            onClick={onClose}
-            className="px-6 py-2 text-xs font-mono font-bold uppercase tracking-wider rounded-2xl text-white transition-all cursor-pointer hover:scale-105 shadow-lg"
+        {/* 
+          === HOLOGRAPHIC PROJECTOR BASE === 
+        */}
+        <div className="event-modal-projector-base">
+          {/* Light Beam projecting UP into the panel */}
+          <div
+            className="event-modal-projector-beam"
             style={{
-              backgroundColor: themeConfig.accent,
-              boxShadow: `0 0 20px ${themeConfig.borderGlow}`
+              background: `linear-gradient(to top, ${themeConfig.accent}, transparent)`,
+              clipPath: 'polygon(0 100%, 100% 100%, 80% 0, 20% 0)'
             }}
-          >
-            Resume Expedition ➔
-          </button>
+          />
+          {/* Physical Projector Ring */}
+          <div
+            className="event-modal-projector-ring"
+            style={{
+              borderColor: themeConfig.accent,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              boxShadow: `0 0 30px ${themeConfig.accentGlow}, inset 0 0 15px ${themeConfig.accent}`
+            }}
+          />
+          <div className="event-modal-projector-glow" />
         </div>
       </div>
     </div>

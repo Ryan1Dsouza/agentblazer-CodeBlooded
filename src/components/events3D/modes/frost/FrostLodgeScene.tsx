@@ -27,8 +27,10 @@ export default function FrostLodgeScene({
 }: FrostSceneProps) {
   const { camera } = useThree();
 
+  const roverGroupRef = useRef<THREE.Group>(null);
+
   // Rover physical state
-  const roverPos = useRef(new THREE.Vector3(0, 0, 25));
+  const roverPos = useRef(new THREE.Vector3(0, 0, 10));
   const roverVelocity = useRef(new THREE.Vector3(0, 0, 0));
   const roverYaw = useRef(0);
   const [speedVal, setSpeedVal] = useState(0);
@@ -42,10 +44,19 @@ export default function FrostLodgeScene({
   // Set cooldown ONLY when resuming from HUD_OPEN to GAMEPLAY
   useEffect(() => {
     if (prevGameState.current === 'HUD_OPEN' && gameState === 'GAMEPLAY') {
-      dockingCooldown.current = 3.5;
+      dockingCooldown.current = 2.5;
     }
     prevGameState.current = gameState;
   }, [gameState]);
+
+  // Spatial coordinates for the 3 Arctic Research Outposts positioned closer together
+  const outpostPositions = useMemo(() => {
+    return [
+      new THREE.Vector3(-18, 0, -28),  // Outpost 1: Cybersecurity
+      new THREE.Vector3(16, 0, -60),   // Outpost 2: GSoC
+      new THREE.Vector3(-10, 0, -92)   // Outpost 3: PromptOps
+    ];
+  }, []);
 
   // Keyboard navigation
   const keys = useRef<{ [k: string]: boolean }>({});
@@ -54,7 +65,7 @@ export default function FrostLodgeScene({
       if (gameState === 'HUD_OPEN') return;
       keys.current[e.key.toLowerCase()] = true;
 
-      // Press 'E' to instantly dock to nearest outpost if within 50m
+      // Press 'E' to instantly dock to nearest outpost if within 40m
       if (e.key.toLowerCase() === 'e' && gameState === 'GAMEPLAY') {
         let nearestIdx = -1;
         let nearestDist = Infinity;
@@ -65,7 +76,7 @@ export default function FrostLodgeScene({
             nearestIdx = idx;
           }
         });
-        if (nearestIdx >= 0 && nearestDist < 50) {
+        if (nearestIdx >= 0 && nearestDist < 40) {
           dockingTargetIdx.current = nearestIdx;
           dockingProgress.current = 0;
           onDockComplete(-1);
@@ -81,16 +92,7 @@ export default function FrostLodgeScene({
       window.removeEventListener('keydown', onDown);
       window.removeEventListener('keyup', onUp);
     };
-  }, [gameState]);
-
-  // Spatial coordinates for the 3 Arctic Research Outposts positioned along a natural trail
-  const outpostPositions = useMemo(() => {
-    return [
-      new THREE.Vector3(-25, 0, -40),  // Outpost 1: Cybersecurity
-      new THREE.Vector3(20, 0, -95),   // Outpost 2: GSoC
-      new THREE.Vector3(-15, 0, -155)  // Outpost 3: PromptOps
-    ];
-  }, []);
+  }, [gameState, outpostPositions, onDockComplete]);
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
@@ -103,24 +105,29 @@ export default function FrostLodgeScene({
     // 1. AUTOMATIC PARKING DOCKING AT OUTPOST
     if (gameState === 'DOCKING' && dockingTargetIdx.current !== null) {
       const targetOutpost = outpostPositions[dockingTargetIdx.current];
-      // Park directly on the heated apron at z + 6
-      const targetParkPos = new THREE.Vector3(targetOutpost.x, 0, targetOutpost.z + 6);
+      // Park directly on the apron at z + 5.5
+      const targetParkPos = new THREE.Vector3(targetOutpost.x, 0, targetOutpost.z + 5.5);
 
-      dockingProgress.current = Math.min(1, dockingProgress.current + dt * 1.2);
+      dockingProgress.current = Math.min(1, dockingProgress.current + dt * 1.5);
 
-      roverPos.current.lerp(targetParkPos, dt * 4.0);
-      roverVelocity.current.multiplyScalar(0.65);
-      roverYaw.current = THREE.MathUtils.lerp(roverYaw.current, 0, dt * 4);
+      roverPos.current.lerp(targetParkPos, dt * 5.0);
+      roverVelocity.current.multiplyScalar(0.5);
+      roverYaw.current = THREE.MathUtils.lerp(roverYaw.current, 0, dt * 5);
+
+      if (roverGroupRef.current) {
+        roverGroupRef.current.position.copy(roverPos.current);
+        roverGroupRef.current.rotation.set(0, roverYaw.current, 0);
+      }
 
       setSpeedVal(roverVelocity.current.length());
       setSteerVal(0);
 
       const desiredCamPos = new THREE.Vector3(
         roverPos.current.x,
-        roverPos.current.y + 3.0,
-        roverPos.current.z + 8.5
+        roverPos.current.y + 2.8,
+        roverPos.current.z + 7.5
       );
-      camera.position.lerp(desiredCamPos, dt * 4.5);
+      camera.position.lerp(desiredCamPos, dt * 5);
       camera.lookAt(targetOutpost);
 
       // Update target HUD
@@ -165,7 +172,7 @@ export default function FrostLodgeScene({
     setSteerVal(turn);
 
     // Apply vehicle steering
-    const turnSpeed = 1.8;
+    const turnSpeed = 2.2;
     roverYaw.current += turn * turnSpeed * dt;
 
     const forwardDir = new THREE.Vector3(
@@ -174,28 +181,33 @@ export default function FrostLodgeScene({
       -Math.cos(roverYaw.current)
     );
 
-    const accel = 20;
+    const accel = 30;
     if (throttle !== 0) {
       roverVelocity.current.addScaledVector(forwardDir, throttle * accel * dt);
     }
 
     // Terrain traction damping
-    roverVelocity.current.multiplyScalar(Math.pow(0.90, dt * 60));
+    roverVelocity.current.multiplyScalar(Math.pow(0.89, dt * 60));
     roverPos.current.addScaledVector(roverVelocity.current, dt);
 
     // Keep on ground
     roverPos.current.y = 0;
 
+    if (roverGroupRef.current) {
+      roverGroupRef.current.position.copy(roverPos.current);
+      roverGroupRef.current.rotation.set(0, roverYaw.current, 0);
+    }
+
     setSpeedVal(roverVelocity.current.length());
 
     // Camera chase
     const camOffset = new THREE.Vector3(
-      Math.sin(roverYaw.current) * 8.5,
-      3.2,
-      Math.cos(roverYaw.current) * 8.5
+      Math.sin(roverYaw.current) * 7.5,
+      2.8,
+      Math.cos(roverYaw.current) * 7.5
     );
     const desiredCamPos = roverPos.current.clone().add(camOffset);
-    camera.position.lerp(desiredCamPos, dt * 5);
+    camera.position.lerp(desiredCamPos, dt * 6);
 
     const lookTarget = roverPos.current.clone().add(forwardDir.clone().multiplyScalar(4));
     camera.lookAt(lookTarget);
@@ -211,7 +223,7 @@ export default function FrostLodgeScene({
       }
     });
 
-    if (nearestIdx >= 0 && nearestDist < 90) {
+    if (nearestIdx >= 0 && nearestDist < 60) {
       onTargetUpdate({
         name: events[nearestIdx]?.title || null,
         distance: nearestDist,
@@ -221,8 +233,8 @@ export default function FrostLodgeScene({
       onTargetUpdate({ name: null, distance: 0, status: 'IDLE' });
     }
 
-    // AUTOMATIC DOCKING — generous 22-unit capture radius
-    if (dockingCooldown.current <= 0 && nearestIdx >= 0 && nearestDist < 22) {
+    // AUTOMATIC DOCKING — generous 18-unit capture radius
+    if (dockingCooldown.current <= 0 && nearestIdx >= 0 && nearestDist < 18) {
       dockingTargetIdx.current = nearestIdx;
       dockingProgress.current = 0;
       onDockComplete(-1); // Transition to DOCKING state
@@ -235,10 +247,7 @@ export default function FrostLodgeScene({
       <ArcticTundraTerrain />
 
       {/* Player Arctic Rover Vehicle */}
-      <group
-        position={[roverPos.current.x, roverPos.current.y, roverPos.current.z]}
-        rotation={[0, roverYaw.current, 0]}
-      >
+      <group ref={roverGroupRef}>
         <ArcticRoverVehicle speed={speedVal} steering={steerVal} />
       </group>
 

@@ -5,14 +5,14 @@ interface ModeHUDProps {
 
 export default function ModeHUD({ theme, gameState }: ModeHUDProps) {
   const themeAccent =
-    theme === 'inferno' ? '#ff6b35' : theme === 'frost' ? '#0ea5e9' : '#8b5cf6';
+    theme === 'inferno' ? '#ff6b35' : theme === 'frost' ? '#0ea5e9' : '#a855f7';
 
   if (gameState === 'HUD_OPEN') return null;
 
   return (
     <div className="fixed bottom-6 left-6 pointer-events-none z-30 select-none">
       <div
-        className="backdrop-blur-md bg-black/70 px-4 py-3 rounded-2xl border shadow-2xl flex flex-col gap-1.5"
+        className="backdrop-blur-md bg-black/75 px-4 py-3 rounded-2xl border shadow-2xl flex flex-col gap-1.5"
         style={{
           borderColor: `${themeAccent}55`,
           boxShadow: `0 0 20px ${themeAccent}33`
@@ -30,19 +30,21 @@ export default function ModeHUD({ theme, gameState }: ModeHUDProps) {
 
         {theme === 'inferno' ? (
           <div className="text-[11px] text-gray-300 font-mono space-y-0.5">
-            <div><span className="text-white font-bold">Scroll / W S:</span> Drive Mag-Lev Train</div>
+            <div><span className="text-white font-bold">Scroll / W S:</span> Drive Train along Spline</div>
+            <div><span className="text-white font-bold">Panels:</span> Scroll Images & Click Terminal</div>
             <div><span className="text-white font-bold">Approach Depot:</span> Automatic Docking</div>
           </div>
         ) : theme === 'frost' ? (
           <div className="text-[11px] text-gray-300 font-mono space-y-0.5">
             <div><span className="text-white font-bold">WASD / Arrows:</span> Drive Arctic Rover</div>
+            <div><span className="text-white font-bold">Panels:</span> Scroll Images & Click Terminal</div>
             <div><span className="text-white font-bold">Approach Outpost:</span> Automatic Parking</div>
           </div>
         ) : (
           <div className="text-[11px] text-gray-300 font-mono space-y-0.5">
-            <div><span className="text-white font-bold">WASD:</span> Steer & Thrust</div>
-            <div><span className="text-white font-bold">Space:</span> Ascend</div>
-            <div><span className="text-white font-bold">Shift:</span> Hyper Boost</div>
+            <div><span className="text-white font-bold">Scroll Wheel:</span> Auto-Travel to Next Station</div>
+            <div><span className="text-white font-bold">WASD / Shift:</span> Free Flight & Hyper Boost</div>
+            <div><span className="text-white font-bold">Panels:</span> Scroll Images & Click Terminal</div>
             <div><span className="text-white font-bold">Approach Station:</span> Automatic Docking</div>
           </div>
         )}

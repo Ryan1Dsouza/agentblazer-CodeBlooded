@@ -1,6 +1,5 @@
-import * as THREE from 'three';
+import { Html } from '@react-three/drei';
 import { Event } from '../../../../types';
-import StationDisplayPanel from '../../shared/StationDisplayPanel';
 
 interface StationProps {
   event: Event;
@@ -72,18 +71,38 @@ export default function LavaStationDepot({
         distance={22}
       />
 
-      {/* 
-        === 3D HOLOGRAPHIC WORKSHOP DISPLAY PANEL ===
-        Transparent glassmorphic panel with scrollable workshop images
-      */}
-      <StationDisplayPanel
-        event={event}
-        index={index}
-        position={[0, 4.2, 0]}
-        isActive={isActive}
-        theme="inferno"
-        onInspect={onInspect}
-      />
+      {/* Compact In-World Depot Beacon Marker */}
+      <Html position={[0, 4.5, 0]} center distanceFactor={18} zIndexRange={[50, 0]}>
+        <div
+          onClick={onInspect}
+          className={`px-3 py-2 rounded-xl backdrop-blur-md border text-center transition-all cursor-pointer select-none shadow-xl flex flex-col items-center gap-1 ${
+            isActive ? 'scale-105 ring-1 ring-orange-400' : 'hover:scale-105 opacity-90'
+          }`}
+          style={{
+            backgroundColor: 'rgba(28, 15, 10, 0.9)',
+            borderColor: accentColor,
+            boxShadow: `0 0 20px ${accentColor}66`,
+            color: '#fff',
+            minWidth: '170px'
+          }}
+        >
+          <div className="flex items-center gap-1">
+            <span className="text-[9px] font-bold font-mono px-2 py-0.5 rounded-full bg-orange-600/40 text-orange-200 border border-orange-500/40 uppercase">
+              DEPOT 0{index + 1} • {event.category}
+            </span>
+          </div>
+          <h3 className="text-xs font-bold text-white tracking-wide truncate max-w-[160px]">
+            {event.title}
+          </h3>
+          <span className="text-[9px] text-orange-200/80 font-mono">{event.date}</span>
+          <span
+            className="text-[8px] font-mono font-bold mt-0.5 uppercase tracking-wider animate-pulse"
+            style={{ color: accentColor }}
+          >
+            Approach Platform ➔
+          </span>
+        </div>
+      </Html>
     </group>
   );
 }
