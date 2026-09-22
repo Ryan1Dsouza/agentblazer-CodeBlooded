@@ -83,25 +83,26 @@ export default function InfernoLavaScene({
     prevGameState.current = gameState;
   }, [gameState]);
 
-  // Scroll wheel listener for natural scroll-driven rail traversal
+  // Scroll wheel listener for natural gentle scroll-driven rail traversal
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (gameState === 'HUD_OPEN' || gameState === 'DOCKING') return;
-      const delta = e.deltaY * 0.0004;
+      const delta = e.deltaY * 0.00015;
       progressRef.current = (progressRef.current + delta + 1) % 1;
-      velocityRef.current = Math.sign(delta) * 0.6;
+      velocityRef.current = Math.sign(delta) * 0.25;
     };
 
     window.addEventListener('wheel', handleWheel, { passive: true });
     return () => window.removeEventListener('wheel', handleWheel);
   }, [gameState]);
 
-  // Keyboard navigation
+  // Keyboard navigation & Shift Boost tracking
   const keys = useRef<{ [k: string]: boolean }>({});
   useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
       if (gameState === 'HUD_OPEN') return;
       keys.current[e.key.toLowerCase()] = true;
+      if (e.key === 'Shift') keys.current['shift'] = true;
 
       // Press 'E' to instantly dock to nearest depot
       if (e.key.toLowerCase() === 'e' && gameState === 'GAMEPLAY') {
@@ -126,6 +127,7 @@ export default function InfernoLavaScene({
     };
     const onUp = (e: KeyboardEvent) => {
       keys.current[e.key.toLowerCase()] = false;
+      if (e.key === 'Shift') keys.current['shift'] = false;
     };
     window.addEventListener('keydown', onDown);
     window.addEventListener('keyup', onUp);
@@ -192,8 +194,10 @@ export default function InfernoLavaScene({
       return;
     }
 
-    // 3. NORMAL TRAIN EXPEDITION DRIVING
+    // 3. NORMAL TRAIN EXPEDITION DRIVING (With Shift Overdrive Boost)
     let driveInput = 0;
+    const boosting = !!keys.current['shift'];
+
     if (keys.current['w'] || keys.current['arrowup'] || keys.current['arrowright'] || keys.current['d']) driveInput += 1;
     if (keys.current['s'] || keys.current['arrowdown'] || keys.current['arrowleft'] || keys.current['a']) driveInput -= 1;
 
@@ -201,10 +205,13 @@ export default function InfernoLavaScene({
       driveInput -= mobileMove.y;
     }
 
+    const accelMultiplier = boosting ? 1.0 : 0.5;
+    const maxThrottle = boosting ? 0.8 : 0.4;
+
     // Smooth throttle interpolation from keyboard
     if (driveInput !== 0) {
-      throttleTarget.current += driveInput * 0.5 * dt;
-      throttleTarget.current = Math.max(-0.4, Math.min(0.4, throttleTarget.current));
+      throttleTarget.current += driveInput * accelMultiplier * dt;
+      throttleTarget.current = Math.max(-maxThrottle, Math.min(maxThrottle, throttleTarget.current));
     } else {
       throttleTarget.current = THREE.MathUtils.lerp(throttleTarget.current, 0, dt * 3);
     }
@@ -254,9 +261,10 @@ export default function InfernoLavaScene({
       onDockComplete(-1); // Transition to DOCKING state
     }
 
-    // Camera chase logic
-    const lookAheadPt = spline.getPointAt((progressRef.current + 0.04) % 1);
-    const camOffset = new THREE.Vector3(0, 5.0, 0).sub(tangent.clone().multiplyScalar(12));
+    // Dynamic Camera Chase & Boost Thrust
+    const lookAheadPt = spline.getPointAt((progressRef.current + (boosting ? 0.06 : 0.04)) % 1);
+    const camDistance = boosting ? 14 : 12;
+    const camOffset = new THREE.Vector3(0, boosting ? 4.5 : 5.0, 0).sub(tangent.clone().multiplyScalar(camDistance));
     const desiredCamPos = pt.clone().add(camOffset).add(new THREE.Vector3(tangent.z * 3.5, 0, -tangent.x * 3.5));
 
     camera.position.lerp(desiredCamPos, dt * 5);

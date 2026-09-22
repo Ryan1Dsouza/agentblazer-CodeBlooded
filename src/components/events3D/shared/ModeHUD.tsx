@@ -31,20 +31,19 @@ export default function ModeHUD({ theme, gameState }: ModeHUDProps) {
         {theme === 'inferno' ? (
           <div className="text-[11px] text-gray-300 font-mono space-y-0.5">
             <div><span className="text-white font-bold">Scroll / W S:</span> Drive Train along Spline</div>
-            <div><span className="text-white font-bold">Panels:</span> Scroll Images & Click Terminal</div>
+            <div><span className="text-white font-bold">Shift:</span> Overdrive Boost</div>
             <div><span className="text-white font-bold">Approach Depot:</span> Automatic Docking</div>
           </div>
         ) : theme === 'frost' ? (
           <div className="text-[11px] text-gray-300 font-mono space-y-0.5">
-            <div><span className="text-white font-bold">WASD / Arrows:</span> Drive Arctic Rover</div>
-            <div><span className="text-white font-bold">Panels:</span> Scroll Images & Click Terminal</div>
+            <div><span className="text-white font-bold">Scroll Wheel:</span> Auto-Travel to Next Outpost</div>
+            <div><span className="text-white font-bold">WASD / Shift:</span> Drive & Sprint Zoom</div>
             <div><span className="text-white font-bold">Approach Outpost:</span> Automatic Parking</div>
           </div>
         ) : (
           <div className="text-[11px] text-gray-300 font-mono space-y-0.5">
             <div><span className="text-white font-bold">Scroll Wheel:</span> Auto-Travel to Next Station</div>
             <div><span className="text-white font-bold">WASD / Shift:</span> Free Flight & Hyper Boost</div>
-            <div><span className="text-white font-bold">Panels:</span> Scroll Images & Click Terminal</div>
             <div><span className="text-white font-bold">Approach Station:</span> Automatic Docking</div>
           </div>
         )}

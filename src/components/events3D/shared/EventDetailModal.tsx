@@ -51,7 +51,7 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
       } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
         e.preventDefault();
         prevPhoto();
-      } else if (e.key === 'Escape') {
+      } else if (e.key === 'Escape' || e.key === 'x' || e.key === 'X') {
         e.preventDefault();
         onClose();
       }
@@ -296,6 +296,8 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
                   alt={`${event.title} capture ${activePhotoIdx + 1}`}
                   className="event-modal-main-img"
                   style={{
+                    width: isZoomed ? '100%' : 'auto',
+                    height: isZoomed ? '100%' : 'auto',
                     objectFit: isZoomed ? 'cover' : 'contain'
                   }}
                   onError={(e) => {
@@ -339,7 +341,11 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
 
               {/* Zoom Toggle */}
               <button
-                onClick={() => setIsZoomed((z) => !z)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  lastInteractionTime.current = Date.now();
+                  setIsZoomed((z) => !z);
+                }}
                 className="event-modal-zoom-btn"
               >
                 {isZoomed ? 'FIT' : 'FILL'}

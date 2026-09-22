@@ -38,27 +38,29 @@ export default function VioletSpaceScene({
   const shipRotation = useRef(new THREE.Euler(0, 0, 0, 'YXZ'));
   const [speedVal, setSpeedVal] = useState(0);
   const [isBoosting, setIsBoosting] = useState(false);
+  const [trailProgress, setTrailProgress] = useState(0);
 
   // Scroll Autopilot navigation state
   const scrollProgress = useRef(0);
   const isScrollNavigating = useRef(false);
   const scrollTimeout = useRef<number | null>(null);
 
-  // Docking sequence state
+  // Docking sequence state & departure latch
   const dockingTargetIdx = useRef<number | null>(null);
   const dockingProgress = useRef(0);
   const dockingCooldown = useRef(0);
+  const lastCompletedStationIdx = useRef<number | null>(null);
   const prevGameState = useRef(gameState);
 
   // Set cooldown ONLY when resuming from HUD_OPEN to GAMEPLAY
   useEffect(() => {
     if (prevGameState.current === 'HUD_OPEN' && gameState === 'GAMEPLAY') {
-      dockingCooldown.current = 2.5;
+      dockingCooldown.current = 4.0; // 4 second safety window upon modal close
     }
     prevGameState.current = gameState;
   }, [gameState]);
 
-  // Spatial coordinates for the 3 Space Stations positioned closer together
+  // Spatial coordinates for the 3 Space Stations positioned along natural flight trajectory
   const stationPositions = useMemo(() => {
     return [
       new THREE.Vector3(-18, 2, -28),  // Station 1: Cybersecurity & Career Pathways
@@ -86,7 +88,7 @@ export default function VioletSpaceScene({
     const handleWheel = (e: WheelEvent) => {
       if (gameState === 'HUD_OPEN' || gameState === 'DOCKING') return;
 
-      const delta = e.deltaY * 0.0006;
+      const delta = e.deltaY * 0.00022;
       scrollProgress.current = Math.max(0, Math.min(1, scrollProgress.current + delta));
       isScrollNavigating.current = true;
 
@@ -112,12 +114,12 @@ export default function VioletSpaceScene({
       keys.current[e.key.toLowerCase()] = true;
       if (e.key === 'Shift') keys.current['shift'] = true;
 
-      // Disable scroll autopilot when player uses manual controls
+      // Disable scroll autopilot when player uses manual keys
       if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) {
         isScrollNavigating.current = false;
       }
 
-      // Press 'E' to instantly dock to nearest station if within 40m
+      // Press 'E' to instantly dock to nearest station if within 25m
       if (e.key.toLowerCase() === 'e' && gameState === 'GAMEPLAY') {
         let nearestIdx = -1;
         let nearestDist = Infinity;
@@ -128,7 +130,7 @@ export default function VioletSpaceScene({
             nearestIdx = idx;
           }
         });
-        if (nearestIdx >= 0 && nearestDist < 40) {
+        if (nearestIdx >= 0 && nearestDist < 25) {
           dockingTargetIdx.current = nearestIdx;
           dockingProgress.current = 0;
           onDockComplete(-1);
@@ -201,6 +203,7 @@ export default function VioletSpaceScene({
 
       if (dockingProgress.current >= 0.95) {
         const completedIdx = dockingTargetIdx.current;
+        lastCompletedStationIdx.current = completedIdx;
         dockingTargetIdx.current = null;
         dockingProgress.current = 0;
         onTargetUpdate({ name: null, distance: 0, status: 'IDLE' });
@@ -231,6 +234,8 @@ export default function VioletSpaceScene({
         shipGroupRef.current.rotation.copy(shipRotation.current);
       }
 
+      setTrailProgress(scrollProgress.current);
+
       const camOffset = new THREE.Vector3(0, 2.8, 7.5);
       camOffset.applyEuler(new THREE.Euler(0, shipRotation.current.y, 0));
       const desiredCamPos = shipPos.current.clone().add(camOffset);
@@ -238,9 +243,13 @@ export default function VioletSpaceScene({
       const lookTarget = shipPos.current.clone().add(splineTangent.clone().multiplyScalar(5));
       camera.lookAt(lookTarget);
 
-      // Check docking proximity to station Ts
+      // Check docking proximity to station Ts (tight 0.020 check)
       stationSplineTs.forEach((stT, idx) => {
-        if (Math.abs(scrollProgress.current - stT) < 0.035 && dockingCooldown.current <= 0) {
+        if (
+          Math.abs(scrollProgress.current - stT) < 0.020 &&
+          dockingCooldown.current <= 0 &&
+          lastCompletedStationIdx.current !== idx
+        ) {
           dockingTargetIdx.current = idx;
           dockingProgress.current = 0;
           isScrollNavigating.current = false;
@@ -293,7 +302,7 @@ export default function VioletSpaceScene({
     moveDir.applyEuler(shipRotation.current);
 
     // High velocity & boost multiplier
-    const accel = boosting ? 65 : 32;
+    const accel = boosting ? 75 : 36;
 
     if (forward !== 0) {
       shipVelocity.current.addScaledVector(moveDir, forward * accel * dt);
@@ -309,14 +318,29 @@ export default function VioletSpaceScene({
     const curSpeed = shipVelocity.current.length();
     setSpeedVal(curSpeed);
 
+    // Update trail progress approximately based on position along Z axis
+    const zProgress = Math.max(0, Math.min(0.98, (10 - shipPos.current.z) / 106));
+    setTrailProgress(zProgress);
+
     // Direct Three.js transform update
     if (shipGroupRef.current) {
       shipGroupRef.current.position.copy(shipPos.current);
       shipGroupRef.current.rotation.copy(shipRotation.current);
     }
 
+    // Dynamic Camera FOV Kick during Shift Boost
+    const targetFov = boosting ? 68 : 60;
+    if ((camera as THREE.PerspectiveCamera).fov !== targetFov) {
+      (camera as THREE.PerspectiveCamera).fov = THREE.MathUtils.lerp(
+        (camera as THREE.PerspectiveCamera).fov,
+        targetFov,
+        dt * 4
+      );
+      (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
+    }
+
     // Chase Camera update
-    const camOffset = new THREE.Vector3(0, 2.6, boosting ? 8.5 : 7.0);
+    const camOffset = new THREE.Vector3(0, 2.6, boosting ? 9.5 : 7.0);
     camOffset.applyEuler(new THREE.Euler(0, shipRotation.current.y, 0));
     const desiredCamPos = shipPos.current.clone().add(camOffset);
 
@@ -335,6 +359,14 @@ export default function VioletSpaceScene({
       }
     });
 
+    // Reset departure latch if player has flown >18m away from last completed station
+    if (lastCompletedStationIdx.current !== null) {
+      const lastPos = stationPositions[lastCompletedStationIdx.current];
+      if (lastPos && shipPos.current.distanceTo(lastPos) > 18) {
+        lastCompletedStationIdx.current = null;
+      }
+    }
+
     // Show target HUD when within 60 units
     if (nearestIdx >= 0 && nearestDist < 60) {
       onTargetUpdate({
@@ -346,8 +378,13 @@ export default function VioletSpaceScene({
       onTargetUpdate({ name: null, distance: 0, status: 'IDLE' });
     }
 
-    // AUTOMATIC DOCKING — generous 18-unit capture radius
-    if (dockingCooldown.current <= 0 && nearestIdx >= 0 && nearestDist < 18) {
+    // AUTOMATIC DOCKING — tight 8.5-unit capture radius with station departure latch
+    if (
+      dockingCooldown.current <= 0 &&
+      nearestIdx >= 0 &&
+      nearestDist < 8.5 &&
+      lastCompletedStationIdx.current !== nearestIdx
+    ) {
       dockingTargetIdx.current = nearestIdx;
       dockingProgress.current = 0;
       onDockComplete(-1); // Transition state to DOCKING
@@ -391,22 +428,36 @@ export default function VioletSpaceScene({
         );
       })}
 
-      {/* Glowing Violet Energy Flight Path Tube */}
-      <PurpleEnergyBeam spline={flightSpline} />
+      {/* Dynamic Forward-Only Disappearing Energy Flight Path */}
+      <DynamicDisappearingBeam spline={flightSpline} progress={trailProgress} />
     </group>
   );
 }
 
-function PurpleEnergyBeam({ spline }: { spline: THREE.CatmullRomCurve3 }) {
+function DynamicDisappearingBeam({ spline, progress }: { spline: THREE.CatmullRomCurve3; progress: number }) {
+  // Generate forward sub-spline from progress -> 1.0
+  const forwardSpline = useMemo(() => {
+    const startT = Math.min(0.96, Math.max(0, progress));
+    const subPoints: THREE.Vector3[] = [];
+    const steps = 30;
+    for (let i = 0; i <= steps; i++) {
+      const t = startT + (i / steps) * (1.0 - startT);
+      subPoints.push(spline.getPointAt(t));
+    }
+    return new THREE.CatmullRomCurve3(subPoints, false, 'catmullrom', 0.2);
+  }, [spline, progress]);
+
+  if (progress >= 0.97) return null;
+
   return (
     <group>
       <mesh>
-        <tubeGeometry args={[spline, 100, 0.2, 8, false]} />
-        <meshBasicMaterial color="#a855f7" transparent opacity={0.6} />
+        <tubeGeometry args={[forwardSpline, 60, 0.18, 8, false]} />
+        <meshBasicMaterial color="#a855f7" transparent opacity={0.65} />
       </mesh>
       <mesh>
-        <tubeGeometry args={[spline, 100, 0.06, 6, false]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.8} />
+        <tubeGeometry args={[forwardSpline, 60, 0.05, 6, false]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.85} />
       </mesh>
     </group>
   );
