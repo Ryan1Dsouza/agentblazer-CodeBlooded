@@ -159,6 +159,43 @@ button {
   padding-top: 80px;
 }
 
+.main-content.events-main-override {
+  padding-top: 0;
+  padding-bottom: 0;
+  margin: 0;
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.events-viewport-section {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.events-canvas-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: #000;
+  user-select: none;
+}
+
+.events-canvas-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
 /* ========== HEADER ========== */
 .header {
   position: fixed;
