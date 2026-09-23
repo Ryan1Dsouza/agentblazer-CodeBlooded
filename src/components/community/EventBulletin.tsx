@@ -1,84 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { AdminEvent, getPublishedEvents } from '../../store/eventStore';
 
-interface BulletinPost {
-  id: string;
-  title: string;
-  date: string;
-  description: string;
-  location: string;
-  imageUrl: string;
-  videoUrl: string;
-  createdAt: number;
+// ─── Helpers ─────────────────────────────────────────────────
+
+function formatDisplayDate(isoDate: string): string {
+  if (!isoDate) return '';
+  const d = new Date(isoDate + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-interface Props {
-  isAdmin: boolean;
+function formatTime(t: string): string {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour   = h % 12 || 12;
+  return `${hour}:${m.toString().padStart(2, '0')} ${period}`;
 }
 
-function getStoredPosts(): BulletinPost[] {
-  try {
-    const raw = localStorage.getItem('nexus_bulletin_posts');
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
+const CATEGORY_COLORS: Record<string, string> = {
+  Workshop:        'var(--accent-primary)',
+  Seminar:         'var(--accent-secondary)',
+  Hackathon:       '#22c55e',
+  Competition:     '#f59e0b',
+  'Technical Event': '#a78bfa',
+  'Club Event':    '#f472b6',
+  Other:           'var(--text-secondary)',
+};
 
-function savePosts(posts: BulletinPost[]) {
-  localStorage.setItem('nexus_bulletin_posts', JSON.stringify(posts));
-}
+// ─── Component ───────────────────────────────────────────────
 
-function getYouTubeEmbedUrl(url: string): string | null {
-  if (!url) return null;
-  // Handle youtube.com/watch?v=ID
-  const watchMatch = url.match(/(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/);
-  if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}`;
-  // Handle youtu.be/ID
-  const shortMatch = url.match(/(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  if (shortMatch) return `https://www.youtube.com/embed/${shortMatch[1]}`;
-  // Handle youtube.com/embed/ID
-  if (url.includes('youtube.com/embed/')) return url;
-  // Treat as direct video URL
-  return null;
-}
+export default function EventBulletin() {
+  const [events, setEvents] = useState<AdminEvent[]>([]);
 
-export default function EventBulletin({ isAdmin }: Props) {
-  const [posts, setPosts] = useState<BulletinPost[]>(getStoredPosts);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    title: '',
-    date: '',
-    description: '',
-    location: '',
-    imageUrl: '',
-    videoUrl: '',
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.title.trim() || !form.date.trim()) return;
-
-    const newPost: BulletinPost = {
-      id: Date.now().toString(36),
-      ...form,
-      createdAt: Date.now(),
-    };
-    const updated = [newPost, ...posts];
-    setPosts(updated);
-    savePosts(updated);
-    setForm({ title: '', date: '', description: '', location: '', imageUrl: '', videoUrl: '' });
-    setShowForm(false);
-  };
-
-  const handleDelete = (id: string) => {
-    const updated = posts.filter((p) => p.id !== id);
-    setPosts(updated);
-    savePosts(updated);
-  };
-
-  const isDirectVideo = (url: string) => {
-    return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
-  };
+  // Poll every 1 second so edits from /admin show up immediately
+  useEffect(() => {
+    const sync = () => setEvents(getPublishedEvents());
+    sync();
+    const id = setInterval(sync, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <div className="bulletin-section">
@@ -87,153 +47,86 @@ export default function EventBulletin({ isAdmin }: Props) {
           <h2 className="section-title">
             <span className="section-icon">📡</span> Event Bulletin Board
           </h2>
-          <p className="section-subtitle">Upcoming events, workshops & announcements</p>
+          <p className="section-subtitle">Upcoming events, workshops &amp; announcements</p>
         </div>
-        {isAdmin && (
-          <button
-            className="btn-admin-action"
-            onClick={() => setShowForm(!showForm)}
-          >
-            {showForm ? '✕ Cancel' : '＋ New Post'}
-          </button>
-        )}
       </div>
 
-      {/* Admin Post Form */}
-      {isAdmin && showForm && (
-        <form className="bulletin-form glass-panel" onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Event Title *</label>
-              <input
-                type="text"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="e.g. AI Hackathon 2026"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Date *</label>
-              <input
-                type="date"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Location</label>
-              <input
-                type="text"
-                value={form.location}
-                onChange={(e) => setForm({ ...form, location: e.target.value })}
-                placeholder="e.g. SJEC Auditorium"
-              />
-            </div>
-            <div className="form-group">
-              <label>Poster Image URL</label>
-              <input
-                type="url"
-                value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
-            <div className="form-group full-width">
-              <label>Video URL (YouTube or direct .mp4/.webm)</label>
-              <input
-                type="url"
-                value={form.videoUrl}
-                onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
-                placeholder="https://youtube.com/watch?v=... or https://...video.mp4"
-              />
-            </div>
-            <div className="form-group full-width">
-              <label>Description</label>
-              <textarea
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Event details, registration info, etc."
-                rows={3}
-              />
-            </div>
-          </div>
-          <button type="submit" className="btn-primary btn-post">
-            Publish Event Post
-          </button>
-        </form>
-      )}
-
-      {/* Posts Grid */}
-      {posts.length === 0 ? (
+      {/* Empty State */}
+      {events.length === 0 ? (
         <div className="bulletin-empty">
           <span className="empty-icon">📭</span>
           <p>No events posted yet.</p>
-          {isAdmin && <p className="empty-hint">Click "New Post" to create the first bulletin.</p>}
+          <p className="empty-hint">Check back soon — events will appear here when published.</p>
         </div>
       ) : (
         <div className="bulletin-grid">
-          {posts.map((post) => {
-            const ytEmbed = getYouTubeEmbedUrl(post.videoUrl);
-            return (
-              <div key={post.id} className="bulletin-card glass-panel">
-                {/* Media */}
-                {post.imageUrl && (
-                  <div className="bulletin-media">
-                    <img src={post.imageUrl} alt={post.title} loading="lazy" />
-                  </div>
-                )}
-                {post.videoUrl && (
-                  <div className="bulletin-media bulletin-video">
-                    {ytEmbed ? (
-                      <iframe
-                        src={ytEmbed}
-                        title={post.title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    ) : isDirectVideo(post.videoUrl) ? (
-                      <video controls preload="metadata">
-                        <source src={post.videoUrl} />
-                      </video>
-                    ) : null}
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="bulletin-content">
-                  <div className="bulletin-meta">
-                    <span className="bulletin-date">
-                      📅 {new Date(post.date).toLocaleDateString('en-US', {
-                        year: 'numeric', month: 'long', day: 'numeric'
-                      })}
-                    </span>
-                    {post.location && (
-                      <span className="bulletin-location">📍 {post.location}</span>
-                    )}
-                  </div>
-                  <h3 className="bulletin-title">{post.title}</h3>
-                  {post.description && (
-                    <p className="bulletin-desc">{post.description}</p>
-                  )}
-                </div>
-
-                {/* Admin Controls */}
-                {isAdmin && (
-                  <button
-                    className="btn-delete-post"
-                    onClick={() => handleDelete(post.id)}
-                    title="Delete post"
-                  >
-                    🗑️
-                  </button>
-                )}
-              </div>
-            );
-          })}
+          {events.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Event Card ──────────────────────────────────────────────
+
+function EventCard({ event }: { event: AdminEvent }) {
+  const catColor = CATEGORY_COLORS[event.category] ?? 'var(--accent-primary)';
+  const hasTime  = event.startTime || event.endTime;
+
+  return (
+    <div className="bulletin-card glass-panel">
+      {/* Image */}
+      {event.image && (
+        <div className="bulletin-media">
+          <img src={event.image} alt={event.title} loading="lazy" />
+        </div>
+      )}
+
+      {/* Category badge overlay */}
+      <div
+        className="bulletin-category-badge"
+        style={{ '--cat-color': catColor } as React.CSSProperties}
+      >
+        {event.category}
+      </div>
+
+      {/* Content */}
+      <div className="bulletin-content">
+        <div className="bulletin-meta">
+          {event.date && (
+            <span className="bulletin-date">
+              📅 {formatDisplayDate(event.date)}
+            </span>
+          )}
+          {hasTime && (
+            <span className="bulletin-date">
+              🕐 {formatTime(event.startTime)}{event.endTime ? ` – ${formatTime(event.endTime)}` : ''}
+            </span>
+          )}
+          {event.location && (
+            <span className="bulletin-location">📍 {event.location}</span>
+          )}
+        </div>
+
+        <h3 className="bulletin-title">{event.title}</h3>
+
+        {event.description && (
+          <p className="bulletin-desc">{event.description}</p>
+        )}
+
+        {event.registrationLink && (
+          <a
+            href={event.registrationLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bulletin-register-btn"
+          >
+            Register Now →
+          </a>
+        )}
+      </div>
     </div>
   );
 }

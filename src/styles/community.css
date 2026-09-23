@@ -357,6 +357,42 @@
   opacity: 0.7;
 }
 
+/* ---- Event Card Category Badge ---- */
+.bulletin-category-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  margin: 0.85rem 1.25rem 0;
+  color: var(--cat-color, var(--accent-primary));
+  background: color-mix(in srgb, var(--cat-color, var(--accent-primary)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cat-color, var(--accent-primary)) 35%, transparent);
+}
+
+/* ---- Register Button ---- */
+.bulletin-register-btn {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.55rem 1.2rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: var(--button-background);
+  color: #fff;
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.bulletin-register-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px var(--glow);
+  color: #fff;
+}
+
 /* ============================================
    COMMUNITY VOICE
    ============================================ */

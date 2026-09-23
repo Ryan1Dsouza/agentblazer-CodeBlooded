@@ -48,7 +48,7 @@ export default function Community() {
 
         {/* Tab Content */}
         <div className="community-content">
-          {activeTab === 'bulletin' && <EventBulletin isAdmin={isAdmin} />}
+          {activeTab === 'bulletin' && <EventBulletin />}
           {activeTab === 'voice' && <CommunityVoice isAdmin={isAdmin} />}
           {activeTab === 'chat' && <NexusChat />}
         </div>

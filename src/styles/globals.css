@@ -1,6 +1,7 @@
 @import './missionSelector.css';
 @import './community.css';
 @import './nexusFloatingChat.css';
+@import './admin.css';
 
 * {
   margin: 0;
