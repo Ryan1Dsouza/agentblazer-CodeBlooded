@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { collection, addDoc, query, orderBy, onSnapshot, limit, serverTimestamp } from 'firebase/firestore';
+import { auth, db, googleProvider } from '../../lib/firebase';
 
 interface ChatMessage {
   id: string;
@@ -9,50 +12,12 @@ interface ChatMessage {
   timestamp: number;
 }
 
-function getStoredMessages(): ChatMessage[] {
-  try {
-    const todayDate = new Date().toDateString();
-    const lastClearDate = localStorage.getItem('nexus_chat_last_clear_date');
-    if (lastClearDate !== todayDate) {
-      localStorage.removeItem('nexus_chat_messages');
-      localStorage.setItem('nexus_chat_last_clear_date', todayDate);
-      return [];
-    }
-
-    const raw = localStorage.getItem('nexus_chat_messages');
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveMessages(msgs: ChatMessage[]) {
-  // Keep last 200 messages
-  const trimmed = msgs.slice(-200);
-  localStorage.setItem('nexus_chat_messages', JSON.stringify(trimmed));
-}
-
-function getDisplayName(): string {
-  const name = sessionStorage.getItem('nexus_display_name');
-  const email = sessionStorage.getItem('nexus_user_email');
-  // Require both name and email to be present to bypass the gate
-  if (name && email) return name;
-  
-  // If email is missing, force re-registration by returning empty string
-  sessionStorage.removeItem('nexus_display_name');
-  return '';
-}
-
-function setDisplayName(name: string) {
-  sessionStorage.setItem('nexus_display_name', name);
-}
-
 export default function NexusChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>(getStoredMessages);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
-  const [displayName, setName] = useState(getDisplayName);
-  const [emailInput, setEmailInput] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const [user, setUser] = useState<User | null>(null);
+  const [displayName, setDisplayName] = useState('');
+  const [authError, setAuthError] = useState('');
   const [cooldown, setCooldown] = useState(0);
   const [isSending, setIsSending] = useState(false);
   const [moderationWarning, setModerationWarning] = useState('');
@@ -63,68 +28,69 @@ export default function NexusChat() {
   const mockUsers = ['agentblazer', 'admin', 'ryan', 'jason_99'];
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Auto-scroll to bottom (block:'nearest' prevents outer page from scrolling)
+  
+  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages]);
-
-  // Cooldown timer
   useEffect(() => {
-    if (cooldown > 0) {
-      cooldownRef.current = setInterval(() => {
-        setCooldown((prev) => {
-          if (prev <= 100) {
-            if (cooldownRef.current) clearInterval(cooldownRef.current);
-            return 0;
-          }
-          return prev - 100;
-        });
-      }, 100);
-      return () => {
-        if (cooldownRef.current) clearInterval(cooldownRef.current);
-      };
-    }
-  }, [cooldown > 0]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Listen for storage changes (cross-tab sync)
-  useEffect(() => {
-    const handler = (e: StorageEvent) => {
-      if (e.key === 'nexus_chat_messages') {
-        setMessages(getStoredMessages());
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        const email = currentUser.email || '';
+        if (email.endsWith('@sjec.ac.in')) {
+          setUser(currentUser);
+          const localPart = email.split('@')[0];
+          const dotParts = localPart.split('.');
+          const extractedName = dotParts.length > 1 ? dotParts[dotParts.length - 1] : localPart;
+          setDisplayName(extractedName.charAt(0).toUpperCase() + extractedName.slice(1));
+        } else {
+          signOut(auth);
+          setAuthError('Please use your college Gmail ending with @sjec.ac.in');
+        }
+      } else {
+        setUser(null);
+        setDisplayName('');
       }
-    };
-    window.addEventListener('storage', handler);
-    return () => window.removeEventListener('storage', handler);
+    });
+    return () => unsubscribe();
   }, []);
 
-  const handleSetName = (e: React.FormEvent) => {
-    e.preventDefault();
-    const email = emailInput.trim().toLowerCase();
-    setEmailError('');
+  // Listen to Firestore Messages
+  useEffect(() => {
+    if (!user) return;
+    
+    const q = query(collection(db, 'chat_messages'), orderBy('timestamp', 'asc'), limit(200));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgs: ChatMessage[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        msgs.push({
+          id: doc.id,
+          author: data.author,
+          content: data.content,
+          isBot: data.isBot || false,
+          isSystem: data.isSystem || false,
+          timestamp: data.timestamp?.toMillis() || Date.now(),
+        });
+      });
+      setMessages(msgs);
+    });
+    return () => unsubscribe();
+  }, [user]);
 
-    // Validate college email
-    if (!email.endsWith('@sjec.ac.in')) {
-      setEmailError('Please use your college Gmail ending with @sjec.ac.in');
-      return;
+  const handleSignIn = async () => {
+    setAuthError('');
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err: any) {
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setAuthError('Failed to sign in. Please try again.');
+      }
     }
+  };
 
-    // Extract name: part between last '.' and '@'
-    // e.g. 24g55.ryan@sjec.ac.in -> ryan
-    const localPart = email.split('@')[0]; // "24g55.ryan"
-    const dotParts = localPart.split('.');
-    const extractedName = dotParts.length > 1
-      ? dotParts[dotParts.length - 1]  // last segment after dot -> "ryan"
-      : localPart;                      // fallback if no dot
-
-    // Capitalize first letter
-    const name = extractedName.charAt(0).toUpperCase() + extractedName.slice(1);
-
-    setDisplayName(name);
-    setName(name);
-    // Store email for reference
-    sessionStorage.setItem('nexus_user_email', email);
+  const handleSignOut = () => {
+    signOut(auth);
   };
 
   // Client-side profanity filter (fallback when API is unreachable)
@@ -223,29 +189,13 @@ export default function NexusChat() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || cooldown > 0 || isSending) return;
+    if (!input.trim() || cooldown > 0 || isSending || !user) return;
 
     const text = input.trim();
     setInput('');
     setIsSending(true);
     setModerationWarning('');
     setShowMentionMenu(false);
-
-    // Optimistically add user message
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      author: displayName,
-      content: text,
-      isBot: false,
-      isSystem: false,
-      timestamp: Date.now(),
-    };
-
-    setMessages((prev) => {
-      const updated = [...prev, userMsg];
-      saveMessages(updated);
-      return updated;
-    });
 
     // Start 2-second cooldown
     setCooldown(2000);
@@ -254,33 +204,34 @@ export default function NexusChat() {
     moderateMessage(text).then(async (allowed) => {
       if (!allowed) {
         setModerationWarning('⚠️ Message blocked by AgentBlazer AI — please keep it respectful.');
-        setMessages((prev) => {
-          const filtered = prev.filter(m => m.id !== userMsg.id);
-          saveMessages(filtered);
-          return filtered;
-        });
         setIsSending(false);
         return;
       }
 
-      // Check for @agentblazer mention
-      if (text.toLowerCase().includes('@agentblazer')) {
-        const reply = await getAIResponse(text);
-        const botContent = reply || "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
-        
-        const botMsg: ChatMessage = {
-          id: Date.now().toString(36) + 'bot',
-          author: 'AgentBlazer AI',
-          content: botContent,
-          isBot: true,
+      try {
+        await addDoc(collection(db, 'chat_messages'), {
+          author: displayName,
+          content: text,
+          isBot: false,
           isSystem: false,
-          timestamp: Date.now(),
-        };
-        setMessages((prev) => {
-          const withBot = [...prev, botMsg];
-          saveMessages(withBot);
-          return withBot;
+          timestamp: serverTimestamp(),
         });
+
+        // Check for @agentblazer mention
+        if (text.toLowerCase().includes('@agentblazer')) {
+          const reply = await getAIResponse(text);
+          const botContent = reply || "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
+          
+          await addDoc(collection(db, 'chat_messages'), {
+            author: 'AgentBlazer AI',
+            content: botContent,
+            isBot: true,
+            isSystem: false,
+            timestamp: serverTimestamp(),
+          });
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
       }
       setIsSending(false);
     });
@@ -314,8 +265,8 @@ export default function NexusChat() {
     }
   });
 
-  // Email entry screen
-  if (!displayName) {
+  // Email entry screen (Google Auth)
+  if (!user || !displayName) {
     return (
       <div className="chat-section">
         <div className="chat-name-gate">
@@ -323,17 +274,17 @@ export default function NexusChat() {
             <span className="chat-gate-icon">🤖</span>
             <h3>Welcome to AgentBlazer Chat</h3>
             <p>Link your college Gmail to join the conversation</p>
-            <form onSubmit={handleSetName} className="name-form">
-              <input
-                type="email"
-                value={emailInput}
-                onChange={(e) => { setEmailInput(e.target.value); setEmailError(''); }}
-                placeholder="yourname@sjec.ac.in"
-                autoFocus
-              />
-              <button type="submit" className="btn-primary">Join Chat</button>
-            </form>
-            {emailError && <p className="email-error">{emailError}</p>}
+            <div className="name-form" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}>
+              <button 
+                onClick={handleSignIn} 
+                className="btn-primary"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: '#fff', color: '#000' }}
+              >
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '18px', height: '18px' }} />
+                Sign in with sjec.ac.in
+              </button>
+            </div>
+            {authError && <p className="email-error">{authError}</p>}
             <p className="email-hint">Only @sjec.ac.in emails are accepted. Your name will be auto-detected.</p>
           </div>
         </div>
@@ -357,8 +308,7 @@ export default function NexusChat() {
             <button 
               onClick={() => {
                 if(window.confirm('Are you sure you want to clear the entire chat log?')) {
-                  localStorage.removeItem('nexus_chat_messages');
-                  setMessages([]);
+                  // TODO: Firebase clear logic could go here if needed
                 }
               }}
               style={{ 
@@ -377,6 +327,22 @@ export default function NexusChat() {
           )}
           <span className="user-dot" />
           {displayName}
+          <button 
+            onClick={handleSignOut}
+            style={{ 
+              marginLeft: '0.75rem', 
+              background: 'transparent', 
+              border: '1px solid rgba(255,255,255,0.2)', 
+              color: 'var(--text-dim)',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '4px',
+              fontSize: '0.65rem',
+              cursor: 'pointer'
+            }}
+            title="Sign Out"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
 
