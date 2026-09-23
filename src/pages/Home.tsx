@@ -13,19 +13,37 @@ export default function Home() {
   return (
     <section className="home-hero">
       <div className="container">
-        <div className="hero-grid">
-          <div className="hero-content">
-            <Badge text={siteConfig.club.badge} />
+        <div className="hero-grid centered-layout">
+          <div className="hero-visual">
+            <div className="logo-container logo-container-large" style={{ background: "transparent", border: "none" }}>
+              {/* Persistent Solid-Powdered Particle Logo */}
+              <ParticleLogo logoPath={logoPath} alt="AgentBlazer Logo" theme={theme} />
+
+              {/* Theme Glow Layer */}
+              <div className={`logo-glow-${theme === "inferno" ? "inferno" : theme === "frost" ? "frost" : "violet"}`} />
+
+              {/* Continuous Orbiting Social Media Icons */}
+              <OrbitingSocials theme={theme} />
+            </div>
+          </div>
+
+          <div className="hero-content centered-content">
+            <div className="hero-badge-wrapper">
+              <Badge text={siteConfig.club.badge} />
+            </div>
 
             <h1 className="hero-title">
               Pioneering Autonomous<br />
               <span className="accent-text">and Agentic</span> AI Systems
             </h1>
 
-            <p className="hero-dept">
-              {siteConfig.department.name}<br />
-              {siteConfig.department.college}
-            </p>
+            <div className="hero-dept-card">
+              <div className="dept-indicator" aria-hidden="true" />
+              <p className="hero-dept">
+                <span className="hero-dept-main">{siteConfig.department.name}</span>
+                <span className="hero-dept-sub">{siteConfig.department.college}</span>
+              </p>
+            </div>
 
             <p className="hero-description">
               {siteConfig.club.description}
@@ -41,19 +59,6 @@ export default function Home() {
             </div>
 
             <StatPanel />
-          </div>
-
-          <div className="hero-visual">
-            <div className="logo-container" style={{ background: "transparent", border: "none" }}>
-              {/* Persistent Solid-Powdered Particle Logo */}
-              <ParticleLogo logoPath={logoPath} alt="AgentBlazer Logo" theme={theme} />
-
-              {/* Theme Glow Layer */}
-              <div className={`logo-glow-${theme === "inferno" ? "inferno" : theme === "frost" ? "frost" : "violet"}`} />
-
-              {/* Continuous Orbiting Social Media Icons */}
-              <OrbitingSocials theme={theme} />
-            </div>
           </div>
         </div>
       </div>

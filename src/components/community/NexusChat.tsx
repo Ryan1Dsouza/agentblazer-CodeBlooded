@@ -60,7 +60,7 @@ export default function NexusChat() {
   // Mentions state
   const [showMentionMenu, setShowMentionMenu] = useState(false);
   const [mentionFilter, setMentionFilter] = useState('');
-  const mockUsers = ['nexus', 'admin', 'ryan', 'jason_99'];
+  const mockUsers = ['agentblazer', 'admin', 'ryan', 'jason_99'];
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -253,7 +253,7 @@ export default function NexusChat() {
     // Moderate in background
     moderateMessage(text).then(async (allowed) => {
       if (!allowed) {
-        setModerationWarning('⚠️ Message blocked by Nexus AI — please keep it respectful.');
+        setModerationWarning('⚠️ Message blocked by AgentBlazer AI — please keep it respectful.');
         setMessages((prev) => {
           const filtered = prev.filter(m => m.id !== userMsg.id);
           saveMessages(filtered);
@@ -263,14 +263,14 @@ export default function NexusChat() {
         return;
       }
 
-      // Check for @nexus mention
-      if (text.toLowerCase().includes('@nexus')) {
+      // Check for @agentblazer mention
+      if (text.toLowerCase().includes('@agentblazer')) {
         const reply = await getAIResponse(text);
         const botContent = reply || "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
         
         const botMsg: ChatMessage = {
           id: Date.now().toString(36) + 'bot',
-          author: 'Nexus AI',
+          author: 'AgentBlazer AI',
           content: botContent,
           isBot: true,
           isSystem: false,
@@ -349,7 +349,7 @@ export default function NexusChat() {
             <span className="section-icon">💬</span> Nexus Chat
           </h2>
           <span className="chat-header-hint">
-            Type <code>@nexus</code> to ask the AI • Monitored by Nexus AI
+            Type <code>@agentblazer</code> to ask the AI • Monitored by AgentBlazer AI
           </span>
         </div>
         <div className="chat-user-badge">

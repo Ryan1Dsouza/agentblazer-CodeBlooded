@@ -20,7 +20,7 @@ export default function NexusFloatingChat() {
     {
       id: 'welcome',
       role: 'assistant',
-      content: 'Hi! I am Nexus AI. I can answer questions about AgentBlazer, our events, and community. How can I help you today?'
+      content: 'Hi! I am AgentBlazer AI. I can answer questions about AgentBlazer, our events, and community. How can I help you today?'
     }
   ]);
   const [input, setInput] = useState('');
@@ -91,7 +91,7 @@ export default function NexusFloatingChat() {
             <div className="nfc-header-info">
               <span className="nfc-avatar">🤖</span>
               <div>
-                <h4>Nexus AI</h4>
+                <h4>AgentBlazer AI</h4>
                 <p className="nfc-status">Online</p>
               </div>
             </div>

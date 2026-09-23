@@ -62,25 +62,27 @@ interface OrbitingSocialsProps {
 }
 
 export default function OrbitingSocials({ theme }: OrbitingSocialsProps) {
-  // Social links configuration — replace "#" with official URLs when available
   const socials = [
     {
       name: 'Instagram',
       icon: InstagramIcon,
       url: 'https://www.instagram.com/agentblazer.sjec?stkn=YTBoZ2xkZWx5MDky',
-      angle: 0
+      angle: 0,
+      color: '#E1306C' // Instagram Pink/Red
     },
     {
       name: 'LinkedIn',
       icon: LinkedInIcon,
       url: 'https://www.linkedin.com/in/theagentblazerclubsjec/',
-      angle: 120
+      angle: 120,
+      color: '#0A66C2' // LinkedIn Blue
     },
     {
       name: 'GitHub',
       icon: GitHubIcon,
       url: 'https://github.com/AgentBlazer',
-      angle: 240
+      angle: 240,
+      color: '#fafafa' // GitHub White
     }
   ];
 
@@ -99,11 +101,12 @@ export default function OrbitingSocials({ theme }: OrbitingSocialsProps) {
               href={s.url}
               target="_blank"
               rel="noreferrer"
-              className={`orbit-icon-btn orbit-icon-${theme}`}
+              className="orbit-icon-btn"
+              style={{ color: s.color, borderColor: s.color, boxShadow: `0 0 10px ${s.color}66` }}
               aria-label={s.name}
               title={s.name}
             >
-              <Icon size={18} />
+              <Icon size={28} />
             </a>
           </div>
         );

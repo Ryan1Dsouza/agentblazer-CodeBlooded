@@ -25,9 +25,9 @@ export default function Community() {
               {isAdmin && <span className="admin-indicator">🔑 ADMIN</span>}
               Community Hub
             </span>
-            <h1 className="community-title glow-text">Nexus Hub</h1>
+            <h1 className="community-title glow-text">AgentBlazer Hub</h1>
             <p className="community-subtitle">
-              Your central command for events, community voices, and live chat — powered by Nexus AI
+              Your central command for events, community voices, and live chat — powered by AgentBlazer AI
             </p>
           </div>
         </div>

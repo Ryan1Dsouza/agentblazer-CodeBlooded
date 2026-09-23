@@ -19,7 +19,7 @@ export default function AdminGate() {
       fontFamily: 'monospace',
       fontSize: '1.1rem'
     }}>
-      Authenticating... Redirecting to Nexus Hub.
+      Authenticating... Redirecting to AgentBlazer Hub.
     </div>
   );
 }

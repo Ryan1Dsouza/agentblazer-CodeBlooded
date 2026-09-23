@@ -8,7 +8,7 @@ const navItems = [
   { path: '/about', label: 'About Us' },
   { path: '/events', label: 'Events & Workshops' },
   { path: '/join', label: 'Join & Connect' },
-  { path: '/community', label: 'Nexus Hub' }
+  { path: '/community', label: 'AgentBlazer Hub' }
 ];
 
 const themes: { id: Theme; label: string }[] = [

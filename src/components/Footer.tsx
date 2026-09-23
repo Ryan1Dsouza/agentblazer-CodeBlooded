@@ -6,11 +6,13 @@ export default function Footer() {
       <div className="container">
         <div className="footer-content">
           <div className="footer-brand">
-            <img src="/assets/logos/logo_clean.png" alt="AgentBlazer" className="footer-logo" />
-            <div>
+            <div className="footer-logo-wrapper">
+              <img src="/assets/logos/logo_clean.png" alt="AgentBlazer" className="footer-logo" />
+            </div>
+            <div className="footer-brand-info">
               <h3>{siteConfig.club.name}</h3>
-              <p>{siteConfig.department.name}</p>
-              <p>{siteConfig.department.college}</p>
+              <p className="footer-brand-dept">{siteConfig.department.name}</p>
+              <p className="footer-brand-college">{siteConfig.department.college}</p>
             </div>
           </div>
           <div className="footer-links">
@@ -22,14 +24,20 @@ export default function Footer() {
           </div>
           <div className="footer-contact">
             <h4>Contact</h4>
-            <p>{siteConfig.contact.email}</p>
-            <p>{siteConfig.contact.phone}</p>
-            <p>{siteConfig.department.college}</p>
+            <p className="footer-contact-item">
+              <span className="contact-label">Email:</span> {siteConfig.contact.email}
+            </p>
+            <p className="footer-contact-item">
+              <span className="contact-label">Phone:</span> {siteConfig.contact.phone}
+            </p>
+            <p className="footer-contact-item">
+              <span className="contact-label">Location:</span> {siteConfig.department.college}
+            </p>
           </div>
         </div>
         <div className="footer-bottom">
           <p>&copy; 2026 {siteConfig.club.name} - CodeBlooded. All rights reserved.</p>
-          <p>Organized by {siteConfig.department.name} in collaboration with Cipher (CSE Association)</p>
+          <p className="footer-bottom-sub">Organized by {siteConfig.department.name} in collaboration with Cipher (CSE Association)</p>
         </div>
       </div>
     </footer>
