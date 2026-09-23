@@ -7,7 +7,7 @@ export const committeeMembers: TeamMember[] = [
     role: 'Departmental Representative',
     department: 'AI & LLM Research Group',
     category: 'Committee',
-    photoPath: ''
+    photoPath: '/modes/prajwal.jpg'
   },
   {
     id: 'cm2',
@@ -15,7 +15,7 @@ export const committeeMembers: TeamMember[] = [
     role: 'Departmental Representative',
     department: 'Model Evaluation Benchmarks',
     category: 'Committee',
-    photoPath: ''
+    photoPath: '/modes/chacko.jpg'
   },
   {
     id: 'cm3',
@@ -23,6 +23,6 @@ export const committeeMembers: TeamMember[] = [
     role: 'Departmental Representative',
     department: 'Project Operations & Labs',
     category: 'Committee',
-    photoPath: ''
+    photoPath: '/modes/alma.jpg'
   }
 ];

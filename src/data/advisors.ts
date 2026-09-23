@@ -6,7 +6,7 @@ export const advisors: Advisor[] = [
     name: 'Keith Raymond Fernandes',
     role: 'Faculty Advisor',
     department: 'Computer Science & Engineering',
-    photoPath: '/assets/Photos/mr-keith-raymond-fernandes.jpg'
+    photoPath: '/Photos/mr-keith-raymond-fernandes.jpg'
   },
   {
     id: '2',

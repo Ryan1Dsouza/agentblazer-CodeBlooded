@@ -3,6 +3,7 @@
   --background: #0a0a1a;
   --surface: rgba(20, 20, 40, 0.7);
   --surface-elevated: rgba(30, 30, 60, 0.85);
+  --font-mono: 'Space Mono', monospace;
   --text-primary: #e8e8f0;
   --text-secondary: #a0a0b8;
   --accent-primary: #00d4ff;

@@ -72,6 +72,8 @@ export default function TeamCard({ member, onSelect, isSelected }: Props) {
           </div>
         </div>
       )}
+      
+      <div className="hud-telemetry-footer" aria-hidden="true" />
     </div>
   );
 }

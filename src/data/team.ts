@@ -7,7 +7,7 @@ export const officers: TeamMember[] = [
     role: 'President',
     department: 'CSE',
     category: 'Officer',
-    photoPath: '/assets/Photos/Ruben Saldanha.jpg',
+    photoPath: '/Photos/Ruben Saldanha.jpg',
     description: 'Guiding club vision, university collaborations, and strategic workshop series.'
   },
   {
@@ -16,7 +16,7 @@ export const officers: TeamMember[] = [
     role: 'Vice President',
     department: 'CSE',
     category: 'Officer',
-    photoPath: '/assets/Photos/Ajay Preenal Dsouza_.jpg',
+    photoPath: '/Photos/Ajay Preenal Dsouza_.jpg',
     description: 'Coordinating student mentorship, event operations, and community growth.'
   },
   {
@@ -25,7 +25,7 @@ export const officers: TeamMember[] = [
     role: 'Tech Lead',
     department: 'CSE',
     category: 'Officer',
-    photoPath: '/assets/Photos/Stevin D Souza.jpg',
+    photoPath: '/Photos/Stevin D Souza.jpg',
     description: 'Technical architectures, hands-on lab environments, and repository supervision.'
   },
   {
@@ -34,7 +34,7 @@ export const officers: TeamMember[] = [
     role: 'Resource Head',
     department: 'ECE',
     category: 'Officer',
-    photoPath: '/assets/Photos/Frenny Chrystal Saldanha ECE-A.jpg',
+    photoPath: '/Photos/Frenny Chrystal Saldanha ECE-A.jpg',
     description: 'Managing cloud compute budgets, venue infrastructure, and participant toolkits.'
   },
   {
@@ -43,7 +43,7 @@ export const officers: TeamMember[] = [
     role: 'Secretary',
     department: 'CSBS',
     category: 'Officer',
-    photoPath: '/assets/Photos/joyline V CSBS.jpg',
+    photoPath: '/Photos/joyline V CSBS.jpg',
     description: 'Documentation, accreditation reporting, meeting minutes, and member onboarding.'
   },
   {
@@ -52,7 +52,7 @@ export const officers: TeamMember[] = [
     role: 'Media Head',
     department: 'CSE',
     category: 'Officer',
-    photoPath: '/assets/Photos/Chinthan N V.jpg',
+    photoPath: '/Photos/Chinthan N V.jpg',
     description: 'Brand storytelling, photo documentation, visual design, and social publishing.'
   }
 ];
@@ -64,7 +64,7 @@ export const otherCoreTeam: TeamMember[] = [
     role: 'Event Coordinator',
     department: 'CSE - 5th Sem',
     category: 'Core Team',
-    photoPath: '/assets/Photos/Ashwini Shenoy B-5th A CSE.jpg'
+    photoPath: '/Photos/Ashwini Shenoy B-5th A CSE.jpg'
   },
   {
     id: 'c2',
@@ -72,7 +72,7 @@ export const otherCoreTeam: TeamMember[] = [
     role: 'PR Head',
     department: 'CSE - 5th Sem',
     category: 'Core Team',
-    photoPath: '/assets/Photos/Tejashwini K M 5th Sem CSE-D.jpg'
+    photoPath: '/Photos/Tejashwini K M 5th Sem CSE-D.jpg'
   },
   {
     id: 'c3',
@@ -80,7 +80,7 @@ export const otherCoreTeam: TeamMember[] = [
     role: 'Member',
     department: 'CSE',
     category: 'Core Team',
-    photoPath: '/assets/Photos/Vinisha Sweedal Saldanha .jpg'
+    photoPath: '/Photos/Vinisha Sweedal Saldanha .jpg'
   },
   {
     id: 'c4',
@@ -88,7 +88,7 @@ export const otherCoreTeam: TeamMember[] = [
     role: 'Member',
     department: 'CSE - 5th Sem',
     category: 'Core Team',
-    photoPath: '/assets/Photos/Winona Lobo CSE-D.jpg'
+    photoPath: '/Photos/Winona Lobo CSE-D.jpg'
   },
   {
     id: 'c5',
@@ -96,7 +96,7 @@ export const otherCoreTeam: TeamMember[] = [
     role: 'Member',
     department: 'ECE',
     category: 'Core Team',
-    photoPath: '/assets/Photos/Nandini S P - ECE _A_.jpg'
+    photoPath: '/Photos/Nandini S P - ECE _A_.jpg'
   },
   {
     id: 'c6',
@@ -104,6 +104,6 @@ export const otherCoreTeam: TeamMember[] = [
     role: 'Member',
     department: 'CSE - 5th Sem',
     category: 'Core Team',
-    photoPath: '/assets/Photos/Aditi J N 5th Sem CSE _A_.jpg'
+    photoPath: '/Photos/Aditi J N 5th Sem CSE _A_.jpg'
   }
 ];
