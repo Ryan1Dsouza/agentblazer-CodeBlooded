@@ -19,6 +19,24 @@ export default function CursorFollower() {
       mouse.current = { x: e.clientX, y: e.clientY };
     };
 
+    const onDeviceOrientation = (e: DeviceOrientationEvent) => {
+      if (e.beta === null || e.gamma === null) return;
+      
+      const screenW = window.innerWidth;
+      const screenH = window.innerHeight;
+      
+      const gamma = Math.max(-45, Math.min(45, e.gamma));
+      const beta = Math.max(0, Math.min(90, e.beta));
+      
+      const targetX = screenW / 2 + (gamma / 45) * (screenW / 1.5);
+      const targetY = screenH / 2 + ((beta - 45) / 45) * (screenH / 1.5);
+      
+      mouse.current = {
+        x: mouse.current.x === -100 ? targetX : mouse.current.x + (targetX - mouse.current.x) * 0.1,
+        y: mouse.current.y === -100 ? targetY : mouse.current.y + (targetY - mouse.current.y) * 0.1
+      };
+    };
+
     const renderLoop = () => {
       const { x, y } = mouse.current;
       
@@ -44,11 +62,23 @@ export default function CursorFollower() {
       animationFrameId = requestAnimationFrame(renderLoop);
     };
 
-    window.addEventListener('mousemove', onMove);
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    
+    if (isMobile) {
+      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+        // Handle iOS
+      }
+      window.addEventListener('deviceorientation', onDeviceOrientation);
+      mouse.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    } else {
+      window.addEventListener('mousemove', onMove);
+    }
+
     animationFrameId = requestAnimationFrame(renderLoop);
 
     return () => {
       window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('deviceorientation', onDeviceOrientation);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);

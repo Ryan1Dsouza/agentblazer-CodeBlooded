@@ -392,3 +392,4 @@ function RailTrackStructure({ spline }: { spline: THREE.CatmullRomCurve3 }) {
     </group>
   );
 }
+

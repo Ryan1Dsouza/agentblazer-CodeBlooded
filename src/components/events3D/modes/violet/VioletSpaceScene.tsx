@@ -476,3 +476,4 @@ function DynamicDisappearingBeam({ spline, progress }: { spline: THREE.CatmullRo
     </group>
   );
 }
+
