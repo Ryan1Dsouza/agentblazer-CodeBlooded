@@ -87,16 +87,18 @@ export default function CommunityVoice({ isAdmin }: Props) {
           </h2>
           <p className="section-subtitle">Share your thoughts, experiences & ideas</p>
         </div>
-        <button
-          className="btn-admin-action"
-          onClick={() => setShowForm(!showForm)}
-        >
-          {showForm ? '✕ Cancel' : '✍️ Share Your Voice'}
-        </button>
+        {isAdmin && (
+          <button
+            className="btn-admin-action"
+            onClick={() => setShowForm(!showForm)}
+          >
+            {showForm ? '✕ Cancel' : '✍️ Share Your Voice'}
+          </button>
+        )}
       </div>
 
       {/* Submit Form */}
-      {showForm && (
+      {isAdmin && showForm && (
         <form className="voice-form glass-panel" onSubmit={handleSubmit}>
           <div className="form-grid">
             <div className="form-group">
@@ -129,11 +131,11 @@ export default function CommunityVoice({ isAdmin }: Props) {
         </form>
       )}
 
-      {/* Entries */}
       {sorted.length === 0 ? (
         <div className="bulletin-empty">
           <span className="empty-icon">💬</span>
-          <p>No community voices yet. Be the first to share!</p>
+          <p>No community voices yet.</p>
+          {isAdmin && <p>Be the first to share!</p>}
         </div>
       ) : (
         <div className="voice-grid">
