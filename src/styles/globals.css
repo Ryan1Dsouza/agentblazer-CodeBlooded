@@ -2646,7 +2646,10 @@ button {
     gap: 2rem;
   }
 
-  .leadership-grid {
+  .leadership-grid,
+  .honored-grid,
+  .team-grid,
+  .committee-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -2827,7 +2830,10 @@ button {
   }
 
   .leadership-grid,
+  .honored-grid,
+  .faculty-row,
   .team-grid,
+  .committee-grid,
   .events-grid {
     grid-template-columns: 1fr;
   }
