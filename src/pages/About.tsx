@@ -138,7 +138,7 @@ export default function About() {
       name,
       role,
       department: tag,
-      category: 'Honored Guest',
+      category: 'Leadership' as const,
       photoPath: photo,
       organization: org
     });
