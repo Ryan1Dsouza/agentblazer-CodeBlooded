@@ -22,7 +22,21 @@ export default function Community() {
         <div className="community-hero">
           <div className="community-hero-text">
             <span className="community-badge">
-              {isAdmin && <span className="admin-indicator">🔑 ADMIN</span>}
+              {isAdmin && (
+                <span className="admin-indicator">
+                  🔑 ADMIN
+                  <button
+                    className="admin-logout-btn"
+                    onClick={() => {
+                      sessionStorage.removeItem('isAdmin');
+                      window.location.reload();
+                    }}
+                    title="Exit Admin Mode"
+                  >
+                    ✕ EXIT
+                  </button>
+                </span>
+              )}
               Community Hub
             </span>
             <h1 className="community-title glow-text">AgentBlazer Hub</h1>
