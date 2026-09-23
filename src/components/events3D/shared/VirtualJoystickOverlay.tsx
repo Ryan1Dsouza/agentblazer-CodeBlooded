@@ -3,7 +3,7 @@ import React, { useRef, useState, useCallback } from 'react';
 interface Props {
   onMove: (x: number, y: number) => void;
   onLook?: (dx: number, dy: number) => void;
-  onAction?: (action: 'up' | 'down' | 'boost' | 'interact') => void;
+  onAction?: (action: 'up' | 'down' | 'boost' | 'boost_end' | 'interact') => void;
   actionLabel?: string;
   theme?: string;
 }
