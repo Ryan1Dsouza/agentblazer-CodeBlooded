@@ -38,8 +38,10 @@ Switch between three distinct visual identities on the fly with synchronized 3D 
 *   **Frost**: Ice-blue aurora tones, frosted translucent glassmorphism, and clean light-mode surfaces.
 
 ### 🌐 4. Nexus Hub Community Platform
-*   A collaborative student ecosystem featuring community discussion channels, workshop resources, announcements, and peer networking.
-*   Interactive messaging UI with mock real-time latency and channel switching.
+*   **Real-Time Firebase Chat**: A live, multi-user chat room synchronized instantly across all connected users via Google Cloud Firestore.
+*   **Domain-Restricted Google Auth**: Secure login via Firebase Authentication, strictly limited to approved `@sjec.ac.in` college email addresses for a safe student environment.
+*   **Admin-Moderated Community Voice**: A dedicated space for sharing thoughts and experiences, where only authorized admins (via secure password portal) can broadcast announcements.
+*   **Integrated AI Moderation & Bot**: Tag `@agentblazer` in the real-time chat to get instant AI-generated responses visible to the entire community.
 
 ### 🤖 5. Nexus Floating AI Assistant
 *   An on-screen interactive floating assistant widget.
@@ -58,6 +60,7 @@ Switch between three distinct visual identities on the fly with synchronized 3D 
 | **React 18** | Modern component-based declarative user interface |
 | **TypeScript** | Type-safe enterprise-grade codebase |
 | **Vite** | Blazing fast build tooling, HMR, and asset bundling |
+| **Firebase** | Cloud Firestore for real-time DB & Google Authentication |
 | **Three.js** | Core 3D WebGL rendering engine |
 | **@react-three/fiber** | Declarative React Three.js scene graph |
 | **@react-three/drei** | Three.js shader, lighting, camera, and mesh utilities |
