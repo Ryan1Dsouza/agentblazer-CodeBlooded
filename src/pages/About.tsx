@@ -31,6 +31,7 @@ function FloatingPreview({ member, isHovered, side }: { member: any, isHovered: 
         <div className="floating-preview-caption">
           <span className="floating-preview-name">{member.name}</span>
           <span className="floating-preview-role">{member.role}</span>
+          {member.quote && <span className="floating-preview-quote">"{member.quote}"</span>}
         </div>
       </div>
     </div>
@@ -52,26 +53,31 @@ function HoverableHonoredCard({ p, onSelect }: { p: any, onSelect: () => void })
 
   return (
     <div 
+      className="card-wrapper"
       ref={cardRef}
-      className="honored-card hud-panel"
-      onClick={onSelect}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setIsHovered(false)}
-      style={{ cursor: 'pointer' }}
     >
-      <div className="honored-avatar">
-        {p.photoPath ? (
-          <img src={p.photoPath} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'12px'}} />
-        ) : (
-          <span className="honored-initials">{p.name.split(' ').slice(-1)[0][0]}{p.name.split(' ').slice(0, -1).pop()?.[0] || 'D'}</span>
-        )}
-      </div>
-      <div className="honored-body">
-        <h4 className="honored-name">{p.name}</h4>
-        <p className="honored-org">{p.org}</p>
-        <div className="honored-footer">
-          <span className="honored-designation">{p.design}</span>
-          <span className="honored-tag hud-status-tag">{p.tag}</span>
+      <div 
+        className="honored-card hud-panel"
+        onClick={onSelect}
+        style={{ cursor: 'pointer' }}
+      >
+        <div className="honored-avatar">
+          {p.photoPath ? (
+            <img src={p.photoPath} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'12px'}} />
+          ) : (
+            <span className="honored-initials">{p.name.split(' ').slice(-1)[0][0]}{p.name.split(' ').slice(0, -1).pop()?.[0] || 'D'}</span>
+          )}
+        </div>
+        <div className="honored-body">
+          <h4 className="honored-name">{p.name}</h4>
+          <p className="honored-org">{p.org}</p>
+          <div className="honored-footer">
+            <span className="honored-designation">{p.design}</span>
+            <span className="honored-tag hud-status-tag">{p.tag}</span>
+          </div>
+          {p.quote && <p className="team-quote honored-quote">"{p.quote}"</p>}
         </div>
       </div>
       <FloatingPreview member={{ name: p.name, role: p.design, photoPath: p.photoPath }} isHovered={isHovered} side={side} />
@@ -94,23 +100,28 @@ function HoverableFacultyCard({ p, onSelect }: { p: any, onSelect: () => void })
 
   return (
     <div 
+      className="card-wrapper"
       ref={cardRef}
-      className="faculty-card hud-panel" 
-      onClick={onSelect}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setIsHovered(false)}
-      style={{ cursor: 'pointer' }}
     >
-      <div className="faculty-avatar">
-        {p.photoPath ? (
-          <img src={p.photoPath} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'10px'}} />
-        ) : (
-          <span className="faculty-initials">{p.initials}</span>
-        )}
-      </div>
-      <div className="faculty-body">
-        <h4 className="faculty-name">{p.name}</h4>
-        <p className="faculty-designation">{p.role}</p>
+      <div 
+        className="faculty-card hud-panel" 
+        onClick={onSelect}
+        style={{ cursor: 'pointer' }}
+      >
+        <div className="faculty-avatar">
+          {p.photoPath ? (
+            <img src={p.photoPath} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'10px'}} />
+          ) : (
+            <span className="faculty-initials">{p.initials}</span>
+          )}
+        </div>
+        <div className="faculty-body">
+          <h4 className="faculty-name">{p.name}</h4>
+          <p className="faculty-designation">{p.role}</p>
+          {p.quote && <p className="team-quote faculty-quote">"{p.quote}"</p>}
+        </div>
       </div>
       <FloatingPreview member={{ name: p.name, role: p.role, photoPath: p.photoPath }} isHovered={isHovered} side={side} />
     </div>
@@ -164,10 +175,10 @@ export default function About() {
         </div>
         <div className="honored-grid">
           {[
-            { name: 'Mr. Santosh Rebello', org: 'Salesforce', design: 'Guest of Honor', tag: 'Keynote Speaker', photoPath: '/modes/santhoshRebello.jpg' },
-            { name: 'Mr. Stephen Pinto', org: 'Salesforce & SJEC Alumnus', design: 'Technical Mentor', tag: 'Alumni Guide', photoPath: '' },
-            { name: "Dr. Rio D'Souza", org: 'Principal, SJEC', design: 'Presidential Address', tag: 'Patron', photoPath: '/modes/principal.jpg' },
-            { name: "Dr. Melwyn D'Souza", org: 'HOD, Computer Science & Engineering', design: 'Program Chair', tag: 'Department Head', photoPath: '/modes/Melwyn.jpg' },
+            { name: 'Mr. Santosh Rebello', org: 'Salesforce', design: 'Guest of Honor', tag: 'Keynote Speaker', photoPath: '/Photos/santhoshRebello.jpg', quote: 'A language that doesn\'t affect the way you think about programming is not worth knowing.' },
+            { name: 'Mr. Stephen Pinto', org: 'Salesforce & SJEC Alumnus', design: 'Technical Mentor', tag: 'Alumni Guide', photoPath: '', quote: 'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.' },
+            { name: "Dr. Rio D'Souza", org: 'Principal, SJEC', design: 'Presidential Address', tag: 'Patron', photoPath: '/Photos/principal.jpg', quote: 'One man\'s crappy software is another man\'s full-time job.' },
+            { name: "Dr. Melwyn D'Souza", org: 'HOD, Computer Science & Engineering', design: 'Program Chair', tag: 'Department Head', photoPath: '/Photos/Melwyn.jpg', quote: 'Make it work, make it right, make it fast.' },
           ].map((p, i) => (
             <HoverableHonoredCard 
               key={i} 
@@ -184,8 +195,8 @@ export default function About() {
         <div className="faculty-council">
           <div className="faculty-row">
             {[
-              { name: 'Ms. Nisha Roche', role: 'Assistant Professor, CSE • Faculty Coordinator', initials: 'NR', photoPath: '/modes/nishaRoche.jpg' },
-              { name: 'Mr. Keith Fernandes', role: 'Assistant Professor, CSE • Faculty Coordinator', initials: 'KF', photoPath: '/Photos/mr-keith-raymond-fernandes.jpg' }
+              { name: 'Ms. Nisha Roche', role: 'Assistant Professor, CSE • Faculty Coordinator', initials: 'NR', photoPath: '/Photos/ms-nisha-jenifer-roche.jpg', quote: 'If debugging is the process of removing software bugs, then programming must be the process of putting them in.' },
+              { name: 'Mr. Keith Fernandes', role: 'Assistant Professor, CSE • Faculty Coordinator', initials: 'KF', photoPath: '/Photos/mr-keith-raymond-fernandes.jpg', quote: 'Sometimes it pays to stay in bed on Monday, rather than spending the rest of the week debugging Monday’s code.' }
             ].map((p, i) => (
               <HoverableFacultyCard 
                 key={i} 
@@ -220,8 +231,8 @@ export default function About() {
             <TeamCard 
               key={member.id} 
               member={{ ...member, category: 'Committee' }} 
-              onSelect={() => {}} 
-              isSelected={false}
+              onSelect={setSelectedMember} 
+              isSelected={selectedMember?.id === member.id}
             />
           ))}
         </div>

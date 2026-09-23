@@ -19,7 +19,7 @@ const themes: { id: Theme; label: string }[] = [
 
 export default function Header() {
   const { theme, switchTheme } = useTheme();
-  const logoPath = '/assets/logos/logo_clean.png';
+  const logoPath = '/AgentBlazer_Logo.png';
 
   return (
     <header className="header">

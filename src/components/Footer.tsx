@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="footer-content">
           <div className="footer-brand">
             <div className="footer-logo-wrapper">
-              <img src="/assets/logos/logo_clean.png" alt="AgentBlazer" className="footer-logo" />
+              <img src="/AgentBlazer_Logo.png" alt="AgentBlazer" className="footer-logo" />
             </div>
             <div className="footer-brand-info">
               <h3>{siteConfig.club.name}</h3>

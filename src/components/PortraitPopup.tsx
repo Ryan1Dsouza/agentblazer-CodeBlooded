@@ -18,6 +18,9 @@ export default function PortraitPopup({ member, onClose }: Props) {
         <img src={member.photoPath} alt={member.name} className="popup-photo" />
         <h3 className="popup-name">{member.name}</h3>
         <p className="popup-role">{member.role}</p>
+        {member.quote && (
+          <p className="popup-quote">"{member.quote}"</p>
+        )}
         {member.organization && (
           <p className="popup-org">{member.organization}</p>
         )}

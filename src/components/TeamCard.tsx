@@ -37,18 +37,37 @@ export default function TeamCard({ member, onSelect, isSelected }: Props) {
 
   return (
     <div 
+      className="card-wrapper"
       ref={cardRef}
-      className={`team-card ${isSelected ? 'selected' : ''}`}
-      onClick={() => onSelect(member)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <span className={`team-badge ${member.category.toLowerCase().replace(/\s+/g, '-')}`}>
-        {member.category}
-      </span>
-      <h3 className="team-name">{member.name}</h3>
-      <p className="team-role">{member.role}</p>
-      <p className="team-dept">{member.department}</p>
+      <div 
+        className={`team-card ${isSelected ? 'selected' : ''}`}
+        onClick={() => onSelect(member)}
+      >
+        <span className={`team-badge ${member.category.toLowerCase().replace(/\s+/g, '-')}`}>
+          {member.category}
+        </span>
+        {hasValidImage && (
+          <div className="team-card-avatar">
+            <img 
+              src={member.photoPath} 
+              alt={member.name}
+              onError={() => setImageError(true)}
+              loading="lazy"
+            />
+          </div>
+        )}
+        <h3 className="team-name">{member.name}</h3>
+        <p className="team-role">{member.role}</p>
+        <p className="team-dept">{member.department}</p>
+        {member.quote && (
+          <p className="team-quote">"{member.quote}"</p>
+        )}
+
+        <div className="hud-telemetry-footer" aria-hidden="true" />
+      </div>
 
       {hasValidImage && (
         <div 
@@ -56,7 +75,13 @@ export default function TeamCard({ member, onSelect, isSelected }: Props) {
           aria-hidden={!isHovered}
         >
           <div className="floating-preview-inner">
-            <div className="floating-preview-img-wrapper">
+            <div className="floating-preview-img-wrapper" style={{ position: 'relative' }}>
+              <span className="preview-top-badge">
+                {member.category === 'Officer' ? 'LEADERSHIP' : member.category.toUpperCase()}
+              </span>
+              <span className="preview-bottom-badge">
+                SJEC CSE
+              </span>
               <img 
                 src={member.photoPath} 
                 alt={member.name}
@@ -67,13 +92,12 @@ export default function TeamCard({ member, onSelect, isSelected }: Props) {
             </div>
             <div className="floating-preview-caption">
               <span className="floating-preview-name">{member.name}</span>
-              <span className="floating-preview-role">{member.role}</span>
+              <span className="floating-preview-role">{member.role} • AgentBlazer Club</span>
+              {member.quote && <span className="floating-preview-quote">"{member.quote}"</span>}
             </div>
           </div>
         </div>
       )}
-      
-      <div className="hud-telemetry-footer" aria-hidden="true" />
     </div>
   );
 }

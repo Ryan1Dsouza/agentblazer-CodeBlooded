@@ -6,6 +6,7 @@ export interface TeamMember {
   category: 'Leadership' | 'Core Team' | 'Faculty' | 'Officer' | 'Committee';
   photoPath: string;
   description?: string;
+  quote?: string;
   organization?: string;
 }
 

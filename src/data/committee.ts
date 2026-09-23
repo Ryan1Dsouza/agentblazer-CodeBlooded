@@ -7,7 +7,8 @@ export const committeeMembers: TeamMember[] = [
     role: 'Departmental Representative',
     department: 'AI & LLM Research Group',
     category: 'Committee',
-    photoPath: '/modes/prajwal.jpg'
+    photoPath: '/Photos/prajwal.jpg',
+    quote: 'Before software can be reusable it first has to be usable.'
   },
   {
     id: 'cm2',
@@ -15,7 +16,8 @@ export const committeeMembers: TeamMember[] = [
     role: 'Departmental Representative',
     department: 'Model Evaluation Benchmarks',
     category: 'Committee',
-    photoPath: '/modes/chacko.jpg'
+    photoPath: '/Photos/chacko.jpg',
+    quote: 'Simplicity is the soul of efficiency.'
   },
   {
     id: 'cm3',
@@ -23,6 +25,7 @@ export const committeeMembers: TeamMember[] = [
     role: 'Departmental Representative',
     department: 'Project Operations & Labs',
     category: 'Committee',
-    photoPath: '/modes/alma.jpg'
+    photoPath: '/Photos/alma.jpg',
+    quote: 'First, solve the problem. Then, write the code.'
   }
 ];

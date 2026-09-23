@@ -81,7 +81,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     const criticalAssetUrls = [
       clubLogoPath,
       '/AgentBlazer_Logo_Transparent.png',
-      '/logos/logo_clean.png',
+      '/AgentBlazer_Logo.png',
       '/logos/AgentBlazer_Violet.png',
       '/logos/AgentBlazer_Inferno.png',
       '/logos/AgentBlazer_Frost.png'
