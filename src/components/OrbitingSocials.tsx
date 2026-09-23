@@ -61,7 +61,7 @@ interface OrbitingSocialsProps {
   theme: string;
 }
 
-export default function OrbitingSocials({ theme }: OrbitingSocialsProps) {
+export default function OrbitingSocials({}: OrbitingSocialsProps) {
   const socials = [
     {
       name: 'Instagram',
