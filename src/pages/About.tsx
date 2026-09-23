@@ -130,6 +130,8 @@ function HoverableFacultyCard({ p, onSelect }: { p: any, onSelect: () => void })
 
 export default function About() {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [easterEggClicks, setEasterEggClicks] = useState(0);
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
 
   const handleAdvisorSelect = (name: string, role: string, photo: string) => {
     setSelectedMember({
@@ -224,7 +226,20 @@ export default function About() {
 
         <div className="hud-section-header">
           <div className="drone-beacon-indicator" aria-hidden="true" />
-          <h3 className="hud-section-label">Core Working Committee</h3>
+          <h3 
+            className="hud-section-label" 
+            onClick={() => {
+              const newClicks = easterEggClicks + 1;
+              setEasterEggClicks(newClicks);
+              if (newClicks >= 3) {
+                setShowEasterEgg(true);
+                setEasterEggClicks(0);
+              }
+            }}
+            style={{ cursor: 'pointer', userSelect: 'none' }}
+          >
+            Core Working Committee
+          </h3>
         </div>
         <div className="committee-grid">
           {committeeMembers.map((member) => (
@@ -242,6 +257,43 @@ export default function About() {
         member={selectedMember} 
         onClose={() => setSelectedMember(null)} 
       />
+
+      {/* Easter Egg Modal */}
+      {showEasterEgg && (
+        <div 
+          className="portrait-modal-overlay visible" 
+          onClick={() => setShowEasterEgg(false)}
+          style={{ zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <div 
+            className="portrait-modal-content visible glass-panel" 
+            onClick={e => e.stopPropagation()}
+            style={{ 
+              maxWidth: '500px', 
+              width: '90%', 
+              padding: '2rem',
+              textAlign: 'center',
+              border: '1px solid var(--primary)',
+              boxShadow: '0 0 30px rgba(0, 243, 255, 0.2)'
+            }}
+          >
+            <button className="portrait-close" onClick={() => setShowEasterEgg(false)}>✕</button>
+            <h2 style={{ color: 'var(--primary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
+              Secret Unlocked!
+            </h2>
+            <div style={{ borderRadius: '12px', overflow: 'hidden', marginBottom: '1.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <img 
+                src="/Photos/testcase.jpg" 
+                alt="Core Developers" 
+                style={{ width: '100%', height: 'auto', display: 'block' }} 
+              />
+            </div>
+            <p style={{ color: 'var(--text)', fontSize: '1.1rem', lineHeight: '1.6' }}>
+              Welcome to AgentBlazer! This is a special shoutout to the core developers: <strong style={{ color: 'var(--primary)' }}>Ryan</strong> and <strong style={{ color: 'var(--primary)' }}>Kevin</strong>. Thank you for discovering our little secret!
+            </p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
