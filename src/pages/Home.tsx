@@ -8,7 +8,7 @@ import OrbitingSocials from '../components/OrbitingSocials';
 
 export default function Home() {
   const { theme } = useTheme();
-  const logoPath = '/AgentBlazer_Logo_Ready (1).png';
+  const logoPath = '/AgentBlazer_Logo.png';
 
   return (
     <section className="home-hero">

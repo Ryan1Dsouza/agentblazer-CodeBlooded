@@ -37,12 +37,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const exitProgressRef = useRef(0);
 
   // Dynamically select the logo based on the active theme
-  const clubLogoPath =
-    theme === 'inferno'
-      ? '/logos/AgentBlazer_Inferno.png'
-      : theme === 'frost'
-      ? '/logos/AgentBlazer_Frost.png'
-      : '/AgentBlazer_Logo_Ready (1).png'; // Use high-quality transparent one for default/violet
+  const clubLogoPath = '/AgentBlazer_Logo.png';
 
   const themeColors = {
     violet: {

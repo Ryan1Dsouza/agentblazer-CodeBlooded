@@ -165,7 +165,7 @@ export default function About() {
         
         <div className="inauguration-card glass-panel-elevated">
           <h3>Inauguration & Mentorship Council</h3>
-          <p>AgentBlazer was inaugurated with the mission of fostering a culture of innovation in AI and machine learning. Our mentorship council guides students through their journey in building autonomous and agentic AI systems.</p>
+          <p>The Agentblazer Club was inaugurated on August 25, 2025, with the mission of fostering a culture of innovation in AI and machine learning. Our mentorship council guides students through their journey in building autonomous and agentic AI systems.</p>
           <p>{siteConfig.department.name}<br />{siteConfig.department.college}</p>
         </div>
         
