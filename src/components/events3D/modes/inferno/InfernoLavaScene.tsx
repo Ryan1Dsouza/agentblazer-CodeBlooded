@@ -14,6 +14,7 @@ interface InfernoSceneProps {
   onInspect: (event: Event) => void;
   onTargetUpdate: (target: { name: string | null; distance: number; status: 'APPROACHING' | 'DOCKING' | 'IDLE' }) => void;
   mobileMove?: { x: number; y: number };
+  mobileBoost?: boolean;
 }
 
 export default function InfernoLavaScene({
@@ -23,7 +24,8 @@ export default function InfernoLavaScene({
   onDockComplete,
   onInspect,
   onTargetUpdate,
-  mobileMove
+  mobileMove,
+  mobileBoost
 }: InfernoSceneProps) {
   const { camera } = useThree();
 
@@ -190,25 +192,29 @@ export default function InfernoLavaScene({
 
     // 3. NORMAL TRAIN EXPEDITION DRIVING (Smooth Lerped Scroll + Throttle)
     let driveInput = 0;
-    const boosting = !!keys.current['shift'];
+    const boosting = !!keys.current['shift'] || !!props.mobileBoost;
 
     if (keys.current['w'] || keys.current['arrowup'] || keys.current['arrowright'] || keys.current['d']) driveInput += 1;
     if (keys.current['s'] || keys.current['arrowdown'] || keys.current['arrowleft'] || keys.current['a']) driveInput -= 1;
 
-    if (mobileMove) {
-      driveInput -= mobileMove.y;
+    if (props.mobileMove) {
+      driveInput -= props.mobileMove.y;
     }
 
     const accelMultiplier = boosting ? 0.35 : 0.15;
     const maxThrottle = boosting ? 0.30 : 0.15;
 
-    // Smooth throttle interpolation from keyboard
+    // Smooth throttle interpolation from keyboard/joystick
     if (driveInput !== 0) {
       throttleTarget.current += driveInput * accelMultiplier * dt;
       throttleTarget.current = Math.max(-maxThrottle, Math.min(maxThrottle, throttleTarget.current));
       targetProgress.current = (targetProgress.current + throttleTarget.current * dt + 1) % 1;
     } else {
-      throttleTarget.current = THREE.MathUtils.lerp(throttleTarget.current, 0, dt * 3);
+      throttleTarget.current = THREE.MathUtils.lerp(throttleTarget.current, 0, dt * 5);
+      if (Math.abs(throttleTarget.current) < 0.001) {
+        throttleTarget.current = 0;
+      }
+      targetProgress.current = (targetProgress.current + throttleTarget.current * dt + 1) % 1;
     }
 
     const prevP = currentProgress.current;

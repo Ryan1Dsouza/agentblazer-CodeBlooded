@@ -42,6 +42,7 @@ export default function Events3DCanvas({
   // Mobile movement & look vectors
   const [mobileMove, setMobileMove] = useState({ x: 0, y: 0 });
   const [mobileLook, setMobileLook] = useState({ x: 0, y: 0 });
+  const [mobileBoost, setMobileBoost] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -108,6 +109,7 @@ export default function Events3DCanvas({
               onInspect={handleInspect}
               onTargetUpdate={setTargetInfo}
               mobileMove={gameState === 'GAMEPLAY' ? mobileMove : undefined}
+              mobileBoost={gameState === 'GAMEPLAY' ? mobileBoost : undefined}
             />
           ) : theme === 'frost' ? (
             <FrostLodgeScene
@@ -119,6 +121,7 @@ export default function Events3DCanvas({
               onTargetUpdate={setTargetInfo}
               onSpeedUpdate={(s, b) => { setSpeed(s); setIsBoosting(b); }}
               mobileMove={gameState === 'GAMEPLAY' ? mobileMove : undefined}
+              mobileBoost={gameState === 'GAMEPLAY' ? mobileBoost : undefined}
             />
           ) : (
             <VioletSpaceScene
@@ -130,6 +133,7 @@ export default function Events3DCanvas({
               onTargetUpdate={setTargetInfo}
               mobileMove={gameState === 'GAMEPLAY' ? mobileMove : undefined}
               mobileLook={gameState === 'GAMEPLAY' ? mobileLook : undefined}
+              mobileBoost={gameState === 'GAMEPLAY' ? mobileBoost : undefined}
             />
           )}
         </Suspense>
@@ -162,6 +166,10 @@ export default function Events3DCanvas({
         <VirtualJoystickOverlay
           onMove={(x, y) => setMobileMove({ x, y })}
           onLook={(dx, dy) => setMobileLook({ x: dx, y: dy })}
+          onAction={(act) => {
+            if (act === 'boost') setMobileBoost(true);
+            if (act === 'boost_end') setMobileBoost(false);
+          }}
           theme={theme}
         />
       )}

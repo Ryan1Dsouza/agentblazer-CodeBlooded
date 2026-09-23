@@ -15,6 +15,7 @@ interface VioletSceneProps {
   onTargetUpdate: (target: { name: string | null; distance: number; status: 'APPROACHING' | 'DOCKING' | 'IDLE' }) => void;
   mobileMove?: { x: number; y: number };
   mobileLook?: { x: number; y: number };
+  mobileBoost?: boolean;
 }
 
 export default function VioletSpaceScene({
@@ -25,7 +26,8 @@ export default function VioletSpaceScene({
   onInspect,
   onTargetUpdate,
   mobileMove,
-  mobileLook
+  mobileLook,
+  mobileBoost
 }: VioletSceneProps) {
   const { camera } = useThree();
 
@@ -274,7 +276,7 @@ export default function VioletSpaceScene({
     let turn = 0;
     let pitch = 0;
     let vertical = 0;
-    const boosting = !!keys.current['shift'];
+    const boosting = !!keys.current['shift'] || !!mobileBoost;
     setIsBoosting(boosting);
 
     if (keys.current['w'] || keys.current['arrowup']) forward += 1;

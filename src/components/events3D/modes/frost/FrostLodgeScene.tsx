@@ -15,6 +15,7 @@ interface FrostSceneProps {
   onTargetUpdate: (target: { name: string | null; distance: number; status: 'APPROACHING' | 'DOCKING' | 'IDLE' }) => void;
   onSpeedUpdate?: (speed: number, isBoosting: boolean) => void;
   mobileMove?: { x: number; y: number };
+  mobileBoost?: boolean;
 }
 
 export default function FrostLodgeScene({
@@ -25,7 +26,8 @@ export default function FrostLodgeScene({
   onInspect,
   onTargetUpdate,
   onSpeedUpdate,
-  mobileMove
+  mobileMove,
+  mobileBoost
 }: FrostSceneProps) {
   const { camera } = useThree();
 
@@ -273,7 +275,7 @@ export default function FrostLodgeScene({
     // 4. NORMAL ARCTIC TUNDRA EXPLORATION
     let throttle = 0;
     let turn = 0;
-    const boosting = !!keys.current['shift'];
+    const boosting = !!keys.current['shift'] || !!mobileBoost;
 
     if (keys.current['w'] || keys.current['arrowup']) throttle += 1;
     if (keys.current['s'] || keys.current['arrowdown']) throttle -= 0.6;

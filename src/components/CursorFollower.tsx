@@ -16,7 +16,7 @@ export default function CursorFollower() {
   const trailHistory = useRef(Array(12).fill({ x: -100, y: -100 }));
 
   useEffect(() => {
-    const mobileCheck = window.matchMedia("(pointer: coarse)").matches;
+    const mobileCheck = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 1024;
     setIsMobile(mobileCheck);
     
     let animationFrameId: number;

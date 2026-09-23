@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Event } from '../../../types';
 import './EventDetailModal.css';
 
@@ -148,7 +149,7 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
   const hudClipPath = 'polygon(40px 0, calc(100% - 80px) 0, 100% 80px, 100% 100%, 0 100%, 0 40px)';
   const innerClipPath = 'polygon(39px 0, calc(100% - 79px) 0, 100% 79px, 100% 100%, 0 100%, 0 39px)';
 
-  return (
+  const modalContent = (
     <div className="event-modal-overlay" onClick={onClose}>
       <div className="event-modal-wrapper" onClick={(e) => e.stopPropagation()}>
         {/* Floating Data Node (Top-Left Branch) */}
@@ -404,4 +405,6 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

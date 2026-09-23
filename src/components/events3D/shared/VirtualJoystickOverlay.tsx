@@ -96,16 +96,25 @@ export default function VirtualJoystickOverlay({
 
   return (
     <div className="fixed inset-0 pointer-events-none z-30 select-none touch-none">
+      {/* Look Area (Full Screen) */}
+      <div
+        onTouchStart={handleLookStart}
+        onTouchMove={handleLookMove}
+        onTouchEnd={handleLookEnd}
+        onTouchCancel={handleLookEnd}
+        className="absolute inset-0 z-0 pointer-events-auto touch-none"
+      />
+
       {/* Left movement joystick */}
       <div
-        className="absolute left-6 bottom-8 pointer-events-auto flex flex-col items-center justify-center"
+        className="absolute left-6 bottom-8 pointer-events-auto flex flex-col items-center justify-center z-10"
       >
         <div
           ref={stickRef}
           onTouchStart={handleStickStart}
           onTouchMove={handleStickMove}
           onTouchEnd={handleStickEnd}
-          className="relative w-28 h-28 rounded-full border-2 bg-black/40 backdrop-blur-md flex items-center justify-center transition-shadow shadow-lg"
+          className="relative w-28 h-28 rounded-full border-2 bg-black/40 backdrop-blur-md flex items-center justify-center transition-shadow shadow-lg touch-none"
           style={{
             borderColor: active ? themeAccent : 'rgba(255,255,255,0.2)',
             boxShadow: active ? `0 0 20px ${themeAccent}66` : 'none'
@@ -120,50 +129,28 @@ export default function VirtualJoystickOverlay({
             }}
           />
         </div>
-        <span className="text-[10px] font-mono tracking-widest text-gray-400 mt-2">MOVE / STEER</span>
+        <span className="text-[10px] font-mono tracking-widest text-gray-400 mt-2 pointer-events-none">MOVE / STEER</span>
       </div>
 
-      {/* Right Look Area & Action Buttons */}
+      {/* Right Action Buttons */}
       <div
-        onTouchStart={handleLookStart}
-        onTouchMove={handleLookMove}
-        onTouchEnd={handleLookEnd}
-        className="absolute right-6 bottom-8 pointer-events-auto flex flex-col items-end gap-3"
+        className="absolute right-6 bottom-10 pointer-events-auto flex flex-col items-end gap-3 z-10"
       >
-        <div className="flex gap-2">
-          {onAction && (
-            <>
-              <button
-                onTouchStart={() => onAction('up')}
-                className="w-12 h-12 rounded-full border border-white/20 bg-black/50 text-white font-bold backdrop-blur-md active:scale-95 flex items-center justify-center shadow-lg"
-              >
-                ▲
-              </button>
-              <button
-                onTouchStart={() => onAction('down')}
-                className="w-12 h-12 rounded-full border border-white/20 bg-black/50 text-white font-bold backdrop-blur-md active:scale-95 flex items-center justify-center shadow-lg"
-              >
-                ▼
-              </button>
-            </>
-          )}
-          {onAction && (
-            <button
-              onTouchStart={() => onAction('interact')}
-              className="px-4 h-12 rounded-full text-white font-bold text-xs tracking-wider border backdrop-blur-md active:scale-95 flex items-center justify-center shadow-lg"
-              style={{
-                backgroundColor: `${themeAccent}cc`,
-                borderColor: themeAccent,
-                boxShadow: `0 0 15px ${themeAccent}88`
-              }}
-            >
-              {actionLabel}
-            </button>
-          )}
-        </div>
-        <div className="w-32 h-20 rounded-xl border border-white/10 bg-black/20 backdrop-blur-sm flex items-center justify-center">
-          <span className="text-[10px] font-mono tracking-widest text-gray-400">TOUCH TO LOOK</span>
-        </div>
+        {onAction && (
+          <button
+            onTouchStart={(e) => { e.stopPropagation(); onAction('boost'); }}
+            onTouchEnd={(e) => { e.stopPropagation(); onAction('boost_end'); }}
+            onTouchCancel={(e) => { e.stopPropagation(); onAction('boost_end'); }}
+            className="w-24 h-24 rounded-full text-white font-bold tracking-widest border backdrop-blur-md active:scale-95 flex items-center justify-center shadow-lg pointer-events-auto touch-none select-none"
+            style={{
+              backgroundColor: `${themeAccent}99`,
+              borderColor: themeAccent,
+              boxShadow: `0 0 20px ${themeAccent}aa`
+            }}
+          >
+            BOOST
+          </button>
+        )}
       </div>
     </div>
   );
