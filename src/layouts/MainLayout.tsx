@@ -4,10 +4,12 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BackgroundScene from '../three/BackgroundScene';
 import CursorFollower from '../components/CursorFollower';
+import NexusFloatingChat from '../components/NexusFloatingChat';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const isEventsPage = location.pathname === '/events';
+  const isHomePage = location.pathname === '/';
 
   useEffect(() => {
     document.title = 'AgentBlazer - CodeBlooded';
@@ -21,7 +23,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <main className={`main-content ${isEventsPage ? 'events-main-override' : ''}`}>
         {children}
       </main>
-      {!isEventsPage && <Footer />}
+      {isHomePage && <Footer />}
+      <NexusFloatingChat />
     </div>
   );
 }
+

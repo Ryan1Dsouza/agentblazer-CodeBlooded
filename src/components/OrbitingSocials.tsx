@@ -67,19 +67,19 @@ export default function OrbitingSocials({ theme }: OrbitingSocialsProps) {
     {
       name: 'Instagram',
       icon: InstagramIcon,
-      url: 'https://instagram.com', // Replace with real Instagram URL
+      url: 'https://www.instagram.com/agentblazer.sjec?stkn=YTBoZ2xkZWx5MDky',
       angle: 0
     },
     {
       name: 'LinkedIn',
       icon: LinkedInIcon,
-      url: 'https://linkedin.com', // Replace with real LinkedIn URL
+      url: 'https://www.linkedin.com/in/theagentblazerclubsjec/',
       angle: 120
     },
     {
       name: 'GitHub',
       icon: GitHubIcon,
-      url: 'https://github.com', // Replace with real GitHub URL
+      url: 'https://github.com/AgentBlazer',
       angle: 240
     }
   ];

@@ -31,12 +31,14 @@ export default function InfernoLavaScene({
   const trainGroupRef = useRef<THREE.Group>(null);
 
   // Progress along the rail spline: range [0, 1]
-  const progressRef = useRef(0.12);
+  const currentProgress = useRef(0.12);
+  const targetProgress = useRef(0.12);
   const velocityRef = useRef(0);
   const throttleTarget = useRef(0);
   const dockingTargetIdx = useRef<number | null>(null);
   const dockingProgress = useRef(0);
   const dockingCooldown = useRef(0);
+  const lastCompletedDepotIdx = useRef<number | null>(null);
   const prevGameState = useRef(gameState);
 
   // Generate a winding monorail spline passing through the 3 depots
@@ -62,8 +64,8 @@ export default function InfernoLavaScene({
   // Position train immediately on initial mount
   useEffect(() => {
     if (trainGroupRef.current) {
-      const pt = spline.getPointAt(progressRef.current);
-      const tangent = spline.getTangentAt(progressRef.current).normalize();
+      const pt = spline.getPointAt(currentProgress.current);
+      const tangent = spline.getTangentAt(currentProgress.current).normalize();
       trainGroupRef.current.position.copy(pt);
       const rotY = Math.atan2(tangent.x, tangent.z) + Math.PI;
       trainGroupRef.current.rotation.set(0, rotY, 0);
@@ -75,21 +77,17 @@ export default function InfernoLavaScene({
     }
   }, [spline, camera]);
 
-  // Set cooldown ONLY when resuming from HUD_OPEN to GAMEPLAY
+  // Clear HUD state tracker
   useEffect(() => {
-    if (prevGameState.current === 'HUD_OPEN' && gameState === 'GAMEPLAY') {
-      dockingCooldown.current = 2.5;
-    }
     prevGameState.current = gameState;
   }, [gameState]);
 
-  // Scroll wheel listener for natural gentle scroll-driven rail traversal
+  // Calibrated, smooth scroll wheel listener for steady monorail traversal
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (gameState === 'HUD_OPEN' || gameState === 'DOCKING') return;
-      const delta = e.deltaY * 0.00015;
-      progressRef.current = (progressRef.current + delta + 1) % 1;
-      velocityRef.current = Math.sign(delta) * 0.25;
+      const delta = e.deltaY * 0.00003; // Gentle progression
+      targetProgress.current = (targetProgress.current + delta + 1) % 1;
     };
 
     window.addEventListener('wheel', handleWheel, { passive: true });
@@ -110,8 +108,8 @@ export default function InfernoLavaScene({
         let nearestDiff = Infinity;
         stationTs.forEach((stT, idx) => {
           const diff = Math.min(
-            Math.abs(progressRef.current - stT),
-            1 - Math.abs(progressRef.current - stT)
+            Math.abs(currentProgress.current - stT),
+            1 - Math.abs(currentProgress.current - stT)
           );
           if (diff < nearestDiff) {
             nearestDiff = diff;
@@ -140,23 +138,19 @@ export default function InfernoLavaScene({
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
 
-    // Only tick down cooldown during active GAMEPLAY exploration
-    if (gameState === 'GAMEPLAY' && dockingCooldown.current > 0) {
-      dockingCooldown.current -= dt;
-    }
-
     // 1. AUTOMATIC DOCKING AT TRAIN PLATFORM
-    if (gameState === 'DOCKING' && dockingTargetIdx.current !== null) {
+    if ((gameState === 'DOCKING' || dockingTargetIdx.current !== null) && dockingTargetIdx.current !== null) {
       const targetT = stationTs[dockingTargetIdx.current];
       dockingProgress.current = Math.min(1, dockingProgress.current + dt * 1.5);
 
-      // Smoothly interpolate progress directly to depot stopping coordinate
-      progressRef.current = THREE.MathUtils.lerp(progressRef.current, targetT, dt * 5.0);
+      // Smoothly interpolate progress directly to depot stopping coordinate (softer grab)
+      currentProgress.current = THREE.MathUtils.lerp(currentProgress.current, targetT, dt * 2.5);
+      targetProgress.current = targetT;
       velocityRef.current *= 0.5;
       throttleTarget.current = 0;
 
-      const pt = spline.getPointAt(progressRef.current);
-      const tangent = spline.getTangentAt(progressRef.current).normalize();
+      const pt = spline.getPointAt(currentProgress.current);
+      const tangent = spline.getTangentAt(currentProgress.current).normalize();
 
       if (trainGroupRef.current) {
         trainGroupRef.current.position.copy(pt);
@@ -164,7 +158,7 @@ export default function InfernoLavaScene({
         trainGroupRef.current.rotation.set(0, rotY, 0);
       }
 
-      const lookAheadPt = spline.getPointAt((progressRef.current + 0.03) % 1);
+      const lookAheadPt = spline.getPointAt((currentProgress.current + 0.03) % 1);
       const camOffset = new THREE.Vector3(0, 5.5, 0).sub(tangent.clone().multiplyScalar(12));
       const desiredCamPos = pt.clone().add(camOffset).add(new THREE.Vector3(tangent.z * 4, 0, -tangent.x * 4));
       camera.position.lerp(desiredCamPos, dt * 5);
@@ -173,12 +167,13 @@ export default function InfernoLavaScene({
       // Update target HUD
       onTargetUpdate({
         name: events[dockingTargetIdx.current]?.title || null,
-        distance: Math.abs(progressRef.current - targetT) * 400,
+        distance: Math.abs(currentProgress.current - targetT) * 400,
         status: 'DOCKING'
       });
 
       if (dockingProgress.current >= 0.95) {
         const completedIdx = dockingTargetIdx.current;
+        lastCompletedDepotIdx.current = completedIdx;
         dockingTargetIdx.current = null;
         dockingProgress.current = 0;
         onTargetUpdate({ name: null, distance: 0, status: 'IDLE' });
@@ -194,7 +189,7 @@ export default function InfernoLavaScene({
       return;
     }
 
-    // 3. NORMAL TRAIN EXPEDITION DRIVING (With Shift Overdrive Boost)
+    // 3. NORMAL TRAIN EXPEDITION DRIVING (Smooth Lerped Scroll + Throttle)
     let driveInput = 0;
     const boosting = !!keys.current['shift'];
 
@@ -205,23 +200,30 @@ export default function InfernoLavaScene({
       driveInput -= mobileMove.y;
     }
 
-    const accelMultiplier = boosting ? 1.0 : 0.5;
-    const maxThrottle = boosting ? 0.8 : 0.4;
+    const accelMultiplier = boosting ? 0.35 : 0.15;
+    const maxThrottle = boosting ? 0.30 : 0.15;
 
     // Smooth throttle interpolation from keyboard
     if (driveInput !== 0) {
       throttleTarget.current += driveInput * accelMultiplier * dt;
       throttleTarget.current = Math.max(-maxThrottle, Math.min(maxThrottle, throttleTarget.current));
+      targetProgress.current = (targetProgress.current + throttleTarget.current * dt + 1) % 1;
     } else {
       throttleTarget.current = THREE.MathUtils.lerp(throttleTarget.current, 0, dt * 3);
     }
 
-    velocityRef.current += throttleTarget.current * dt;
-    velocityRef.current *= Math.pow(0.89, dt * 60);
-    progressRef.current = (progressRef.current + velocityRef.current * dt + 1) % 1;
+    const prevP = currentProgress.current;
+    
+    // Smoothly glide current progress toward target with circular modulo support
+    let pDiff = targetProgress.current - currentProgress.current;
+    if (pDiff > 0.5) pDiff -= 1;
+    if (pDiff < -0.5) pDiff += 1;
+    currentProgress.current = (currentProgress.current + pDiff * (dt * 4.0) + 1) % 1;
+    
+    const currP = currentProgress.current;
 
-    const pt = spline.getPointAt(progressRef.current);
-    const tangent = spline.getTangentAt(progressRef.current).normalize();
+    const pt = spline.getPointAt(currP);
+    const tangent = spline.getTangentAt(currP).normalize();
 
     if (trainGroupRef.current) {
       trainGroupRef.current.position.copy(pt);
@@ -234,14 +236,23 @@ export default function InfernoLavaScene({
     let nearestDiff = Infinity;
     stationTs.forEach((stT, idx) => {
       const diff = Math.min(
-        Math.abs(progressRef.current - stT),
-        1 - Math.abs(progressRef.current - stT)
+        Math.abs(currP - stT),
+        1 - Math.abs(currP - stT)
       );
       if (diff < nearestDiff) {
         nearestDiff = diff;
         nearestIdx = idx;
       }
     });
+
+    // Reset departure latch if train has moved away from depot (>0.06 spline diff)
+    if (lastCompletedDepotIdx.current !== null) {
+      const lastT = stationTs[lastCompletedDepotIdx.current];
+      const diffFromLast = Math.min(Math.abs(currP - lastT), 1 - Math.abs(currP - lastT));
+      if (diffFromLast > 0.06) {
+        lastCompletedDepotIdx.current = null;
+      }
+    }
 
     const approxDist = nearestDiff * 400;
     if (nearestIdx >= 0 && approxDist < 90) {
@@ -254,15 +265,48 @@ export default function InfernoLavaScene({
       onTargetUpdate({ name: null, distance: 0, status: 'IDLE' });
     }
 
-    // AUTOMATIC DOCKING — 0.04 spline diff trigger
-    if (dockingCooldown.current <= 0 && nearestIdx >= 0 && nearestDiff < 0.04) {
-      dockingTargetIdx.current = nearestIdx;
-      dockingProgress.current = 0;
-      onDockComplete(-1); // Transition to DOCKING state
-    }
+    // GUARANTEED DEPOT INTERCEPT DOCKING
+    stationTs.forEach((stT, idx) => {
+      // Calculate continuous movement step
+      let step = currP - prevP;
+      if (step > 0.5) step -= 1;
+      if (step < -0.5) step += 1;
+      
+      const isMovingForward = step > 0;
+      const isMovingBackward = step < 0;
+      
+      // Handle crossing considering wrap-around
+      let crossedForward = false;
+      let crossedBackward = false;
+      
+      if (isMovingForward) {
+        if (prevP <= stT && currP >= stT && step < 0.5) crossedForward = true;
+        if (prevP > 0.9 && currP < 0.1 && (stT >= prevP || stT <= currP)) crossedForward = true; // wrapped 1->0
+      } else if (isMovingBackward) {
+        if (prevP >= stT && currP <= stT && step > -0.5) crossedBackward = true;
+        if (prevP < 0.1 && currP > 0.9 && (stT <= prevP || stT >= currP)) crossedBackward = true; // wrapped 0->1
+      }
+      
+      // Calculate local distance to THIS specific station
+      const localDiff = Math.min(Math.abs(currP - stT), 1 - Math.abs(currP - stT));
+      
+      // Only grab if we cross the center, or if we are extremely close to THIS specific station
+      const isCrossing = crossedForward || crossedBackward || localDiff < 0.005;
+      
+      if (
+        isCrossing &&
+        lastCompletedDepotIdx.current !== idx
+      ) {
+        // MAGNETIC GRAB: Set target, but let the DOCKING state lerp currentProgress smoothly
+        targetProgress.current = stT;
+        dockingTargetIdx.current = idx;
+        dockingProgress.current = 0;
+        onDockComplete(-1); // Transition to DOCKING state
+      }
+    });
 
     // Dynamic Camera Chase & Boost Thrust
-    const lookAheadPt = spline.getPointAt((progressRef.current + (boosting ? 0.06 : 0.04)) % 1);
+    const lookAheadPt = spline.getPointAt((currP + (boosting ? 0.06 : 0.04)) % 1);
     const camDistance = boosting ? 14 : 12;
     const camOffset = new THREE.Vector3(0, boosting ? 4.5 : 5.0, 0).sub(tangent.clone().multiplyScalar(camDistance));
     const desiredCamPos = pt.clone().add(camOffset).add(new THREE.Vector3(tangent.z * 3.5, 0, -tangent.x * 3.5));

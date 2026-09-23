@@ -8,6 +8,8 @@ const Home = lazy(() => import('./pages/Home'))
 const About = lazy(() => import('./pages/About'))
 const Events = lazy(() => import('./pages/Events'))
 const Join = lazy(() => import('./pages/Join'))
+const Community = lazy(() => import('./pages/Community'))
+const AdminGate = lazy(() => import('./components/community/AdminGate'))
 
 function App() {
   const [loading, setLoading] = useState(true)
@@ -26,6 +28,8 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/events" element={<Events />} />
             <Route path="/join" element={<Join />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/admin" element={<AdminGate />} />
           </Routes>
         </Suspense>
       </MainLayout>

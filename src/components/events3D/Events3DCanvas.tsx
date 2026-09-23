@@ -8,10 +8,12 @@ import ModeHUD from './shared/ModeHUD';
 import TargetHUD from './shared/TargetHUD';
 import VirtualJoystickOverlay from './shared/VirtualJoystickOverlay';
 import EventDetailModal from './shared/EventDetailModal';
+import RoverSpeedometerHUD from './modes/frost/RoverSpeedometerHUD';
 
 interface Events3DCanvasProps {
   events: Event[];
   theme: string;
+  onAbort?: () => void;
 }
 
 export type GameState = 'GAMEPLAY' | 'DOCKING' | 'HUD_OPEN';
@@ -24,13 +26,18 @@ export interface TargetInfo {
 
 export default function Events3DCanvas({
   events,
-  theme
+  theme,
+  onAbort
 }: Events3DCanvasProps) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [gameState, setGameState] = useState<GameState>('GAMEPLAY');
   const [modalEvent, setModalEvent] = useState<Event | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [targetInfo, setTargetInfo] = useState<TargetInfo>({ name: null, distance: 0, status: 'IDLE' });
+
+  // Rover Speedometer State (Frost Mode)
+  const [speed, setSpeed] = useState(0);
+  const [isBoosting, setIsBoosting] = useState(false);
 
   // Mobile movement & look vectors
   const [mobileMove, setMobileMove] = useState({ x: 0, y: 0 });
@@ -44,6 +51,20 @@ export default function Events3DCanvas({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Keyboard shortcut to abort mission (if not in HUD)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Don't abort if HUD is open (HUD handles its own close via X/ESC)
+      if (gameState === 'HUD_OPEN') return;
+
+      if (e.key === 'x' || e.key === 'X' || e.key === 'Escape') {
+        if (onAbort) onAbort();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [gameState, onAbort]);
 
   // Handle docking sequence callback from 3D scene
   const handleDockComplete = (idx: number) => {
@@ -96,6 +117,7 @@ export default function Events3DCanvas({
               onDockComplete={handleDockComplete}
               onInspect={handleInspect}
               onTargetUpdate={setTargetInfo}
+              onSpeedUpdate={(s, b) => { setSpeed(s); setIsBoosting(b); }}
               mobileMove={gameState === 'GAMEPLAY' ? mobileMove : undefined}
             />
           ) : (
@@ -120,6 +142,15 @@ export default function Events3DCanvas({
           distance={targetInfo.distance}
           status={gameState === 'DOCKING' ? 'DOCKING' : targetInfo.status}
           theme={theme}
+        />
+      )}
+
+      {/* Speedometer HUD — bottom-right (Frost Mode only) */}
+      {theme === 'frost' && (
+        <RoverSpeedometerHUD
+          speed={speed}
+          isBoosting={isBoosting}
+          visible={gameState === 'GAMEPLAY'}
         />
       )}
 

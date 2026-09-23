@@ -5,7 +5,6 @@ import { Event } from '../../../../types';
 import ArcticRoverVehicle from './ArcticRoverVehicle';
 import ArcticTundraTerrain from './ArcticTundraTerrain';
 import ArcticResearchOutpost from './ArcticResearchOutpost';
-import RoverSpeedometerHUD from './RoverSpeedometerHUD';
 
 interface FrostSceneProps {
   events: Event[];
@@ -14,6 +13,7 @@ interface FrostSceneProps {
   onDockComplete: (idx: number) => void;
   onInspect: (event: Event) => void;
   onTargetUpdate: (target: { name: string | null; distance: number; status: 'APPROACHING' | 'DOCKING' | 'IDLE' }) => void;
+  onSpeedUpdate?: (speed: number, isBoosting: boolean) => void;
   mobileMove?: { x: number; y: number };
 }
 
@@ -24,6 +24,7 @@ export default function FrostLodgeScene({
   onDockComplete,
   onInspect,
   onTargetUpdate,
+  onSpeedUpdate,
   mobileMove
 }: FrostSceneProps) {
   const { camera } = useThree();
@@ -36,11 +37,11 @@ export default function FrostLodgeScene({
   const roverYaw = useRef(0);
   const [speedVal, setSpeedVal] = useState(0);
   const [steerVal, setSteerVal] = useState(0);
-  const [isBoosting, setIsBoosting] = useState(false);
   const [trailProgress, setTrailProgress] = useState(0);
 
-  // Scroll Autopilot navigation state
-  const scrollProgress = useRef(0);
+  // Smooth Scroll Autopilot state
+  const currentScrollProgress = useRef(0);
+  const targetScrollProgress = useRef(0);
   const isScrollNavigating = useRef(false);
   const scrollTimeout = useRef<number | null>(null);
 
@@ -53,7 +54,7 @@ export default function FrostLodgeScene({
   // Set cooldown ONLY when resuming from HUD_OPEN to GAMEPLAY
   useEffect(() => {
     if (prevGameState.current === 'HUD_OPEN' && gameState === 'GAMEPLAY') {
-      dockingCooldown.current = 4.0;
+      dockingCooldown.current = 3.5;
     }
     prevGameState.current = gameState;
   }, [gameState]);
@@ -81,19 +82,19 @@ export default function FrostLodgeScene({
   // Station normalized parameter points along ground spline
   const outpostSplineTs = useMemo(() => [0.33, 0.67, 1.0], []);
 
-  // Scroll wheel listener for natural gentle scroll-to-travel autopilot
+  // Calibrated, smooth scroll wheel listener
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (gameState === 'HUD_OPEN' || gameState === 'DOCKING') return;
 
-      const delta = e.deltaY * 0.00022;
-      scrollProgress.current = Math.max(0, Math.min(1, scrollProgress.current + delta));
+      const delta = e.deltaY * 0.00008; // Gentle progression
+      targetScrollProgress.current = Math.max(0, Math.min(1, targetScrollProgress.current + delta));
       isScrollNavigating.current = true;
 
       if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
       scrollTimeout.current = window.setTimeout(() => {
         isScrollNavigating.current = false;
-      }, 1200);
+      }, 1500);
     };
 
     window.addEventListener('wheel', handleWheel, { passive: true });
@@ -171,8 +172,12 @@ export default function FrostLodgeScene({
         roverGroupRef.current.rotation.set(0, roverYaw.current, 0);
       }
 
-      setSpeedVal(roverVelocity.current.length());
+      const dockingSpeed = roverVelocity.current.length();
+      setSpeedVal(dockingSpeed);
       setSteerVal(0);
+      if (onSpeedUpdate) {
+        onSpeedUpdate(dockingSpeed, false);
+      }
 
       const desiredCamPos = new THREE.Vector3(
         roverPos.current.x,
@@ -205,13 +210,20 @@ export default function FrostLodgeScene({
     if (gameState === 'HUD_OPEN') {
       roverVelocity.current.set(0, 0, 0);
       setSpeedVal(0);
+      if (onSpeedUpdate) {
+        onSpeedUpdate(0, false);
+      }
       return;
     }
 
-    // 3. SCROLL-DRIVEN AUTOPILOT TRAIL
+    // 3. SMOOTH SCROLL-DRIVEN AUTOPILOT WITH GUARANTEED WAYPOINT INTERCEPT
     if (isScrollNavigating.current) {
-      const splinePt = groundSpline.getPointAt(scrollProgress.current);
-      const splineTangent = groundSpline.getTangentAt(scrollProgress.current).normalize();
+      const prevP = currentScrollProgress.current;
+      currentScrollProgress.current = THREE.MathUtils.lerp(currentScrollProgress.current, targetScrollProgress.current, dt * 3.5);
+      const currP = currentScrollProgress.current;
+
+      const splinePt = groundSpline.getPointAt(currP);
+      const splineTangent = groundSpline.getTangentAt(currP).normalize();
 
       roverPos.current.lerp(splinePt, dt * 5.0);
       const targetYaw = Math.atan2(-splineTangent.x, -splineTangent.z);
@@ -224,7 +236,10 @@ export default function FrostLodgeScene({
 
       setSpeedVal(18);
       setSteerVal(0);
-      setTrailProgress(scrollProgress.current);
+      setTrailProgress(currP);
+      if (onSpeedUpdate) {
+        onSpeedUpdate(18, false);
+      }
 
       const camOffset = new THREE.Vector3(
         Math.sin(roverYaw.current) * 7.5,
@@ -236,13 +251,16 @@ export default function FrostLodgeScene({
       const lookTarget = roverPos.current.clone().add(splineTangent.clone().multiplyScalar(4));
       camera.lookAt(lookTarget);
 
-      // Check docking proximity to station Ts (tight 0.020 check)
+      // GUARANTEED OUTPOST INTERCEPT: Check if progress interval [prevP, currP] crosses outpost
       outpostSplineTs.forEach((stT, idx) => {
+        const isCrossing = (prevP <= stT && currP >= stT) || Math.abs(currP - stT) < 0.035;
         if (
-          Math.abs(scrollProgress.current - stT) < 0.020 &&
+          isCrossing &&
           dockingCooldown.current <= 0 &&
           lastCompletedOutpostIdx.current !== idx
         ) {
+          currentScrollProgress.current = stT;
+          targetScrollProgress.current = stT;
           dockingTargetIdx.current = idx;
           dockingProgress.current = 0;
           isScrollNavigating.current = false;
@@ -256,7 +274,6 @@ export default function FrostLodgeScene({
     let throttle = 0;
     let turn = 0;
     const boosting = !!keys.current['shift'];
-    setIsBoosting(boosting);
 
     if (keys.current['w'] || keys.current['arrowup']) throttle += 1;
     if (keys.current['s'] || keys.current['arrowdown']) throttle -= 0.6;
@@ -300,9 +317,16 @@ export default function FrostLodgeScene({
 
     const curSpeed = roverVelocity.current.length();
     setSpeedVal(curSpeed);
+    if (onSpeedUpdate) {
+      onSpeedUpdate(curSpeed, boosting);
+    }
 
     const zProgress = Math.max(0, Math.min(0.98, (10 - roverPos.current.z) / 102));
     setTrailProgress(zProgress);
+
+    // Synchronize scroll progress tracker so scrolling can pick up smoothly
+    currentScrollProgress.current = zProgress;
+    targetScrollProgress.current = zProgress;
 
     // Dynamic Camera FOV & Zoom-In on Shift Boost
     const targetFov = boosting ? 54 : 60; // 54deg zooms in on the rover
@@ -403,13 +427,6 @@ export default function FrostLodgeScene({
 
       {/* Dynamic Forward-Only Disappearing Ground Energy Trail */}
       <DynamicDisappearingGroundBeam spline={groundSpline} progress={trailProgress} />
-
-      {/* Digital Speedometer HUD Instrument */}
-      <RoverSpeedometerHUD
-        speed={speedVal}
-        isBoosting={isBoosting}
-        visible={gameState === 'GAMEPLAY'}
-      />
     </group>
   );
 }

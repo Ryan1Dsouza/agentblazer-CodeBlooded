@@ -7,7 +7,8 @@ const navItems = [
   { path: '/', label: 'Home' },
   { path: '/about', label: 'About Us' },
   { path: '/events', label: 'Events & Workshops' },
-  { path: '/join', label: 'Join & Connect' }
+  { path: '/join', label: 'Join & Connect' },
+  { path: '/community', label: 'Nexus Hub' }
 ];
 
 const themes: { id: Theme; label: string }[] = [

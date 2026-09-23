@@ -40,8 +40,9 @@ export default function VioletSpaceScene({
   const [isBoosting, setIsBoosting] = useState(false);
   const [trailProgress, setTrailProgress] = useState(0);
 
-  // Scroll Autopilot navigation state
-  const scrollProgress = useRef(0);
+  // Smooth Scroll Autopilot state
+  const currentScrollProgress = useRef(0);
+  const targetScrollProgress = useRef(0);
   const isScrollNavigating = useRef(false);
   const scrollTimeout = useRef<number | null>(null);
 
@@ -55,7 +56,7 @@ export default function VioletSpaceScene({
   // Set cooldown ONLY when resuming from HUD_OPEN to GAMEPLAY
   useEffect(() => {
     if (prevGameState.current === 'HUD_OPEN' && gameState === 'GAMEPLAY') {
-      dockingCooldown.current = 4.0; // 4 second safety window upon modal close
+      dockingCooldown.current = 3.5;
     }
     prevGameState.current = gameState;
   }, [gameState]);
@@ -83,19 +84,19 @@ export default function VioletSpaceScene({
   // Station normalized parameter points along flight spline
   const stationSplineTs = useMemo(() => [0.33, 0.67, 1.0], []);
 
-  // Scroll wheel listener for natural scroll-to-travel autopilot
+  // Calibrated, smooth scroll wheel listener
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (gameState === 'HUD_OPEN' || gameState === 'DOCKING') return;
 
-      const delta = e.deltaY * 0.00022;
-      scrollProgress.current = Math.max(0, Math.min(1, scrollProgress.current + delta));
+      const delta = e.deltaY * 0.00008; // Gentle, weighted increment
+      targetScrollProgress.current = Math.max(0, Math.min(1, targetScrollProgress.current + delta));
       isScrollNavigating.current = true;
 
       if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
       scrollTimeout.current = window.setTimeout(() => {
         isScrollNavigating.current = false;
-      }, 1200);
+      }, 1500);
     };
 
     window.addEventListener('wheel', handleWheel, { passive: true });
@@ -218,10 +219,15 @@ export default function VioletSpaceScene({
       return;
     }
 
-    // 3. SCROLL-DRIVEN AUTOPILOT TRAJECTORY
+    // 3. SMOOTH SCROLL-DRIVEN AUTOPILOT WITH GUARANTEED WAYPOINT INTERCEPT
     if (isScrollNavigating.current) {
-      const splinePt = flightSpline.getPointAt(scrollProgress.current);
-      const splineTangent = flightSpline.getTangentAt(scrollProgress.current).normalize();
+      // Smoothly lerp towards target scroll progress to prevent discrete jumps
+      const prevP = currentScrollProgress.current;
+      currentScrollProgress.current = THREE.MathUtils.lerp(currentScrollProgress.current, targetScrollProgress.current, dt * 3.5);
+      const currP = currentScrollProgress.current;
+
+      const splinePt = flightSpline.getPointAt(currP);
+      const splineTangent = flightSpline.getTangentAt(currP).normalize();
 
       shipPos.current.lerp(splinePt, dt * 6.0);
       const targetRotY = Math.atan2(-splineTangent.x, -splineTangent.z);
@@ -234,7 +240,7 @@ export default function VioletSpaceScene({
         shipGroupRef.current.rotation.copy(shipRotation.current);
       }
 
-      setTrailProgress(scrollProgress.current);
+      setTrailProgress(currP);
 
       const camOffset = new THREE.Vector3(0, 2.8, 7.5);
       camOffset.applyEuler(new THREE.Euler(0, shipRotation.current.y, 0));
@@ -243,13 +249,17 @@ export default function VioletSpaceScene({
       const lookTarget = shipPos.current.clone().add(splineTangent.clone().multiplyScalar(5));
       camera.lookAt(lookTarget);
 
-      // Check docking proximity to station Ts (tight 0.020 check)
+      // GUARANTEED STATION INTERCEPT: Check if progress interval [prevP, currP] crosses station waypoint
       stationSplineTs.forEach((stT, idx) => {
+        const isCrossing = (prevP <= stT && currP >= stT) || Math.abs(currP - stT) < 0.035;
         if (
-          Math.abs(scrollProgress.current - stT) < 0.020 &&
+          isCrossing &&
           dockingCooldown.current <= 0 &&
           lastCompletedStationIdx.current !== idx
         ) {
+          // Snap progress to station and trigger docking
+          currentScrollProgress.current = stT;
+          targetScrollProgress.current = stT;
           dockingTargetIdx.current = idx;
           dockingProgress.current = 0;
           isScrollNavigating.current = false;
@@ -321,6 +331,10 @@ export default function VioletSpaceScene({
     // Update trail progress approximately based on position along Z axis
     const zProgress = Math.max(0, Math.min(0.98, (10 - shipPos.current.z) / 106));
     setTrailProgress(zProgress);
+
+    // Synchronize scroll progress tracker so scrolling can pick up smoothly from flight position
+    currentScrollProgress.current = zProgress;
+    targetScrollProgress.current = zProgress;
 
     // Direct Three.js transform update
     if (shipGroupRef.current) {
