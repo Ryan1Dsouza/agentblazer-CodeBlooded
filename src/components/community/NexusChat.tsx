@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { signInWithRedirect, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { collection, addDoc, query, orderBy, onSnapshot, limit, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../../lib/firebase';
 
@@ -81,11 +81,9 @@ export default function NexusChat() {
   const handleSignIn = async () => {
     setAuthError('');
     try {
-      await signInWithPopup(auth, googleProvider);
+      await signInWithRedirect(auth, googleProvider);
     } catch (err: any) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setAuthError('Failed to sign in. Please try again.');
-      }
+      setAuthError('Failed to sign in. Please try again.');
     }
   };
 
