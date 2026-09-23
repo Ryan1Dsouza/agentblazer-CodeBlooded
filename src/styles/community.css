@@ -878,11 +878,12 @@
 
 @media (max-width: 768px) {
   .community-page {
-    padding-top: 4rem;
+    padding-top: 0;
+    padding-bottom: 6rem;
   }
 
   .community-hero {
-    padding: 2rem 0 1.5rem;
+    padding: 1rem 0 1.5rem;
   }
 
   .community-tabs {

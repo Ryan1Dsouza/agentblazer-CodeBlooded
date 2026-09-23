@@ -203,3 +203,40 @@
   box-shadow: 0 0 20px rgba(255, 71, 87, 0.4) !important;
   transform: translateY(-2px);
 }
+
+/* Mobile mission selector */
+@media (max-width: 768px) {
+  .mission-selector-overlay {
+    padding: 2rem 1rem;
+  }
+
+  .mission-selector-title {
+    font-size: 1.8rem;
+    text-align: center;
+  }
+
+  .mission-selector-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    letter-spacing: 2px;
+    text-align: center;
+  }
+
+  .mission-cards-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .btn-exit-mission {
+    top: 10px;
+    left: 10px;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mission-selector-title {
+    font-size: 1.4rem;
+  }
+}

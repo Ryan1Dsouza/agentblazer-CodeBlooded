@@ -197,9 +197,14 @@
     border-radius: 0 !important;
     z-index: 10000;
   }
+
+  .nexus-floating-chat {
+    right: 1rem !important;
+  }
+
   .nfc-toggle-btn {
-    bottom: 1rem;
-    right: 1rem;
+    width: 50px;
+    height: 50px;
     z-index: 10001;
   }
 }

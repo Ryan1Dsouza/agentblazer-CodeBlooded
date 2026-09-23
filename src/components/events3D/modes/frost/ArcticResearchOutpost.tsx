@@ -119,3 +119,4 @@ export default function ArcticResearchOutpost({
     </group>
   );
 }
+

@@ -94,7 +94,7 @@ export default function Events3DCanvas({
       {/* Three.js R3F Canvas - 100% full viewport */}
       <Canvas
         camera={{ position: [0, 5, 20], fov: 60 }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         style={{ width: '100%', height: '100%', display: 'block' }}
       >

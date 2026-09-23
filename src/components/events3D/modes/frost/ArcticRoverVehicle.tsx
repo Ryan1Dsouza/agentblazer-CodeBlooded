@@ -182,3 +182,4 @@ export default function ArcticRoverVehicle({ speed, steering }: RoverProps) {
     </group>
   );
 }
+

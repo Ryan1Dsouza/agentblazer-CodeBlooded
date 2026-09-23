@@ -459,3 +459,4 @@ function DynamicDisappearingGroundBeam({ spline, progress }: { spline: THREE.Cat
     </group>
   );
 }
+
