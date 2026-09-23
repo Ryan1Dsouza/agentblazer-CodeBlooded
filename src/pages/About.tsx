@@ -280,8 +280,10 @@ export default function About() {
             onClick={e => e.stopPropagation()}
             style={{ 
               maxWidth: '550px', 
-              width: '100%', 
-              padding: '2.5rem',
+              width: '90%', 
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              padding: '2rem',
               textAlign: 'center',
               border: '2px solid var(--primary)',
               background: 'rgba(10, 15, 30, 0.95)',
@@ -296,11 +298,12 @@ export default function About() {
                 position: 'absolute',
                 top: '15px', right: '15px',
                 background: 'transparent', border: 'none',
-                color: 'var(--text-dim)', fontSize: '1.5rem', cursor: 'pointer'
+                color: 'var(--text-dim)', fontSize: '1.5rem', cursor: 'pointer',
+                zIndex: 10
               }}
             >✕</button>
             
-            <h2 style={{ color: 'var(--primary)', marginBottom: '1.5rem', fontSize: '1.8rem', textTransform: 'uppercase', letterSpacing: '3px', textShadow: '0 0 10px var(--primary)' }}>
+            <h2 style={{ color: 'var(--primary)', marginBottom: '1rem', marginTop: '0.5rem', fontSize: '1.6rem', textTransform: 'uppercase', letterSpacing: '3px', textShadow: '0 0 10px var(--primary)' }}>
               SYSTEM OVERRIDE
             </h2>
             
