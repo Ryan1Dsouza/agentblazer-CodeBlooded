@@ -1,8 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 
 export default function CursorFollower() {
   const { theme } = useTheme();
+  const location = useLocation();
+  const [isMobile, setIsMobile] = useState(false);
   
   // Refs for direct DOM manipulation to avoid React re-renders
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -13,6 +16,9 @@ export default function CursorFollower() {
   const trailHistory = useRef(Array(12).fill({ x: -100, y: -100 }));
 
   useEffect(() => {
+    const mobileCheck = window.matchMedia("(pointer: coarse)").matches;
+    setIsMobile(mobileCheck);
+    
     let animationFrameId: number;
 
     const onMove = (e: MouseEvent) => {
@@ -62,9 +68,7 @@ export default function CursorFollower() {
       animationFrameId = requestAnimationFrame(renderLoop);
     };
 
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    
-    if (isMobile) {
+    if (mobileCheck) {
       if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
         // Handle iOS
       }
@@ -85,10 +89,15 @@ export default function CursorFollower() {
 
   const color = theme === 'violet' ? '#d946ef' : theme === 'inferno' ? '#ff6b35' : '#07b6d6';
 
+  // Do not show the cursor follower on mobile if we are on the events page (interferes with 3D canvas)
+  if (isMobile && location.pathname === '/events') {
+    return null;
+  }
+
   return (
     <>
       <style>{`@media (pointer: fine) { * { cursor: none !important; } }`}</style>
-      <div aria-hidden="true" style={{ pointerEvents: 'none', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999 }}>
+      <div aria-hidden="true" style={{ pointerEvents: 'none', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 999999 }}>
         {/* Trail dots */}
         {Array.from({ length: 12 }).map((_, i) => (
           <div
@@ -104,7 +113,7 @@ export default function CursorFollower() {
               background: color,
               boxShadow: `0 0 6px ${color}, 0 0 12px ${color}`,
               opacity: (1 - ((11 - i) / 13) * 0.9) * 0.7,
-              zIndex: 9999,
+              zIndex: 999999,
               willChange: 'transform'
             }}
           />
@@ -123,7 +132,7 @@ export default function CursorFollower() {
             background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
             boxShadow: `0 0 15px ${color}, 0 0 30px ${color}88`,
             opacity: 0.9,
-            zIndex: 9999,
+            zIndex: 999999,
             pointerEvents: 'none',
             willChange: 'transform'
           }}
@@ -141,7 +150,7 @@ export default function CursorFollower() {
             borderRadius: '50%',
             background: '#fff',
             boxShadow: `0 0 8px ${color}, 0 0 16px ${color}`,
-            zIndex: 9999,
+            zIndex: 999999,
             pointerEvents: 'none',
             willChange: 'transform'
           }}

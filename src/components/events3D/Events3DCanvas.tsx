@@ -162,13 +162,6 @@ export default function Events3DCanvas({
         <VirtualJoystickOverlay
           onMove={(x, y) => setMobileMove({ x, y })}
           onLook={(dx, dy) => setMobileLook({ x: dx, y: dy })}
-          onAction={(act) => {
-            if (act === 'interact') {
-              setModalEvent(events[activeIdx] || events[0]);
-              setGameState('HUD_OPEN');
-            }
-          }}
-          actionLabel="INSPECT"
           theme={theme}
         />
       )}

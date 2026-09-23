@@ -24,8 +24,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
       {isHomePage && <Footer />}
-      <NexusFloatingChat />
+      {!isEventsPage && <NexusFloatingChat />}
     </div>
   );
 }
-

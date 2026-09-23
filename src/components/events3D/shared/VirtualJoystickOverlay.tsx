@@ -86,6 +86,9 @@ export default function VirtualJoystickOverlay({
     for (let i = 0; i < e.changedTouches.length; i++) {
       if (e.changedTouches[i].identifier === lookTouchRef.current.id) {
         lookTouchRef.current = null;
+        if (onLook) {
+          onLook(0, 0); // Stop looking when finger lifted
+        }
         break;
       }
     }
