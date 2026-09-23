@@ -87,7 +87,7 @@ export default function NexusFloatingChat() {
   return (
     <div className="nexus-floating-chat" style={{ bottom: bottomPos }}>
       {isOpen && (
-        <div className="nfc-window glass-panel-elevated" style={{ height: '500px', display: 'flex', flexDirection: 'column', position: 'relative', padding: 0 }}>
+        <div className="nfc-window glass-panel-elevated">
           <div className="nfc-header">
             <div className="nfc-header-info">
               <span className="nfc-avatar">🤖</span>
@@ -99,7 +99,7 @@ export default function NexusFloatingChat() {
             <button className="nfc-close" onClick={() => setIsOpen(false)}>✕</button>
           </div>
           
-          <div className="nfc-messages" style={{ flex: '1 1 0%', minHeight: 0, overflowY: 'auto', paddingBottom: '70px' }}>
+          <div className="nfc-messages">
             {messages.map((msg) => (
               <div key={msg.id} className={`nfc-message ${msg.role}`}>
                 <div className="nfc-bubble">{msg.content}</div>
@@ -117,7 +117,7 @@ export default function NexusFloatingChat() {
             <div ref={messagesEndRef} />
           </div>
 
-          <form className="nfc-input-form" style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', margin: 0, boxSizing: 'border-box' }} onSubmit={handleSend}>
+          <form className="nfc-input-form" onSubmit={handleSend}>
             <input 
               type="text" 
               placeholder="Ask about AgentBlazer..." 
