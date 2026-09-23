@@ -192,13 +192,13 @@ export default function InfernoLavaScene({
 
     // 3. NORMAL TRAIN EXPEDITION DRIVING (Smooth Lerped Scroll + Throttle)
     let driveInput = 0;
-    const boosting = !!keys.current['shift'] || !!props.mobileBoost;
+    const boosting = !!keys.current['shift'] || !!mobileBoost;
 
     if (keys.current['w'] || keys.current['arrowup'] || keys.current['arrowright'] || keys.current['d']) driveInput += 1;
     if (keys.current['s'] || keys.current['arrowdown'] || keys.current['arrowleft'] || keys.current['a']) driveInput -= 1;
 
-    if (props.mobileMove) {
-      driveInput -= props.mobileMove.y;
+    if (mobileMove) {
+      driveInput -= mobileMove.y;
     }
 
     const accelMultiplier = boosting ? 0.35 : 0.15;
