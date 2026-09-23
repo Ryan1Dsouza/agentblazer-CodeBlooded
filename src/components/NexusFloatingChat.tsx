@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
-import { Bot } from 'lucide-react';
+import { Bot, LogOut } from 'lucide-react';
+import { signInWithRedirect, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { auth, googleProvider } from '../lib/firebase';
 
 interface ChatMessage {
   id: string;
@@ -26,7 +28,46 @@ export default function NexusFloatingChat() {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [displayName, setDisplayName] = useState('');
+  const [authError, setAuthError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        const email = currentUser.email || '';
+        if (email.endsWith('@sjec.ac.in')) {
+          setUser(currentUser);
+          const localPart = email.split('@')[0];
+          const dotParts = localPart.split('.');
+          const extractedName = dotParts.length > 1 ? dotParts[dotParts.length - 1] : localPart;
+          setDisplayName(extractedName.charAt(0).toUpperCase() + extractedName.slice(1));
+          setAuthError('');
+        } else {
+          signOut(auth);
+          setAuthError('Please use your college Gmail ending with @sjec.ac.in');
+        }
+      } else {
+        setUser(null);
+        setDisplayName('');
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSignIn = async () => {
+    setAuthError('');
+    try {
+      await signInWithRedirect(auth, googleProvider);
+    } catch (err) {
+      setAuthError('Failed to sign in. Please try again.');
+    }
+  };
+
+  const handleSignOut = () => {
+    signOut(auth);
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -117,73 +158,130 @@ export default function NexusFloatingChat() {
               <span className="nfc-avatar">🤖</span>
               <div>
                 <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>AgentBlazer AI</h4>
-                <p className="nfc-status" style={{ margin: 0 }}>Online</p>
+                <p className="nfc-status" style={{ margin: 0 }}>Online {displayName && `• ${displayName}`}</p>
               </div>
             </div>
-            <button className="nfc-close" onClick={() => setIsOpen(false)} style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-secondary)',
-              fontSize: '1.2rem',
-              cursor: 'pointer',
-            }}>✕</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {user && (
+                <button 
+                  onClick={handleSignOut} 
+                  title="Sign Out"
+                  style={{
+                    background: 'transparent', border: 'none', color: 'var(--text-secondary)',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center'
+                  }}
+                >
+                  <LogOut size={16} />
+                </button>
+              )}
+              <button className="nfc-close" onClick={() => setIsOpen(false)} style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                fontSize: '1.2rem',
+                cursor: 'pointer',
+              }}>✕</button>
+            </div>
           </div>
           
-          {/* Messages — this MUST flex-grow to fill all remaining space */}
-          <div
-            className="nfc-messages"
-            style={{
-              flex: 1,
-              minHeight: 0,
-              overflowY: 'auto',
-              padding: '0.75rem 1rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.75rem',
-            }}
-          >
-            {messages.map((msg) => (
-              <div key={msg.id} className={`nfc-message ${msg.role}`}>
-                <div className="nfc-bubble">{msg.content}</div>
-              </div>
-            ))}
-            {isTyping && (
-              <div className="nfc-message assistant">
-                <div className="nfc-bubble nfc-typing">
-                  <span className="dot"></span>
-                  <span className="dot"></span>
-                  <span className="dot"></span>
+          {!user ? (
+            <div style={{ 
+              flex: 1, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              padding: '2rem',
+              textAlign: 'center'
+            }}>
+              <Bot size={48} color="var(--primary)" style={{ marginBottom: '1rem' }} />
+              <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>Sign In Required</h3>
+              <p style={{ margin: '0 0 1.5rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                Please link your college Gmail to chat with the AgentBlazer AI.
+              </p>
+              
+              {authError && (
+                <div style={{
+                  color: '#ff4d4f', background: 'rgba(255, 77, 79, 0.1)',
+                  padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem',
+                  marginBottom: '1rem', border: '1px solid rgba(255, 77, 79, 0.3)'
+                }}>
+                  {authError}
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+              )}
 
-          {/* Input Form — stays at the very bottom */}
-          <form
-            className="nfc-input-form"
-            onSubmit={handleSend}
-            style={{
-              padding: '0.75rem 1rem',
-              borderTop: '1px solid var(--border)',
-              background: 'rgba(0,0,0,0.3)',
-              display: 'flex',
-              gap: '0.5rem',
-              flexShrink: 0,
-              boxSizing: 'border-box',
-            }}
-          >
-            <input 
-              type="text" 
-              placeholder="Ask about AgentBlazer..." 
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={isTyping}
-            />
-            <button type="submit" disabled={!input.trim() || isTyping}>
-              ➤
-            </button>
-          </form>
+              <button 
+                onClick={handleSignIn}
+                style={{
+                  background: 'white', color: 'black', padding: '0.75rem 1.5rem',
+                  borderRadius: '24px', border: 'none', fontWeight: 600,
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+                  cursor: 'pointer', boxShadow: '0 4px 12px rgba(255,255,255,0.2)'
+                }}
+              >
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" style={{ width: 18, height: 18 }} />
+                Sign in with sjec.ac.in
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Messages — this MUST flex-grow to fill all remaining space */}
+              <div
+                className="nfc-messages"
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: 'auto',
+                  padding: '0.75rem 1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                }}
+              >
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`nfc-message ${msg.role}`}>
+                    <div className="nfc-bubble">{msg.content}</div>
+                  </div>
+                ))}
+                {isTyping && (
+                  <div className="nfc-message assistant">
+                    <div className="nfc-bubble nfc-typing">
+                      <span className="dot"></span>
+                      <span className="dot"></span>
+                      <span className="dot"></span>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input Form — stays at the very bottom */}
+              <form
+                className="nfc-input-form"
+                onSubmit={handleSend}
+                style={{
+                  padding: '0.75rem 1rem',
+                  borderTop: '1px solid var(--border)',
+                  background: 'rgba(0,0,0,0.3)',
+                  display: 'flex',
+                  gap: '0.5rem',
+                  flexShrink: 0,
+                  boxSizing: 'border-box',
+                }}
+              >
+                <input 
+                  type="text" 
+                  placeholder="Ask about AgentBlazer..." 
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  disabled={isTyping}
+                />
+                <button type="submit" disabled={!input.trim() || isTyping}>
+                  ➤
+                </button>
+              </form>
+            </>
+          )}
         </div>
       )}
 
