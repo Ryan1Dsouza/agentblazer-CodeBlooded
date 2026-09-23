@@ -37,7 +37,6 @@ export default function InfernoLavaScene({
   const throttleTarget = useRef(0);
   const dockingTargetIdx = useRef<number | null>(null);
   const dockingProgress = useRef(0);
-  const dockingCooldown = useRef(0);
   const lastCompletedDepotIdx = useRef<number | null>(null);
   const prevGameState = useRef(gameState);
 

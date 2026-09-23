@@ -24,9 +24,9 @@ export default function Header() {
   return (
     <header className="header">
       <div className="header-left">
-        <img 
-          src={logoPath || '/assets/AgentBlazer_Logo_Transparent.png'} 
-          alt="AgentBlazer" 
+        <img
+          src={logoPath}
+          alt="AgentBlazer"
           className="header-logo"
         />
         <div className="header-brand">
@@ -35,7 +35,7 @@ export default function Header() {
         </div>
         <span className="header-dept">{siteConfig.department.name}</span>
       </div>
-      
+
       <nav className="header-nav">
         {navItems.map((item) => (
           <NavLink
@@ -47,7 +47,7 @@ export default function Header() {
           </NavLink>
         ))}
       </nav>
-      
+
       <div className="header-themes">
         {themes.map((t) => (
           <button

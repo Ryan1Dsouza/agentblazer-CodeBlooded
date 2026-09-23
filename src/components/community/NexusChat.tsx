@@ -56,6 +56,12 @@ export default function NexusChat() {
   const [cooldown, setCooldown] = useState(0);
   const [isSending, setIsSending] = useState(false);
   const [moderationWarning, setModerationWarning] = useState('');
+  
+  // Mentions state
+  const [showMentionMenu, setShowMentionMenu] = useState(false);
+  const [mentionFilter, setMentionFilter] = useState('');
+  const mockUsers = ['nexus', 'admin', 'ryan', 'jason_99'];
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -189,6 +195,32 @@ export default function NexusChat() {
     }
   }, [messages, displayName]);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInput(val);
+    
+    // Look for mention trigger
+    const lastAtIdx = val.lastIndexOf('@');
+    if (lastAtIdx !== -1 && (lastAtIdx === 0 || val[lastAtIdx - 1] === ' ')) {
+      const afterAt = val.slice(lastAtIdx + 1);
+      if (!afterAt.includes(' ')) {
+        setShowMentionMenu(true);
+        setMentionFilter(afterAt.toLowerCase());
+        return;
+      }
+    }
+    setShowMentionMenu(false);
+  };
+
+  const handleMentionSelect = (username: string) => {
+    const lastAtIdx = input.lastIndexOf('@');
+    if (lastAtIdx !== -1) {
+      const beforeAt = input.slice(0, lastAtIdx);
+      setInput(`${beforeAt}@${username} `);
+    }
+    setShowMentionMenu(false);
+  };
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || cooldown > 0 || isSending) return;
@@ -197,17 +229,9 @@ export default function NexusChat() {
     setInput('');
     setIsSending(true);
     setModerationWarning('');
+    setShowMentionMenu(false);
 
-    // Moderate
-    const allowed = await moderateMessage(text);
-    if (!allowed) {
-      setModerationWarning('⚠️ Message blocked by Nexus AI — please keep it respectful.');
-      setIsSending(false);
-      setCooldown(2000);
-      return;
-    }
-
-    // Add user message
+    // Optimistically add user message
     const userMsg: ChatMessage = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       author: displayName,
@@ -217,32 +241,49 @@ export default function NexusChat() {
       timestamp: Date.now(),
     };
 
-    const updated = [...messages, userMsg];
-    setMessages(updated);
-    saveMessages(updated);
+    setMessages((prev) => {
+      const updated = [...prev, userMsg];
+      saveMessages(updated);
+      return updated;
+    });
 
     // Start 2-second cooldown
     setCooldown(2000);
 
-    // Check for @nexus mention
-    if (text.toLowerCase().includes('@nexus')) {
-      const reply = await getAIResponse(text);
-      const botContent = reply || "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
-      
-      const botMsg: ChatMessage = {
-        id: Date.now().toString(36) + 'bot',
-        author: 'Nexus AI',
-        content: botContent,
-        isBot: true,
-        isSystem: false,
-        timestamp: Date.now(),
-      };
-      const withBot = [...updated, botMsg];
-      setMessages(withBot);
-      saveMessages(withBot);
-    }
+    // Moderate in background
+    moderateMessage(text).then(async (allowed) => {
+      if (!allowed) {
+        setModerationWarning('⚠️ Message blocked by Nexus AI — please keep it respectful.');
+        setMessages((prev) => {
+          const filtered = prev.filter(m => m.id !== userMsg.id);
+          saveMessages(filtered);
+          return filtered;
+        });
+        setIsSending(false);
+        return;
+      }
 
-    setIsSending(false);
+      // Check for @nexus mention
+      if (text.toLowerCase().includes('@nexus')) {
+        const reply = await getAIResponse(text);
+        const botContent = reply || "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
+        
+        const botMsg: ChatMessage = {
+          id: Date.now().toString(36) + 'bot',
+          author: 'Nexus AI',
+          content: botContent,
+          isBot: true,
+          isSystem: false,
+          timestamp: Date.now(),
+        };
+        setMessages((prev) => {
+          const withBot = [...prev, botMsg];
+          saveMessages(withBot);
+          return withBot;
+        });
+      }
+      setIsSending(false);
+    });
   };
 
   const formatTime = (ts: number) => {
@@ -385,45 +426,89 @@ export default function NexusChat() {
       )}
 
       {/* Input */}
-      <form className="chat-input-bar" onSubmit={handleSend}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={
-            cooldown > 0
-              ? `Cooldown... ${(cooldown / 1000).toFixed(1)}s`
-              : 'Type a message...'
-          }
-          disabled={cooldown > 0 || isSending}
-          maxLength={500}
-        />
-        <button
-          type="submit"
-          className="btn-send"
-          disabled={cooldown > 0 || isSending || !input.trim()}
-        >
-          {isSending ? (
-            <span className="send-spinner" />
-          ) : cooldown > 0 ? (
-            <span className="cooldown-ring">
-              <svg viewBox="0 0 24 24" width="20" height="20">
-                <circle
-                  cx="12" cy="12" r="10"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray={`${(1 - cooldown / 2000) * 63} 63`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 12 12)"
-                />
-              </svg>
-            </span>
-          ) : (
-            '➤'
-          )}
-        </button>
-      </form>
+      <div className="chat-input-wrapper" style={{ position: 'relative' }}>
+        {showMentionMenu && (
+          <div className="mention-menu" style={{ 
+            position: 'absolute', 
+            bottom: '100%', 
+            left: '2rem', 
+            background: 'rgba(20, 20, 32, 0.98)', 
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)', 
+            borderRadius: '8px',
+            marginBottom: '8px',
+            padding: '4px',
+            minWidth: '200px',
+            zIndex: 9999,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.8)'
+          }}>
+            {mockUsers.filter(u => u.includes(mentionFilter)).length === 0 ? (
+               <div style={{ padding: '8px 12px', color: 'var(--text-dim)', fontSize: '0.875rem' }}>No users found</div>
+            ) : (
+               mockUsers.filter(u => u.includes(mentionFilter)).map(u => (
+                 <div 
+                   key={u} 
+                   onClick={() => handleMentionSelect(u)}
+                   style={{
+                     padding: '8px 12px',
+                     cursor: 'pointer',
+                     borderRadius: '4px',
+                     color: 'var(--text)',
+                     fontSize: '0.875rem',
+                     display: 'flex',
+                     alignItems: 'center',
+                     gap: '8px'
+                   }}
+                   onMouseOver={(e) => e.currentTarget.style.background = 'var(--surface)'}
+                   onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                 >
+                   <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>@</span>
+                   {u}
+                 </div>
+               ))
+            )}
+          </div>
+        )}
+        <form className="chat-input-bar" onSubmit={handleSend}>
+          <input
+            type="text"
+            value={input}
+            onChange={handleInputChange}
+            placeholder={
+              cooldown > 0
+                ? `Cooldown... ${(cooldown / 1000).toFixed(1)}s`
+                : 'Type a message...'
+            }
+            disabled={cooldown > 0 || isSending}
+            maxLength={500}
+          />
+          <button
+            type="submit"
+            className="btn-send"
+            disabled={cooldown > 0 || isSending || !input.trim()}
+          >
+            {isSending ? (
+              <span className="send-spinner" />
+            ) : cooldown > 0 ? (
+              <span className="cooldown-ring">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                  <circle
+                    cx="12" cy="12" r="10"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeDasharray={`${(1 - cooldown / 2000) * 63} 63`}
+                    strokeLinecap="round"
+                    transform="rotate(-90 12 12)"
+                  />
+                </svg>
+              </span>
+            ) : (
+              '➤'
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
