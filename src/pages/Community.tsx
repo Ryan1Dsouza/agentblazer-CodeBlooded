@@ -12,7 +12,7 @@ export default function Community() {
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: 'bulletin', label: 'Event Bulletin', icon: '📡' },
     { id: 'voice', label: 'Community Voice', icon: '🎙️' },
-    { id: 'chat', label: 'Nexus Chat', icon: '💬' },
+    { id: 'chat', label: 'AgentBlazer Chat', icon: '🤖' },
   ];
 
   return (

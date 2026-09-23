@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
+import { Bot } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -159,22 +160,20 @@ export default function NexusFloatingChat() {
         </svg>
 
         {/* Logo Icon (Visible when closed) */}
-        <img 
-          src="/logos/chatbot-logo.png" 
-          alt="AgentBlazer AI" 
+        <Bot 
+          size={28}
           style={{
             position: 'absolute',
-            width: '100%', 
-            height: '100%', 
-            borderRadius: '50%', 
-            objectFit: 'cover',
+            top: '14px',
+            left: '14px',
             opacity: isOpen ? 0 : 1,
             transform: isOpen ? 'rotate(90deg) scale(0.5)' : 'rotate(0deg) scale(1)',
             transition: 'all 0.3s ease',
-            padding: '2px' // slight inset so the glass border shows around it
+            pointerEvents: 'none'
           }} 
         />
       </button>
     </div>
   );
 }
+

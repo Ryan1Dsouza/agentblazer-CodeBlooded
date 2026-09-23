@@ -321,7 +321,7 @@ export default function NexusChat() {
         <div className="chat-name-gate">
           <div className="chat-name-card glass-panel">
             <span className="chat-gate-icon">🤖</span>
-            <h3>Welcome to Nexus Chat</h3>
+            <h3>Welcome to AgentBlazer Chat</h3>
             <p>Link your college Gmail to join the conversation</p>
             <form onSubmit={handleSetName} className="name-form">
               <input
@@ -346,7 +346,7 @@ export default function NexusChat() {
       <div className="chat-header-bar">
         <div className="chat-header-info">
           <h2 className="section-title">
-            <span className="section-icon">💬</span> Nexus Chat
+            <span className="section-icon">💬</span> AgentBlazer Chat
           </h2>
           <span className="chat-header-hint">
             Type <code>@agentblazer</code> to ask the AI • Monitored by AgentBlazer AI
@@ -385,7 +385,7 @@ export default function NexusChat() {
         {messages.length === 0 && (
           <div className="chat-welcome">
             <span className="chat-welcome-icon">🚀</span>
-            <p>Welcome to Nexus Chat! Say hello or ask <code>@nexus</code> anything.</p>
+            <p>Welcome to AgentBlazer Chat! Say hello or ask <code>@agentblazer</code> anything.</p>
           </div>
         )}
         {groupedMessages.map((group) => (
