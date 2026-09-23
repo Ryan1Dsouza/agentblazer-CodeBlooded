@@ -5,6 +5,7 @@ import { siteConfig } from '../data/config';
 import { TeamMember } from '../types';
 import TeamCard from '../components/TeamCard';
 import PortraitPopup from '../components/PortraitPopup';
+import testcaseImg from '../../assets/Photos/testcase.jpg';
 
 // Mini component for adding hover previews to non-TeamCard elements
 function FloatingPreview({ member, isHovered, side }: { member: any, isHovered: boolean, side: string }) {
@@ -305,7 +306,7 @@ export default function About() {
             
             <div style={{ borderRadius: '8px', overflow: 'hidden', marginBottom: '1.5rem', border: '2px solid rgba(255,255,255,0.1)' }}>
               <img 
-                src="/Photos/testcase.jpg" 
+                src={testcaseImg} 
                 alt="Core Developers" 
                 style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} 
               />
