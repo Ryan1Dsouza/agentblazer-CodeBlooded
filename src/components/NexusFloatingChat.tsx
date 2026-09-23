@@ -49,7 +49,6 @@ export default function NexusFloatingChat() {
     setIsTyping(true);
 
     try {
-      // Convert local state messages to API format
       const apiMessages = messages.map(m => ({
         role: m.role,
         content: m.content
@@ -87,19 +86,62 @@ export default function NexusFloatingChat() {
   return (
     <div className="nexus-floating-chat" style={{ bottom: bottomPos }}>
       {isOpen && (
-        <div className="nfc-window glass-panel-elevated">
-          <div className="nfc-header">
-            <div className="nfc-header-info">
+        <div
+          className="nfc-window"
+          style={{
+            width: '370px',
+            height: '520px',
+            maxHeight: 'calc(100vh - 120px)',
+            display: 'flex',
+            flexDirection: 'column',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            background: 'var(--surface-elevated)',
+            border: '1px solid var(--border)',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.5), 0 0 30px var(--glow)',
+            backdropFilter: 'blur(20px)',
+            animation: 'nfc-pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          }}
+        >
+          {/* Header */}
+          <div className="nfc-header" style={{
+            padding: '0.875rem 1.25rem',
+            background: 'rgba(0,0,0,0.25)',
+            borderBottom: '1px solid var(--border)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <span className="nfc-avatar">🤖</span>
               <div>
-                <h4>AgentBlazer AI</h4>
-                <p className="nfc-status">Online</p>
+                <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>AgentBlazer AI</h4>
+                <p className="nfc-status" style={{ margin: 0 }}>Online</p>
               </div>
             </div>
-            <button className="nfc-close" onClick={() => setIsOpen(false)}>✕</button>
+            <button className="nfc-close" onClick={() => setIsOpen(false)} style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              fontSize: '1.2rem',
+              cursor: 'pointer',
+            }}>✕</button>
           </div>
           
-          <div className="nfc-messages">
+          {/* Messages — this MUST flex-grow to fill all remaining space */}
+          <div
+            className="nfc-messages"
+            style={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: 'auto',
+              padding: '0.75rem 1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem',
+            }}
+          >
             {messages.map((msg) => (
               <div key={msg.id} className={`nfc-message ${msg.role}`}>
                 <div className="nfc-bubble">{msg.content}</div>
@@ -117,7 +159,20 @@ export default function NexusFloatingChat() {
             <div ref={messagesEndRef} />
           </div>
 
-          <form className="nfc-input-form" onSubmit={handleSend}>
+          {/* Input Form — stays at the very bottom */}
+          <form
+            className="nfc-input-form"
+            onSubmit={handleSend}
+            style={{
+              padding: '0.75rem 1rem',
+              borderTop: '1px solid var(--border)',
+              background: 'rgba(0,0,0,0.3)',
+              display: 'flex',
+              gap: '0.5rem',
+              flexShrink: 0,
+              boxSizing: 'border-box',
+            }}
+          >
             <input 
               type="text" 
               placeholder="Ask about AgentBlazer..." 
@@ -159,7 +214,7 @@ export default function NexusFloatingChat() {
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
 
-        {/* Logo Icon (Visible when closed) */}
+        {/* Bot Icon (Visible when closed) */}
         <Bot 
           size={28}
           style={{
@@ -176,6 +231,3 @@ export default function NexusFloatingChat() {
     </div>
   );
 }
-
-
-
