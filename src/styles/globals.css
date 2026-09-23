@@ -56,6 +56,12 @@ button {
   padding: 0 2rem;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
+
 .glass-panel {
   background: var(--surface);
   backdrop-filter: blur(12px);
@@ -761,6 +767,8 @@ button {
 .inauguration-card {
   margin: 2rem 0;
   padding: 2rem;
+  overflow: hidden;
+  transform: translateZ(0);
 }
 
 .inauguration-card h3 {
@@ -963,12 +971,15 @@ button {
 .team-card {
   background: var(--surface);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
 }
 
 .team-card:hover {
