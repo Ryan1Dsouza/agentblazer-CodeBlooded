@@ -261,35 +261,59 @@ export default function About() {
       {/* Easter Egg Modal */}
       {showEasterEgg && (
         <div 
-          className="portrait-modal-overlay visible" 
           onClick={() => setShowEasterEgg(false)}
-          style={{ zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ 
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 999999,
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            padding: '1rem'
+          }}
         >
           <div 
-            className="portrait-modal-content visible glass-panel" 
+            className="hud-panel" 
             onClick={e => e.stopPropagation()}
             style={{ 
-              maxWidth: '500px', 
-              width: '90%', 
-              padding: '2rem',
+              maxWidth: '550px', 
+              width: '100%', 
+              padding: '2.5rem',
               textAlign: 'center',
-              border: '1px solid var(--primary)',
-              boxShadow: '0 0 30px rgba(0, 243, 255, 0.2)'
+              border: '2px solid var(--primary)',
+              background: 'rgba(10, 15, 30, 0.95)',
+              boxShadow: '0 0 40px rgba(0, 243, 255, 0.3), inset 0 0 20px rgba(0, 243, 255, 0.1)',
+              borderRadius: '16px',
+              position: 'relative'
             }}
           >
-            <button className="portrait-close" onClick={() => setShowEasterEgg(false)}>✕</button>
-            <h2 style={{ color: 'var(--primary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
-              Secret Unlocked!
+            <button 
+              onClick={() => setShowEasterEgg(false)}
+              style={{
+                position: 'absolute',
+                top: '15px', right: '15px',
+                background: 'transparent', border: 'none',
+                color: 'var(--text-dim)', fontSize: '1.5rem', cursor: 'pointer'
+              }}
+            >✕</button>
+            
+            <h2 style={{ color: 'var(--primary)', marginBottom: '1.5rem', fontSize: '1.8rem', textTransform: 'uppercase', letterSpacing: '3px', textShadow: '0 0 10px var(--primary)' }}>
+              SYSTEM OVERRIDE
             </h2>
-            <div style={{ borderRadius: '12px', overflow: 'hidden', marginBottom: '1.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+            
+            <div style={{ borderRadius: '8px', overflow: 'hidden', marginBottom: '1.5rem', border: '2px solid rgba(255,255,255,0.1)' }}>
               <img 
                 src="/Photos/testcase.jpg" 
                 alt="Core Developers" 
-                style={{ width: '100%', height: 'auto', display: 'block' }} 
+                style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} 
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             </div>
-            <p style={{ color: 'var(--text)', fontSize: '1.1rem', lineHeight: '1.6' }}>
-              Welcome to AgentBlazer! This is a special shoutout to the core developers: <strong style={{ color: 'var(--primary)' }}>Ryan</strong> and <strong style={{ color: 'var(--primary)' }}>Kevin</strong>. Thank you for discovering our little secret!
+            
+            <p style={{ color: 'var(--text)', fontSize: '1.15rem', lineHeight: '1.7', textAlign: 'justify' }}>
+              Shh... you found our hidden override terminal. This is a secret Easter egg planted by <strong style={{ color: 'var(--primary)' }}>Ryan</strong> and <strong style={{ color: 'var(--primary)' }}>Kevin</strong>. No one else knows this exists. Welcome to the true core of AgentBlazer!
             </p>
           </div>
         </div>
