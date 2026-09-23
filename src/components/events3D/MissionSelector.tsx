@@ -11,21 +11,24 @@ export default function MissionSelector({ onSelectMission }: MissionSelectorProp
       name: 'Orbital Node',
       theme: 'violet' as Theme,
       description: 'Zero-gravity environment. Secure the orbital station and manage energy grids.',
-      color: '#8b5cf6'
+      color: '#8b5cf6',
+      image: '/modes/spaceship.jpg'
     },
     {
       id: 'inferno',
       name: 'Magma Depot',
       theme: 'inferno' as Theme,
       description: 'High-temperature volcanic sector. Navigate the lava flows and extract core samples.',
-      color: '#ff6b35'
+      color: '#ff6b35',
+      image: '/modes/Inferno.jpg'
     },
     {
       id: 'frost',
       name: 'Cryo Outpost',
       theme: 'frost' as Theme,
       description: 'Sub-zero frozen wasteland. Deploy drones to survey the ice caverns.',
-      color: '#0ea5e9'
+      color: '#0ea5e9',
+      image: '/modes/frost.jpg'
     }
   ];
 
@@ -41,6 +44,9 @@ export default function MissionSelector({ onSelectMission }: MissionSelectorProp
               key={mission.id}
               className={`mission-card mission-card-${mission.theme}`}
               onClick={() => onSelectMission(mission.theme)}
+              style={{
+                backgroundImage: `url('${mission.image}')`
+              }}
             >
               <div className="mission-card-glow" />
               <div className="mission-card-inner">
