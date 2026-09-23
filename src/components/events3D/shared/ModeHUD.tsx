@@ -10,7 +10,7 @@ export default function ModeHUD({ theme, gameState }: ModeHUDProps) {
   if (gameState === 'HUD_OPEN') return null;
 
   return (
-    <div className="hidden sm:flex fixed bottom-6 left-6 pointer-events-none z-30 select-none">
+    <div className="fixed bottom-6 left-6 pointer-events-none z-30 select-none">
       <div
         className="backdrop-blur-md bg-black/75 px-4 py-3 rounded-2xl border shadow-2xl flex flex-col gap-1.5"
         style={{

@@ -16,7 +16,7 @@ export default function TargetHUD({ targetName, distance, status, theme }: Targe
 
   return (
     <div
-      className="fixed top-24 sm:top-20 right-4 sm:right-6 z-40 pointer-events-none select-none scale-75 sm:scale-100 origin-top-right"
+      className="fixed top-20 right-6 z-40 pointer-events-none select-none"
       style={{ fontFamily: 'monospace' }}
     >
       <div

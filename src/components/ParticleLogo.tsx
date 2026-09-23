@@ -86,7 +86,7 @@ export default function ParticleLogo({ logoPath, alt = 'AgentBlazer Logo', theme
     const particles: Particle[] = [];
 
     // Optimized sampling for performance (balance between powder density and framerate)
-    const step = window.innerWidth < 768 ? 4.0 : 2.4; 
+    const step = displayWidth < 280 ? 2.0 : 2.4; 
     const centerX = displayWidth / 2;
     const centerY = displayHeight / 2;
 

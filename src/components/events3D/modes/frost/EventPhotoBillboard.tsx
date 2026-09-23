@@ -7,7 +7,7 @@ interface BillboardProps {
   position: [number, number, number];
   rotation: [number, number, number];
   isActive: boolean;
-  
+  onInspect: () => void;
 }
 
 export default function EventPhotoBillboard({
@@ -118,4 +118,3 @@ export default function EventPhotoBillboard({
     </group>
   );
 }
-

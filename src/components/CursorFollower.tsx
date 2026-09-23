@@ -19,29 +19,6 @@ export default function CursorFollower() {
       mouse.current = { x: e.clientX, y: e.clientY };
     };
 
-    const onDeviceOrientation = (e: DeviceOrientationEvent) => {
-      if (e.beta === null || e.gamma === null) return;
-      
-      // Map gyro angles to screen coordinates
-      // gamma: left-to-right (-90 to 90)
-      // beta: front-to-back (-180 to 180). We assume 45 deg is holding it normally.
-      const screenW = window.innerWidth;
-      const screenH = window.innerHeight;
-      
-      // Adding a smoothing/clamping factor
-      const gamma = Math.max(-45, Math.min(45, e.gamma));
-      const beta = Math.max(0, Math.min(90, e.beta));
-      
-      const targetX = screenW / 2 + (gamma / 45) * (screenW / 1.5);
-      const targetY = screenH / 2 + ((beta - 45) / 45) * (screenH / 1.5);
-      
-      // Smooth interpolation for gyro
-      mouse.current = {
-        x: mouse.current.x === -100 ? targetX : mouse.current.x + (targetX - mouse.current.x) * 0.1,
-        y: mouse.current.y === -100 ? targetY : mouse.current.y + (targetY - mouse.current.y) * 0.1
-      };
-    };
-
     const renderLoop = () => {
       const { x, y } = mouse.current;
       
@@ -67,25 +44,11 @@ export default function CursorFollower() {
       animationFrameId = requestAnimationFrame(renderLoop);
     };
 
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    
-    if (isMobile) {
-      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-        // iOS requires user interaction, but we will attach ambiently. 
-        // If permission is already granted it works, otherwise it fails gracefully.
-      }
-      window.addEventListener('deviceorientation', onDeviceOrientation);
-      // Initial position for mobile
-      mouse.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    } else {
-      window.addEventListener('mousemove', onMove);
-    }
-    
+    window.addEventListener('mousemove', onMove);
     animationFrameId = requestAnimationFrame(renderLoop);
 
     return () => {
       window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('deviceorientation', onDeviceOrientation);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);

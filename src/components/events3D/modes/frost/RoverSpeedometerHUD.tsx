@@ -76,4 +76,3 @@ export default function RoverSpeedometerHUD({
     </div>
   );
 }
-

@@ -11,7 +11,7 @@ interface VioletSceneProps {
   activeIdx: number;
   gameState: 'GAMEPLAY' | 'DOCKING' | 'HUD_OPEN';
   onDockComplete: (idx: number) => void;
-  
+  onInspect: (event: Event) => void;
   onTargetUpdate: (target: { name: string | null; distance: number; status: 'APPROACHING' | 'DOCKING' | 'IDLE' }) => void;
   mobileMove?: { x: number; y: number };
   mobileLook?: { x: number; y: number };
@@ -22,7 +22,7 @@ export default function VioletSpaceScene({
   activeIdx,
   gameState,
   onDockComplete,
-  
+  onInspect,
   onTargetUpdate,
   mobileMove,
   mobileLook
@@ -476,4 +476,3 @@ function DynamicDisappearingBeam({ spline, progress }: { spline: THREE.CatmullRo
     </group>
   );
 }
-
