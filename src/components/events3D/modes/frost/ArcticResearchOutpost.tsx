@@ -6,7 +6,7 @@ interface OutpostProps {
   index: number;
   position: [number, number, number];
   isActive: boolean;
-  onInspect: () => void;
+  
 }
 
 export default function ArcticResearchOutpost({
@@ -119,3 +119,4 @@ export default function ArcticResearchOutpost({
     </group>
   );
 }
+

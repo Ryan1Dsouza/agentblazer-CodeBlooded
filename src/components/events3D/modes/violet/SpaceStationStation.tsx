@@ -10,7 +10,7 @@ interface StationProps {
   position: [number, number, number];
   isActive: boolean;
   isDocking: boolean;
-  onInspect: () => void;
+  
 }
 
 export default function SpaceStationStation({
@@ -213,3 +213,4 @@ export default function SpaceStationStation({
     </group>
   );
 }
+

@@ -118,3 +118,4 @@ export default function LavaTrainVehicle({ speed }: { speed: number }) {
     </group>
   );
 }
+

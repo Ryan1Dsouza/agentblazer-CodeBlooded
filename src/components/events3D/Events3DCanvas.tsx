@@ -105,7 +105,7 @@ export default function Events3DCanvas({
               activeIdx={activeIdx}
               gameState={gameState}
               onDockComplete={handleDockComplete}
-              onInspect={handleInspect}
+              
               onTargetUpdate={setTargetInfo}
               mobileMove={gameState === 'GAMEPLAY' ? mobileMove : undefined}
             />
@@ -115,7 +115,7 @@ export default function Events3DCanvas({
               activeIdx={activeIdx}
               gameState={gameState}
               onDockComplete={handleDockComplete}
-              onInspect={handleInspect}
+              
               onTargetUpdate={setTargetInfo}
               onSpeedUpdate={(s, b) => { setSpeed(s); setIsBoosting(b); }}
               mobileMove={gameState === 'GAMEPLAY' ? mobileMove : undefined}
@@ -126,7 +126,7 @@ export default function Events3DCanvas({
               activeIdx={activeIdx}
               gameState={gameState}
               onDockComplete={handleDockComplete}
-              onInspect={handleInspect}
+              
               onTargetUpdate={setTargetInfo}
               mobileMove={gameState === 'GAMEPLAY' ? mobileMove : undefined}
               mobileLook={gameState === 'GAMEPLAY' ? mobileLook : undefined}

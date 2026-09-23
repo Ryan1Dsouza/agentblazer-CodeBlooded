@@ -11,7 +11,7 @@ interface FrostSceneProps {
   activeIdx: number;
   gameState: 'GAMEPLAY' | 'DOCKING' | 'HUD_OPEN';
   onDockComplete: (idx: number) => void;
-  onInspect: (event: Event) => void;
+  
   onTargetUpdate: (target: { name: string | null; distance: number; status: 'APPROACHING' | 'DOCKING' | 'IDLE' }) => void;
   onSpeedUpdate?: (speed: number, isBoosting: boolean) => void;
   mobileMove?: { x: number; y: number };
@@ -22,7 +22,7 @@ export default function FrostLodgeScene({
   activeIdx,
   gameState,
   onDockComplete,
-  onInspect,
+  
   onTargetUpdate,
   onSpeedUpdate,
   mobileMove
@@ -459,3 +459,4 @@ function DynamicDisappearingGroundBeam({ spline, progress }: { spline: THREE.Cat
     </group>
   );
 }
+

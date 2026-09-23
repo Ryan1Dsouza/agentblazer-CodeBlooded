@@ -11,7 +11,7 @@ interface InfernoSceneProps {
   activeIdx: number;
   gameState: 'GAMEPLAY' | 'DOCKING' | 'HUD_OPEN';
   onDockComplete: (idx: number) => void;
-  onInspect: (event: Event) => void;
+  
   onTargetUpdate: (target: { name: string | null; distance: number; status: 'APPROACHING' | 'DOCKING' | 'IDLE' }) => void;
   mobileMove?: { x: number; y: number };
 }
@@ -21,7 +21,7 @@ export default function InfernoLavaScene({
   activeIdx,
   gameState,
   onDockComplete,
-  onInspect,
+  
   onTargetUpdate,
   mobileMove
 }: InfernoSceneProps) {
@@ -392,3 +392,4 @@ function RailTrackStructure({ spline }: { spline: THREE.CatmullRomCurve3 }) {
     </group>
   );
 }
+

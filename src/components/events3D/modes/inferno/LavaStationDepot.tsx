@@ -6,7 +6,7 @@ interface StationProps {
   index: number;
   position: [number, number, number];
   isActive: boolean;
-  onInspect: () => void;
+  
 }
 
 export default function LavaStationDepot({
@@ -106,3 +106,4 @@ export default function LavaStationDepot({
     </group>
   );
 }
+
