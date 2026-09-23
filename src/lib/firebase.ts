@@ -17,8 +17,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 export const googleProvider = new GoogleAuthProvider();
-// Force selection of sjec.ac.in emails
+// Force account selection screen so users can pick their sjec.ac.in email
 googleProvider.setCustomParameters({
-  hd: 'sjec.ac.in',
   prompt: 'select_account'
 });
