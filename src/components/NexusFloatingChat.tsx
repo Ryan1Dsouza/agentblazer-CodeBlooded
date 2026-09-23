@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useTheme } from '../hooks/useTheme';
 
 interface ChatMessage {
   id: string;
@@ -7,6 +9,12 @@ interface ChatMessage {
 }
 
 export default function NexusFloatingChat() {
+  const location = useLocation();
+  const { theme } = useTheme();
+  
+  const isFrostEvent = location.pathname === '/events' && theme === 'frost';
+  const bottomPos = isFrostEvent ? '7rem' : '2rem';
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -76,7 +84,7 @@ export default function NexusFloatingChat() {
   };
 
   return (
-    <div className="nexus-floating-chat">
+    <div className="nexus-floating-chat" style={{ bottom: bottomPos }}>
       {isOpen && (
         <div className="nfc-window glass-panel-elevated" style={{ height: '500px', display: 'flex', flexDirection: 'column', position: 'relative', padding: 0 }}>
           <div className="nfc-header">
