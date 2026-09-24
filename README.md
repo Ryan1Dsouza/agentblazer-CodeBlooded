@@ -159,9 +159,12 @@ npm run preview
 | `A` / `←` | Steer Left | Desktop |
 | `D` / `→` | Steer Right | Desktop |
 | `Shift` (Hold) | Engage Turbo Boost | Desktop |
-| `Mouse Wheel` | Smooth Speed Glide | Desktop |
-| `Virtual Joystick` | 360° Omnidirectional Steering & Acceleration | Mobile / Tablet |
-| `E` / `Dock Button` | Dock to Nearest Event Station / Open HUD | All Devices |
+| `Mouse Wheel` | Smooth Scroll Autopilot | Desktop |
+| `E` | Manual Dock to Nearest Station (within 25m) | Desktop |
+| `X` / `ESC` | Abort Mission / Exit 3D Canvas | Desktop |
+| `Virtual Joystick` | Omnidirectional Steering & Acceleration | Mobile / Tablet |
+| `BOOST` Button | Engage Turbo Boost | Mobile / Tablet |
+| *Auto-Dock* | Approach any station to dock automatically | All Devices |
 
 ---
 
