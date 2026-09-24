@@ -43,8 +43,23 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [deferBackground, setDeferBackground] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setDeferBackground(false), 800);
-    return () => clearTimeout(timer);
+    let interactionFired = false;
+    const enableBackground = () => {
+      if (!interactionFired) {
+        interactionFired = true;
+        setDeferBackground(false);
+      }
+    };
+    window.addEventListener('mousemove', enableBackground, { once: true });
+    window.addEventListener('scroll', enableBackground, { once: true });
+    window.addEventListener('touchstart', enableBackground, { once: true });
+    const timer = setTimeout(enableBackground, 3000);
+    return () => {
+      window.removeEventListener('mousemove', enableBackground);
+      window.removeEventListener('scroll', enableBackground);
+      window.removeEventListener('touchstart', enableBackground);
+      clearTimeout(timer);
+    };
   }, []);
 
   useEffect(() => {

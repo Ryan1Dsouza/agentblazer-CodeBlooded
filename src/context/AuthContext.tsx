@@ -24,8 +24,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let active = true;
     let unsubscribe: (() => void) | undefined;
 
-    // Defer the heavy Firebase SDK initialization to free up the main thread during initial load
-    const timer = setTimeout(() => {
+    let interactionFired = false;
+    let timer: NodeJS.Timeout;
+
+    const initFirebase = () => {
+      if (interactionFired || !active) return;
+      interactionFired = true;
       Promise.all([
         import('firebase/auth'),
         import('../lib/firebase')
@@ -56,10 +60,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.warn('Failed to load Firebase auth:', err);
         if (active) setIsInitializing(false);
       });
-    }, 1000);
+    };
+
+    window.addEventListener('mousemove', initFirebase, { once: true });
+    window.addEventListener('scroll', initFirebase, { once: true });
+    window.addEventListener('touchstart', initFirebase, { once: true });
+    timer = setTimeout(initFirebase, 3000);
 
     return () => {
       active = false;
+      window.removeEventListener('mousemove', initFirebase);
+      window.removeEventListener('scroll', initFirebase);
+      window.removeEventListener('touchstart', initFirebase);
       clearTimeout(timer);
       if (unsubscribe) unsubscribe();
     };
