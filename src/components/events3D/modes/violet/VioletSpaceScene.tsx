@@ -3,8 +3,8 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Event } from '../../../../types';
 import SpaceshipVehicle from './SpaceshipVehicle';
-import SpaceStationStation from './SpaceStationStation';
-import CosmicVoidWorld from './CosmicVoidWorld';
+import { createVioletEnvironment } from './createVioletEnvironment';
+import StaticEnvironment from '../../shared/StaticEnvironment';
 
 interface VioletSceneProps {
   events: Event[];
@@ -409,13 +409,20 @@ export default function VioletSpaceScene({
     }
   });
 
+  // Build Kevin's baked violet environment once
+  const envResources = useMemo(
+    () => createVioletEnvironment(stationPositions, flightSpline),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   return (
     <group>
       <ambientLight intensity={0.5} />
       <directionalLight position={[20, 40, 30]} intensity={1.5} color="#c084fc" />
 
-      {/* Cosmic Starfield & Void */}
-      <CosmicVoidWorld />
+      {/* Kevin's baked Violet environment: orbital stations, asteroids, space ring */}
+      <StaticEnvironment resources={envResources} theme="violet" background="#08051a" />
 
       {/* Player Spaceship */}
       <group ref={shipGroupRef} position={[shipPos.current.x, shipPos.current.y, shipPos.current.z]}>
@@ -424,27 +431,6 @@ export default function VioletSpaceScene({
           isBoosting={isBoosting}
         />
       </group>
-
-      {/* Space Station Checkpoints */}
-      {events.map((evt, idx) => {
-        const pos = stationPositions[idx] || stationPositions[0];
-        return (
-          <SpaceStationStation
-            key={evt.id}
-            event={evt}
-            index={idx}
-            position={[pos.x, pos.y, pos.z]}
-            isActive={activeIdx === idx}
-            isDocking={gameState === 'DOCKING' && dockingTargetIdx.current === idx}
-            onInspect={() => {
-              if (onInspect) onInspect(evt);
-              dockingTargetIdx.current = idx;
-              dockingProgress.current = 0;
-              onDockComplete(-1);
-            }}
-          />
-        );
-      })}
 
       {/* Dynamic Forward-Only Disappearing Energy Flight Path */}
       <DynamicDisappearingBeam spline={flightSpline} progress={trailProgress} />

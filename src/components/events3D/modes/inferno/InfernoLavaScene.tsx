@@ -3,8 +3,8 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Event } from '../../../../types';
 import LavaTrainVehicle from './LavaTrainVehicle';
-import MagmaTerrain from './MagmaTerrain';
-import LavaStationDepot from './LavaStationDepot';
+import { createInfernoEnvironment } from './createInfernoEnvironment';
+import StaticEnvironment from '../../shared/StaticEnvironment';
 
 interface InfernoSceneProps {
   events: Event[];
@@ -334,10 +334,17 @@ export default function InfernoLavaScene({
     camera.lookAt(lookTarget);
   });
 
+  // Build Kevin's baked environment once — stations + spline are stable references
+  const envResources = useMemo(
+    () => createInfernoEnvironment(stationPositions, spline),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   return (
     <group>
-      {/* Volcanic Magma Terrain & Sky */}
-      <MagmaTerrain />
+      {/* Kevin's baked Inferno environment: terrain, magma channels, bridge, depots */}
+      <StaticEnvironment resources={envResources} theme="inferno" background="#1a0a00" />
 
       {/* 3D Elevated Mag-Lev Monorail Structure */}
       <RailTrackStructure spline={spline} />
@@ -346,26 +353,6 @@ export default function InfernoLavaScene({
       <group ref={trainGroupRef}>
         <LavaTrainVehicle speed={velocityRef} />
       </group>
-
-      {/* Magma Depots at each Event Station */}
-      {events.map((evt, idx) => {
-        const pos = stationPositions[idx] || new THREE.Vector3(0, 0, 0);
-        return (
-          <LavaStationDepot
-            key={evt.id}
-            event={evt}
-            index={idx}
-            position={[pos.x, pos.y, pos.z]}
-            isActive={activeIdx === idx}
-            onInspect={() => {
-              if (onInspect) onInspect(evt);
-              dockingTargetIdx.current = idx;
-              dockingProgress.current = 0;
-              onDockComplete(-1);
-            }}
-          />
-        );
-      })}
     </group>
   );
 }
