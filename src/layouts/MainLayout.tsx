@@ -50,7 +50,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     if (matched && matched.id !== 'events') {
       const el = sectionRefs.current[matched.id];
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
+        requestAnimationFrame(() => {
+          el.scrollIntoView({ behavior: 'smooth' });
+        });
       }
     }
   }, [location.pathname, isMobile]);
@@ -81,8 +83,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       return;
     }
     navigate(section.path, { replace: true });
-    const el = sectionRefs.current[section.id];
-    el?.scrollIntoView({ behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      const el = sectionRefs.current[section.id];
+      el?.scrollIntoView({ behavior: 'smooth' });
+    });
   };
 
   // ── Desktop: regular layout ───────────────────────────────────────────────

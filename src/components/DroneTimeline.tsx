@@ -54,7 +54,9 @@ export default function DroneTimeline({ events, activeIndex, onSelectIndex }: Pr
 
   // Update on index change
   useEffect(() => {
-    updateDronePosition(activeIndex, true);
+    requestAnimationFrame(() => {
+      updateDronePosition(activeIndex, true);
+    });
   }, [activeIndex, updateDronePosition]);
 
   // Update on resize or mount
