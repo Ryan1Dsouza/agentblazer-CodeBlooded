@@ -6,12 +6,10 @@ import BackgroundScene from '../three/BackgroundScene';
 import CursorFollower from '../components/CursorFollower';
 import NexusFloatingChat from '../components/NexusFloatingChat';
 
-// Mobile one-page scroll: lazy import all page components
-import { lazy, Suspense } from 'react';
-const Home = lazy(() => import('../pages/Home'));
-const About = lazy(() => import('../pages/About'));
-const Join = lazy(() => import('../pages/Join'));
-const Community = lazy(() => import('../pages/Community'));
+import Home from '../pages/Home';
+import About from '../pages/About';
+import Join from '../pages/Join';
+import Community from '../pages/Community';
 
 const MOBILE_SECTIONS = [
   { id: 'home',      label: 'Home',            path: '/' },
@@ -136,9 +134,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           ref={(el) => { sectionRefs.current['home'] = el; }}
           className="mobile-page-section"
         >
-          <Suspense fallback={<div className="mobile-section-loader">Loading…</div>}>
-            <Home />
-          </Suspense>
+          <Home />
         </section>
 
         <div className="mobile-section-divider" />
@@ -148,9 +144,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           ref={(el) => { sectionRefs.current['about'] = el; }}
           className="mobile-page-section"
         >
-          <Suspense fallback={<div className="mobile-section-loader">Loading…</div>}>
-            <About />
-          </Suspense>
+          <About />
         </section>
 
         <div className="mobile-section-divider" />
@@ -178,9 +172,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           ref={(el) => { sectionRefs.current['join'] = el; }}
           className="mobile-page-section"
         >
-          <Suspense fallback={<div className="mobile-section-loader">Loading…</div>}>
-            <Join />
-          </Suspense>
+          <Join />
         </section>
 
         <div className="mobile-section-divider" />
@@ -190,9 +182,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           ref={(el) => { sectionRefs.current['community'] = el; }}
           className="mobile-page-section"
         >
-          <Suspense fallback={<div className="mobile-section-loader">Loading…</div>}>
-            <Community />
-          </Suspense>
+          <Community />
         </section>
 
         <Footer />
