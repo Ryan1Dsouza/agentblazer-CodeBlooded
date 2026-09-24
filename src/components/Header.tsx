@@ -22,7 +22,7 @@ const themes: { id: Theme; label: string }[] = [
 export default function Header() {
   const { theme, switchTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const logoPath = '/AgentBlazer_Logo.webp';
+  const logoPath = '/AgentBlazer_Logo.png';
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);

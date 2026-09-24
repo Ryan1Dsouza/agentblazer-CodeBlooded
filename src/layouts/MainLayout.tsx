@@ -127,7 +127,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* Sticky mobile nav */}
       <header className="mobile-onepage-header">
         <div className="mobile-nav-brand">
-          <img src="/AgentBlazer_Logo.webp" alt="AgentBlazer" className="header-logo" style={{ width: 28, height: 28 }} />
+          <img src="/AgentBlazer_Logo.png" alt="AgentBlazer" className="header-logo" style={{ width: 28, height: 28 }} />
           <span className="header-title" style={{ fontSize: '0.9rem' }}>AgentBlazer</span>
         </div>
         <nav className="mobile-onepage-nav">
