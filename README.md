@@ -1,6 +1,6 @@
 # ⚡ AgentBlazer — Official Web Portal & Interactive 3D Experience
 
-> **Pioneering Autonomous & Agentic AI Systems**  
+> **Official Web Portal & Interactive 3D Experience**  
 > Built by **Team CodeBlooded** for **Build Blazer — Phase 2**  
 > *AgentBlazer Club • Department of Computer Science & Engineering • St Joseph Engineering College (SJEC), Mangaluru*
 
@@ -8,48 +8,41 @@
 
 ## 🌟 Overview
 
-**AgentBlazer** is the official interactive web portal and student engagement platform for the **AgentBlazer Collective** at St Joseph Engineering College (SJEC). Built from the ground up to redefine collegiate club websites, the portal bridges futuristic aesthetics with hands-on gamification, featuring **fully interactive 3D WebGL environments**, a **real-time responsive community hub**, an **AI-driven floating companion**, and a **dynamic three-state theme engine**.
+**AgentBlazer** is the official student engagement platform for the **AgentBlazer Club** at St Joseph Engineering College (SJEC). The portal features an interactive 3D WebGL environment for exploring events, a real-time community hub, a floating chat assistant, and a customizable three-theme layout.
 
 ---
 
 ## 🚀 Key Features
 
-### 🎮 1. Gamified 3D Events & Workshops Exploration
-Powered by **Three.js** and **React Three Fiber (@react-three/fiber)**, users do not just read about club workshops—they physically drive and navigate through them in real time across three bespoke 3D environments:
+### 🎮 1. Interactive 3D Events & Workshops
+Powered by **Three.js** and **React Three Fiber**, users can drive and navigate through virtual environments to explore club workshops across three themes:
 
-*   **🟣 Violet Mode — Cyberpunk Drone Simulation**:
-    *   Pilot an autonomous cyber-drone through a neon-lit cyberpunk cityscape.
-    *   Navigate through checkpoints, neon rings, and orbital energy fields to unlock event archives.
-*   **🔥 Inferno Mode — Volcanic Monorail Expedition**:
-    *   Command an industrial high-speed monorail along magma spline tracks.
-    *   Features automated depot docking stations, dynamic camera lerping, and throttle mechanics.
-*   **❄️ Frost Mode — Glacial Arctic Cruiser**:
-    *   Traverse a frozen cyber tundra in an agile low-drag ice vehicle.
-    *   Inspect interactive 3D Photo Billboards and holographic event beacons showcasing past hackathons and workshops.
+*   **Violet Mode**: Pilot a drone through a neon cityscape.
+*   **Inferno Mode**: Command a monorail along magma tracks with automated docking stations.
+*   **Frost Mode**: Traverse a winter environment to inspect interactive 3D event billboards.
 
-### 🕹️ 2. Adaptive Dual-Mode Controls
-*   **Desktop**: Seamless keyboard navigation (`W`, `A`, `S`, `D` or `Arrow Keys`), `Shift` to engage turbo boost, and smooth mouse wheel acceleration.
-*   **Mobile & Tablets**: Automatically mounts an intuitive on-screen **virtual touch joystick** with haptic-ready spring physics, hiding unnecessary desktop keys for an uncluttered mobile experience.
+### 🕹️ 2. Adaptive Controls
+*   **Desktop**: Keyboard navigation (`W/A/S/D` or Arrows), `Shift` for boost, and mouse wheel for smooth scrolling.
+*   **Mobile**: An intuitive on-screen **virtual touch joystick** with haptic feedback.
 
-### 🎨 3. Dynamic Multi-Theme Engine
-Switch between three distinct visual identities on the fly with synchronized 3D scene lighting, UI palettes, and glowing neon accents:
-*   **Violet**: Cyberpunk synthwave, deep obsidian surfaces, and neon purple glows.
-*   **Inferno**: Magma orange accents, industrial carbon fibers, and volcanic ember effects.
-*   **Frost**: Ice-blue aurora tones, frosted translucent glassmorphism, and clean light-mode surfaces.
+### 🎨 3. Multi-Theme Engine
+Switch between three distinct visual themes with synchronized 3D scene lighting and UI palettes:
+*   **Violet**: Synthwave style with deep surfaces and purple accents.
+*   **Inferno**: Industrial style with orange accents and ember effects.
+*   **Frost**: Light-mode style with ice-blue tones and frosted glassmorphism.
 
-### 🌐 4. Nexus Hub Community Platform (Discord-Style)
-*   **Real-Time Firebase Chat**: A live, multi-user chat room synchronized instantly across all connected users via Google Cloud Firestore.
-*   **Discord-Style UI & Presence**: Features an "Online Members" sidebar with verified `@sjec.ac.in` college email badges and active presence heartbeat.
-*   **Domain-Restricted Google Auth**: Secure login via Firebase Authentication, strictly limited to approved college email addresses.
-*   **Integrated AI Moderation & Bot**: Tag `@agentblazer` in the real-time chat to get instant AI-generated responses visible to the entire community.
+### 🌐 4. Community Hub (Discord-Style)
+*   **Real-Time Firebase Chat**: A live, multi-user chat room synchronized via Google Cloud Firestore.
+*   **Discord-Style UI & Presence**: Features an "Online Members" sidebar with verified `@sjec.ac.in` email badges.
+*   **Domain-Restricted Google Auth**: Secure login strictly limited to approved college email addresses.
+*   **Integrated Bot**: Tag `@agentblazer` in the chat to get automated responses.
 
-### 🤖 5. Nexus Floating AI Assistant
-*   An on-screen interactive floating assistant widget.
-*   Instant prompt recommendations, club FAQ responses, dynamic mode awareness, and smooth overlay expansion.
+### 🤖 5. Floating Assistant
+*   An on-screen interactive floating chat widget.
+*   Provides club FAQ responses, prompt recommendations, and theme awareness.
 
-### 👥 6. Interactive Leadership & Advisor Showcase
-*   Futuristic HUD-styled advisor and executive council cards.
-*   Dynamic photo popups, custom badge tags, and randomized inspiring tech quotes.
+### 👥 6. Leadership & Advisor Showcase
+*   Interactive advisor and executive council cards with dynamic photo popups.
 
 ### 📱 7. Responsive Mobile One-Page Architecture
 *   **Desktop vs. Mobile Rendering**: React Router powers the desktop SPA, while mobile users get a continuous vertical scroll layout.
@@ -59,17 +52,17 @@ Switch between three distinct visual identities on the fly with synchronized 3D 
 
 | Technology | Purpose |
 | :--- | :--- |
-| **React 18** | Modern component-based declarative user interface |
-| **TypeScript** | Type-safe enterprise-grade codebase |
-| **Vite** | Blazing fast build tooling, HMR, and asset bundling |
-| **Firebase** | Cloud Firestore for real-time DB & Google Authentication |
-| **Three.js** | Core 3D WebGL rendering engine |
-| **@react-three/fiber** | Declarative React Three.js scene graph |
-| **@react-three/drei** | Three.js shader, lighting, camera, and mesh utilities |
-| **Tailwind CSS v4** | Next-generation utility-first styling and animations |
-| **Lucide React** | Consistent, modern vector iconography |
-| **React Router v6** | Client-side SPA routing with smooth page transitions |
-| **GSAP** | High-performance animation timelines |
+| **React 18** | UI Library |
+| **TypeScript** | Type-safe development |
+| **Vite** | Build tooling and bundler |
+| **Firebase** | Cloud Firestore & Google Authentication |
+| **Three.js** | 3D WebGL rendering engine |
+| **@react-three/fiber** | React renderer for Three.js |
+| **@react-three/drei** | Three.js utilities and helpers |
+| **Vanilla CSS** | Custom styling and animations |
+| **Lucide React** | Icons |
+| **React Router v6** | Client-side routing |
+| **GSAP** | Animation library |
 
 ---
 
