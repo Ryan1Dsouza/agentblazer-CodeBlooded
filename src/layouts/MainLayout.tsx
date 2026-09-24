@@ -40,6 +40,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   // Track which section is in view on mobile for active nav highlight
   const [activeSection, setActiveSection] = useState('home');
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [deferBackground, setDeferBackground] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDeferBackground(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     document.title = 'AgentBlazer - CodeBlooded';
@@ -95,7 +101,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   if (!isMobile) {
     return (
       <div className="app-layout">
-        {!isEventsPage && (
+        {!isEventsPage && !deferBackground && (
           <Suspense fallback={null}>
             <BackgroundScene />
           </Suspense>
@@ -206,7 +212,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   // Fallback if none of the above conditions are met (e.g., /events or /admin on mobile)
   return (
     <div className="app-layout">
-      {!isEventsPage && (
+      {!isEventsPage && !deferBackground && (
         <Suspense fallback={null}>
           <BackgroundScene />
         </Suspense>
