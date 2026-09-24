@@ -34,6 +34,21 @@ export default function NexusChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages]);
 
+  // Handle cooldown countdown
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 100) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 100;
+      });
+    }, 100);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
   // Listen to Firestore Messages
   useEffect(() => {
     setMessages([]);
