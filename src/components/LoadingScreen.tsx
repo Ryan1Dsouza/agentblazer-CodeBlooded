@@ -155,10 +155,6 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
             <div className="boot-eyebrow"><span className="boot-status-dot" /> COMMAND CENTER <span>/</span> {environment.code}</div>
             <h1 id="boot-title">{environment.name}<span>.</span></h1>
           </div>
-          <div className="boot-station-meta">
-            <span>{environment.sector}</span>
-            <span><i /> {environment.location} <span className="boot-meta-divider">|</span> SECURE CONNECTION</span>
-          </div>
         </div>
         <div className="boot-deck" ref={deckRef}>
 
@@ -190,13 +186,6 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
             <span className="boot-enter-hint">{ready ? 'YOUR NEXT CHAPTER STARTS HERE' : 'ESTABLISHING YOUR CONNECTION'}</span>
           </section>
 
-        </div>
-
-        <footer className="boot-footer">
-          <span><span className="boot-status-dot" /> AGENTBLAZER OS <span className="boot-footer-version">/ V.03.26</span></span>
-          <span>BUILT FOR THE CURIOUS. POWERED BY YOU.</span>
-          <span>{environment.code} <span className="boot-footer-bars" aria-hidden="true">▂▄▆█</span></span>
-        </footer>
       </div>
       <span className="boot-sr-only" role="status" aria-live="polite">{ready ? 'System unlocked. Enter AgentBlazer is ready.' : 'Loading AgentBlazer resources.'}</span>
       {ready && <div className="boot-unlock-flash" aria-hidden="true"><div><span>ACCESS GRANTED / {environment.code}</span><strong>SYSTEM UNLOCKED</strong><span>WELCOME TO AGENTBLAZER</span></div></div>}
