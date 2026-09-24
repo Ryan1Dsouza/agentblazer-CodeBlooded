@@ -3322,3 +3322,175 @@ button {
 .honored-quote, .faculty-quote {
   margin-top: 12px;
 }
+
+/* ================================================================
+   MOBILE ONE-PAGE SCROLLING LAYOUT
+   Only applies on screens ≤ 768px via JS isMobile check in layout
+   ================================================================ */
+
+.mobile-onepage {
+  overflow-x: hidden;
+}
+
+/* Sticky top nav bar for mobile one-page scroll */
+.mobile-onepage-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(6, 4, 16, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  gap: 12px;
+}
+
+.mobile-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Horizontally scrollable nav pill bar */
+.mobile-onepage-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  /* hide scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+}
+.mobile-onepage-nav::-webkit-scrollbar { display: none; }
+
+.mobile-nav-pill {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-pill.active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #fff;
+  box-shadow: 0 0 12px var(--accent-glow, rgba(168,85,247,0.5));
+}
+
+.mobile-nav-pill:not(.active):hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+/* Events link-out pill — slightly different style */
+.mobile-nav-events-link {
+  border-color: rgba(99, 202, 255, 0.3);
+  color: rgba(99, 202, 255, 0.8);
+}
+.mobile-nav-events-link.active,
+.mobile-nav-events-link:hover {
+  background: rgba(99, 202, 255, 0.15);
+  border-color: rgba(99, 202, 255, 0.6);
+  color: #63caff;
+}
+
+/* Main scroll container */
+.mobile-onepage-main {
+  padding-top: 58px; /* clear the fixed header */
+}
+
+/* Each page's section wrapper */
+.mobile-page-section {
+  width: 100%;
+  min-height: 100svh;
+  position: relative;
+  scroll-margin-top: 58px; /* account for sticky header */
+}
+
+/* Thin gradient divider between sections */
+.mobile-section-divider {
+  width: 80%;
+  margin: 0 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.12) 30%,
+    var(--accent-primary, rgba(168, 85, 247, 0.4)) 50%,
+    rgba(255, 255, 255, 0.12) 70%,
+    transparent
+  );
+}
+
+/* Loading placeholder for lazy sections */
+.mobile-section-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.9rem;
+  font-family: monospace;
+}
+
+/* Events teaser card (replaces embedded 3D scene) */
+.mobile-events-teaser {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+}
+
+.mobile-events-card {
+  text-align: center;
+  max-width: 360px;
+  padding: 40px 28px;
+  background: rgba(16, 12, 32, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.mobile-events-icon {
+  font-size: 3rem;
+  animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+.mobile-events-card h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.mobile-events-card p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
