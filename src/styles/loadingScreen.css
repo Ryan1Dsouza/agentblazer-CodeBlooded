@@ -115,7 +115,7 @@
 .boot-core { display: flex; flex-direction: column; align-items: center; min-width: 0; position: relative; padding-top: 2px; }
 .boot-core-caption { display: flex; justify-content: space-between; gap: 12px; width: 100%; font: 8px var(--boot-mono); letter-spacing: .12em; color: var(--boot-dim); }
 .boot-core-caption > span:first-child { color: var(--boot-muted); }
-.boot-gyroscope { --gyro-angle: 0deg; width: min(100%, 750px); aspect-ratio: 1; margin: 15px 0; position: relative; perspective: 750px; }
+.boot-gyroscope { --gyro-angle: 0deg; width: min(100%, 750px); aspect-ratio: 1; margin: 15px 0 60px; position: relative; perspective: 750px; }
 .boot-core-aura { position: absolute; inset: 3%; border-radius: 50%; background: radial-gradient(circle, rgba(var(--boot-rgb), .19), rgba(var(--boot-rgb), .05) 45%, transparent 70%); }
 .boot-orbit-ticks { position: absolute; inset: 8%; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(var(--boot-rgb), .45) 0deg .4deg, transparent .4deg 5deg); mask-image: radial-gradient(closest-side, transparent 96%, #000 97%); transform: rotate(calc(var(--gyro-angle) * -.18)); }
 .boot-orbit-track { position: absolute; inset: 13%; border: 1px solid rgba(var(--boot-rgb), .18); border-radius: 50%; }
@@ -134,12 +134,12 @@
 .boot-crosshair--bottom { bottom: 0; left: calc(50% - 4px); }
 .boot-crosshair--left { left: 1%; top: calc(50% - 8px); }
 .boot-crosshair--right { right: 1%; top: calc(50% - 8px); }
-.boot-logo-core { position: absolute; inset: 13%; display: grid; place-items: center; transform: translateZ(35px); }
+.boot-logo-core { position: absolute; inset: 0; display: grid; place-items: center; transform: translateZ(35px); }
 .boot-logo-core::before { display: none; }
 .boot-logo-core img { width: 100%; height: 100%; object-fit: contain; }
 .boot-logo-fallback { font-size: 42px; font-weight: 600; color: #f0edf9; letter-spacing: -.08em; }
 .boot-logo-indicator { position: absolute; width: 7px; height: 7px; right: 9%; top: 7%; border-radius: 50%; background: var(--boot-secondary); border: 2px solid var(--boot-bg); box-shadow: 0 0 8px var(--boot-secondary); }
-.boot-core-coordinate { position: absolute; bottom: 7%; width: 100%; text-align: center; font: 7px var(--boot-mono); letter-spacing: .12em; color: var(--boot-muted); }
+.boot-core-coordinate { position: absolute; bottom: -30px; width: 100%; text-align: center; font: 7px var(--boot-mono); letter-spacing: .12em; color: var(--boot-muted); }
 .boot-core-coordinate span { color: var(--boot-primary); padding: 0 6px; }
 .boot-core-message { text-align: center; }
 .boot-core-state { display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--boot-secondary); font: 8px var(--boot-mono); letter-spacing: .17em; }
