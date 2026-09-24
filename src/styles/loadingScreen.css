@@ -61,7 +61,7 @@
 .boot-screen--frost .boot-atmosphere { background: radial-gradient(ellipse at 50% 40%, rgba(255,255,255,.7), transparent 55%), linear-gradient(145deg, transparent 45%, rgba(151, 199, 226, .3)); }
 .boot-screen--frost .boot-grid { background-image: linear-gradient(30deg, var(--boot-line) 12%, transparent 12.5%, transparent 87%, var(--boot-line) 87.5%), linear-gradient(150deg, var(--boot-line) 12%, transparent 12.5%, transparent 87%, var(--boot-line) 87.5%), linear-gradient(30deg, var(--boot-line) 12%, transparent 12.5%, transparent 87%, var(--boot-line) 87.5%), linear-gradient(150deg, var(--boot-line) 12%, transparent 12.5%, transparent 87%, var(--boot-line) 87.5%), linear-gradient(60deg, rgba(var(--boot-rgb), .07) 25%, transparent 25.5%, transparent 75%, rgba(var(--boot-rgb), .07) 75%); background-size: 64px 112px; background-position: 0 0, 0 0, 32px 56px, 32px 56px, 0 0; opacity: .2; }
 .boot-shell { position: relative; width: min(100%, 1536px); min-height: 100%; margin: 0 auto; padding: 24px 44px 0; display: flex; flex-direction: column; }
-.boot-header { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 21px; border-bottom: 1px solid var(--boot-line); }
+.boot-header { position: relative; z-index: 10; min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 21px; border-bottom: 1px solid var(--boot-line); }
 .boot-brand, .boot-header-controls { display: flex; align-items: center; gap: 14px; }
 .boot-brand-mark { width: 39px; height: 39px; display: grid; place-items: center; color: var(--boot-primary); border: 1px solid var(--boot-line); border-radius: 10px; background: rgba(var(--boot-rgb), .06); }
 .boot-brand > div { display: flex; flex-direction: column; gap: 2px; }
@@ -74,7 +74,7 @@
 .boot-environments button:hover { color: var(--boot-text); background: rgba(var(--boot-rgb), .1); }
 .boot-motion { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--boot-line); border-radius: 6px; background: transparent; color: var(--boot-muted); }
 .boot-motion:disabled { cursor: default; opacity: .5; }
-.boot-station-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 29px 0 25px; }
+.boot-station-heading { position: relative; z-index: 10; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 29px 0 25px; pointer-events: none; }
 .boot-eyebrow { display: flex; align-items: center; gap: 9px; font: 9px var(--boot-mono); letter-spacing: .13em; color: var(--boot-primary); }
 .boot-eyebrow > span:not(.boot-status-dot) { color: var(--boot-dim); }
 .boot-status-dot, .boot-live i { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--boot-secondary); box-shadow: 0 0 9px rgba(var(--boot-rgb), .6); flex-shrink: 0; }
@@ -84,7 +84,8 @@
 .boot-station-meta > span:first-child { color: var(--boot-muted); }
 .boot-station-meta i { display: inline-block; width: 4px; height: 4px; background: var(--boot-secondary); margin: 0 6px 2px 0; }
 .boot-meta-divider { margin: 0 9px; color: var(--boot-line); }
-.boot-deck { --tilt-x: 0deg; --tilt-y: 0deg; display: flex; justify-content: center; align-items: center; transform: perspective(1500px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transform-origin: 50% 45%; will-change: transform; margin: auto 0; }
+.boot-deck { --tilt-x: 0deg; --tilt-y: 0deg; position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; transform: perspective(1500px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transform-origin: 50% 50%; will-change: transform; z-index: 1; pointer-events: none; }
+.boot-core { pointer-events: auto; }
 .boot-left-column, .boot-right-column { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .boot-panel { position: relative; min-width: 0; background: var(--boot-surface); border: 1px solid var(--boot-line); border-radius: var(--boot-panel-radius); overflow: hidden; backdrop-filter: blur(12px); box-shadow: inset 0 1px rgba(255,255,255,.025); }
 .boot-panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 17px 17px 14px; }
