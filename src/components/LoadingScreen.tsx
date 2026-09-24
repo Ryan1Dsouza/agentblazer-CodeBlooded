@@ -159,7 +159,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         <div className="boot-deck" ref={deckRef}>
 
           <section className="boot-core" aria-label="AgentBlazer core initialization">
-            <div className="boot-core-caption"><span>AB / {environment.core}</span><span>GEN. 03</span></div>
+
             <div className="boot-gyroscope" ref={gyroRef} aria-hidden="true">
               <div className="boot-core-aura" /><div className="boot-orbit-ticks" /><div className="boot-orbit-track" />
               <div className="boot-orbit boot-orbit--one"><div><i /><i /></div></div>
@@ -171,13 +171,9 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                 {logoFailed ? <span className="boot-logo-fallback">AB</span> : <img src={LOGO} alt="" onError={() => setLogoFailed(true)} />}
                 <span className="boot-logo-indicator" />
               </div>
-              <div className="boot-core-coordinate">{environment.code} <span>//</span> {ready ? 'STABILIZED' : 'CALIBRATING'}</div>
+
             </div>
-            <div className="boot-core-message">
-              <div className="boot-core-state"><span className="boot-status-dot" />{ready ? 'SYSTEM UNLOCKED' : `BOOT SEQUENCE ACTIVE · ${progress}%`}</div>
-              <h2>{ready ? 'All systems. Go.' : 'A new mission awaits.'}</h2>
-              <p id="boot-description">{ready ? 'Your world is ready. Take command.' : 'Bringing your AgentBlazer universe online.'}</p>
-            </div>
+
             <button ref={enterRef} type="button" className="boot-enter" disabled={!ready || isExiting} onClick={handleEnter}>
               <span>{isExiting ? 'Launching mission' : ready ? 'Enter AgentBlazer' : 'Initializing systems'}</span>
               {ready ? <ArrowUpRight size={20} /> : <span className="boot-button-loader" />}
