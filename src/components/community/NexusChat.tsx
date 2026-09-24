@@ -17,8 +17,6 @@ export default function NexusChat() {
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
-  const [cooldown, setCooldown] = useState(0);
-  const [isSending, setIsSending] = useState(false);
   const [moderationWarning, setModerationWarning] = useState('');
   const [chatError, setChatError] = useState('');
   
@@ -33,21 +31,6 @@ export default function NexusChat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages]);
-
-  // Handle cooldown countdown
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const timer = setInterval(() => {
-      setCooldown((prev) => {
-        if (prev <= 100) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 100;
-      });
-    }, 100);
-    return () => clearInterval(timer);
-  }, [cooldown]);
 
   // Listen to Firestore Messages
   useEffect(() => {
@@ -184,50 +167,47 @@ export default function NexusChat() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || cooldown > 0 || isSending || !user) return;
+    if (!input.trim() || !user) return;
 
     const text = input.trim();
     setInput('');
-    setIsSending(true);
     setModerationWarning('');
     setShowMentionMenu(false);
 
-    // Start 2-second cooldown
-    setCooldown(2000);
+    // Run network tasks without awaiting them to prevent blocking the UI
+    (async () => {
+      try {
+        const allowed = await moderateMessage(text);
+        if (!allowed) {
+          setModerationWarning('⚠️ Message blocked by AgentBlazer AI — please keep it respectful.');
+          return;
+        }
 
-    try {
-      const allowed = await moderateMessage(text);
-      if (!allowed) {
-        setModerationWarning('⚠️ Message blocked by AgentBlazer AI — please keep it respectful.');
-        return;
-      }
-
-      await addDoc(collection(db, 'chat_messages'), {
-        author: displayName,
-        content: text,
-        isBot: false,
-        isSystem: false,
-        timestamp: serverTimestamp(),
-      });
-
-      // Check for @agentblazer mention
-      if (text.toLowerCase().includes('@agentblazer')) {
-        const reply = await getAIResponse(text);
-        const botContent = reply || "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
-        
         await addDoc(collection(db, 'chat_messages'), {
-          author: 'AgentBlazer AI',
-          content: botContent,
-          isBot: true,
+          author: displayName,
+          content: text,
+          isBot: false,
           isSystem: false,
           timestamp: serverTimestamp(),
         });
+
+        // Check for @agentblazer mention
+        if (text.toLowerCase().includes('@agentblazer')) {
+          const reply = await getAIResponse(text);
+          const botContent = reply || "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
+          
+          await addDoc(collection(db, 'chat_messages'), {
+            author: 'AgentBlazer AI',
+            content: botContent,
+            isBot: true,
+            isSystem: false,
+            timestamp: serverTimestamp(),
+          });
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
       }
-    } catch (error) {
-      console.error("Error sending message:", error);
-    } finally {
-      setIsSending(false);
-    }
+    })();
   };
 
   const formatTime = (ts: number) => {
@@ -442,38 +422,15 @@ export default function NexusChat() {
             type="text"
             value={input}
             onChange={handleInputChange}
-            placeholder={
-              cooldown > 0
-                ? `Cooldown... ${(cooldown / 1000).toFixed(1)}s`
-                : 'Type a message...'
-            }
-            disabled={cooldown > 0 || isSending}
+            placeholder="Type a message..."
             maxLength={500}
           />
           <button
             type="submit"
             className="btn-send"
-            disabled={cooldown > 0 || isSending || !input.trim()}
+            disabled={!input.trim()}
           >
-            {isSending ? (
-              <span className="send-spinner" />
-            ) : cooldown > 0 ? (
-              <span className="cooldown-ring">
-                <svg viewBox="0 0 24 24" width="20" height="20">
-                  <circle
-                    cx="12" cy="12" r="10"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeDasharray={`${(1 - cooldown / 2000) * 63} 63`}
-                    strokeLinecap="round"
-                    transform="rotate(-90 12 12)"
-                  />
-                </svg>
-              </span>
-            ) : (
-              '➤'
-            )}
+            ➤
           </button>
         </form>
       </div>
