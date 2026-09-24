@@ -24,7 +24,7 @@ export function useBootCanvas({ rootRef, deckRef, gyroRef, canvasRef, progressRe
     if (!root || !canvas || !ctx) return;
     let width = 1, height = 1;
     let particles: Particle[] = [];
-    let frame = 0, lastFrame = 0, elapsed = 0, angle = 0, readoutAt = 0;
+    let frame = 0, lastFrame = 0, elapsed = 0, angle = 0;
     let pointerX = 0, pointerY = 0, tiltX = 0, tiltY = 0;
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
 

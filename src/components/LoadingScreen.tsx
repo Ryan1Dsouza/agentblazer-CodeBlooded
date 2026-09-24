@@ -1,5 +1,5 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Activity, ArrowUpRight, Check, ChevronRight, Cpu, Flame, Orbit, Pause, Play, Radio, Snowflake, Terminal } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ArrowUpRight, Flame, Orbit, Pause, Play, Snowflake } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import type { Theme } from '../types';
 import { useBootCanvas } from './loading/useBootCanvas';
@@ -32,7 +32,7 @@ const ENVIRONMENTS = {
   },
 } satisfies Record<Theme, object>;
 
-type Environment = (typeof ENVIRONMENTS)[Theme];
+
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
