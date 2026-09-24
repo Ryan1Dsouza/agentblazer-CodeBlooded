@@ -84,7 +84,7 @@
 .boot-station-meta > span:first-child { color: var(--boot-muted); }
 .boot-station-meta i { display: inline-block; width: 4px; height: 4px; background: var(--boot-secondary); margin: 0 6px 2px 0; }
 .boot-meta-divider { margin: 0 9px; color: var(--boot-line); }
-.boot-deck { --tilt-x: 0deg; --tilt-y: 0deg; display: grid; grid-template-columns: minmax(250px, 1fr) minmax(330px, 1.52fr) minmax(250px, 1fr); align-items: start; gap: clamp(18px, 2.5vw, 44px); transform: perspective(1500px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transform-origin: 50% 45%; will-change: transform; margin: auto 0; }
+.boot-deck { --tilt-x: 0deg; --tilt-y: 0deg; display: flex; justify-content: center; align-items: center; transform: perspective(1500px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transform-origin: 50% 45%; will-change: transform; margin: auto 0; }
 .boot-left-column, .boot-right-column { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .boot-panel { position: relative; min-width: 0; background: var(--boot-surface); border: 1px solid var(--boot-line); border-radius: var(--boot-panel-radius); overflow: hidden; backdrop-filter: blur(12px); box-shadow: inset 0 1px rgba(255,255,255,.025); }
 .boot-panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 17px 17px 14px; }
@@ -183,22 +183,7 @@
 .boot-link-card > div:nth-child(2) { flex: 1; }
 .boot-link-card > div > span { display: block; font-size: 11px; }
 .boot-link-card p { color: var(--boot-dim); font-size: 9px; margin-top: 4px; line-height: 1.6; }
-.boot-progress-section { margin-top: 28px; padding-top: 17px; border-top: 1px solid var(--boot-line); }
-.boot-progress-info { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 11px; }
-.boot-progress-info > div:first-child { display: flex; gap: 18px; align-items: center; }
-.boot-resource-count { color: var(--boot-dim); font: 8px var(--boot-mono); letter-spacing: .08em; }
-.boot-progress-number { font: 31px/1 var(--boot-mono); letter-spacing: -.06em; color: var(--boot-text); }
-.boot-progress-number > span { font-size: 12px; color: var(--boot-primary); margin-left: 3px; }
-.boot-progress-track { position: relative; overflow: hidden; height: 7px; background: rgba(var(--boot-rgb), .1); }
-.boot-progress-track > div { position: absolute; inset: 0; background: linear-gradient(90deg, var(--boot-primary), var(--boot-secondary)); transform-origin: left; transition: transform .45s ease; }
-.boot-progress-track > span { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(2% - 3px), var(--boot-bg) calc(2% - 3px), var(--boot-bg) 2%); }
-.boot-phases { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; padding: 14px 0 19px; }
-.boot-phases > div { display: flex; align-items: center; gap: 8px; color: var(--boot-dim); font: 9px var(--boot-mono); }
-.boot-phases > div > span { display: grid; place-items: center; width: 17px; height: 17px; border: 1px solid var(--boot-line); border-radius: 50%; font-size: 7px; }
-.boot-phases > .is-complete { color: var(--boot-muted); }
-.boot-phases > .is-complete > span { border-color: rgba(var(--boot-rgb), .3); background: rgba(var(--boot-rgb), .12); color: var(--boot-secondary); }
-.boot-phases i { flex: 1; height: 1px; background: var(--boot-line); margin-left: 5px; }
-.boot-phases > div:last-child i { display: none; }
+
 .boot-footer { margin-top: auto; min-height: 48px; border-top: 1px solid var(--boot-line); display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--boot-dim); font: 7px var(--boot-mono); letter-spacing: .08em; }
 .boot-footer > span { display: flex; align-items: center; gap: 7px; }
 .boot-footer > span:first-child { color: var(--boot-muted); }
@@ -252,23 +237,11 @@
   .boot-link-card { padding-block: 13px; }
   .boot-core-message h2 { font-size: 29px; }
   .boot-core-message p { margin-bottom: 14px; }
-  .boot-progress-section { margin-top: 20px; padding-top: 13px; }
-  .boot-phases { padding: 11px 0 14px; }
+
   .boot-footer { min-height: 39px; }
 }
 @media (max-width: 1100px) {
   .boot-shell { padding-inline: 28px; }
-  .boot-deck { grid-template-columns: minmax(210px, 1fr) minmax(280px, 1.4fr); gap: 25px; }
-  .boot-core { grid-column: 2; grid-row: 1; }
-  .boot-left-column { grid-column: 1; grid-row: 1; }
-  .boot-right-column { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr; }
-  .boot-telemetry { display: grid; grid-template-columns: 200px 1fr; }
-  .boot-telemetry .boot-panel-heading { grid-column: 1 / -1; }
-  .boot-gauges { border-bottom: 0; padding-bottom: 14px; }
-  .boot-metrics { padding-top: 7px; }
-  .boot-hex { grid-column: 1 / -1; padding-top: 6px; }
-  .boot-telemetry .boot-panel-foot { grid-column: 1 / -1; }
-  .boot-link-card { display: none; }
   .boot-station-meta { font-size: 7px; }
   .boot-gyroscope { width: min(100%, 370px); }
   .boot-footer > span:nth-child(2) { font-size: 6px; }
@@ -289,28 +262,14 @@
   .boot-station-heading h1 { font-size: 30px; }
   .boot-station-meta { display: none; }
   .boot-eyebrow { font-size: 8px; }
-  .boot-deck { grid-template-columns: 1fr; gap: 22px; transform: none; will-change: auto; }
-  .boot-core { grid-column: 1; grid-row: 1; }
+  .boot-deck { transform: none; will-change: auto; }
   .boot-core-caption { font-size: 7px; }
   .boot-gyroscope { width: min(100%, 300px); margin-block: -2px; }
   .boot-core-message h2 { font-size: 30px; }
   .boot-core-message p { font-size: 12px; margin-bottom: 16px; }
   .boot-enter { width: min(100%, 310px); min-height: 49px; }
   .boot-enter-hint { margin-top: 11px; }
-  .boot-left-column { grid-column: 1; grid-row: 2; gap: 14px; }
-  .boot-right-column { grid-row: 3; }
-  .boot-log-window { height: 154px; }
-  .boot-log-line { font-size: 10px; }
-  .boot-panel-foot { font-size: 8px; }
-  .boot-telemetry { grid-template-columns: 1fr; }
-  .boot-gauges { border-bottom: 1px solid var(--boot-line); padding-bottom: 17px; }
-  .boot-gauge-dial { width: 90px; height: 90px; }
-  .boot-metrics { padding-top: 18px; }
-  .boot-progress-info > div:first-child { align-items: flex-start; flex-direction: column; gap: 7px; }
-  .boot-progress-number { font-size: 30px; }
-  .boot-phases { grid-template-columns: 1fr 1fr; gap: 12px 20px; }
-  .boot-phases > div { font-size: 8px; }
-  .boot-phases i { display: none; }
+
   .boot-footer { min-height: 52px; font-size: 6px; }
   .boot-footer > span:nth-child(2) { display: none; }
   .boot-screen--inferno .boot-header::after { right: 20px; width: 120px; }

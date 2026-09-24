@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { Theme } from '../types';
 import { siteConfig } from '../data/config';
@@ -19,45 +21,58 @@ const themes: { id: Theme; label: string }[] = [
 
 export default function Header() {
   const { theme, switchTheme } = useTheme();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const logoPath = '/AgentBlazer_Logo.png';
 
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const closeMenu = () => setIsMenuOpen(false);
+
   return (
-    <header className="header">
-      <div className="header-left">
-        <img
-          src={logoPath}
-          alt="AgentBlazer"
-          className="header-logo"
-        />
-        <div className="header-brand">
-          <span className="header-title">{siteConfig.club.name}</span>
-          <span className="header-subtitle">collective</span>
+    <header className={`header ${isMenuOpen ? 'menu-open' : ''}`}>
+      <div className="header-top">
+        <div className="header-left">
+          <img
+            src={logoPath}
+            alt="AgentBlazer"
+            className="header-logo"
+          />
+          <div className="header-brand">
+            <span className="header-title">{siteConfig.club.name}</span>
+            <span className="header-subtitle">collective</span>
+          </div>
+          <span className="header-dept">{siteConfig.department.name}</span>
         </div>
-        <span className="header-dept">{siteConfig.department.name}</span>
+        
+        <button className="mobile-menu-btn" onClick={toggleMenu} aria-label="Toggle navigation menu">
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
 
-      <nav className="header-nav">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}
-          >
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
+      <div className={`header-content ${isMenuOpen ? 'show' : ''}`}>
+        <nav className="header-nav">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={closeMenu}
+              className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
 
-      <div className="header-themes">
-        {themes.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => switchTheme(t.id)}
-            className={`theme-btn ${theme === t.id ? 'active' : ''}`}
-          >
-            {t.label}
-          </button>
-        ))}
+        <div className="header-themes">
+          {themes.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => { switchTheme(t.id); closeMenu(); }}
+              className={`theme-btn ${theme === t.id ? 'active' : ''}`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
     </header>
   );
