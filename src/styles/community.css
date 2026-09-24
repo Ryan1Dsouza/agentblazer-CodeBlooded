@@ -35,7 +35,7 @@
   padding: 0.4rem 1rem;
   border-radius: 999px;
   margin-bottom: 1rem;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px);
 }
 
 .admin-indicator {
@@ -926,7 +926,7 @@
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(10, 8, 22, 0.7);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(4px);
 }
 
 /* ── Chat main panel ── */

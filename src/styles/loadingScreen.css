@@ -87,7 +87,7 @@
 .boot-deck { --tilt-x: 0deg; --tilt-y: 0deg; position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; transform: perspective(1500px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transform-origin: 50% 50%; will-change: transform; z-index: 1; pointer-events: none; }
 .boot-core { pointer-events: auto; }
 .boot-left-column, .boot-right-column { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.boot-panel { position: relative; min-width: 0; background: var(--boot-surface); border: 1px solid var(--boot-line); border-radius: var(--boot-panel-radius); overflow: hidden; backdrop-filter: blur(12px); box-shadow: inset 0 1px rgba(255,255,255,.025); }
+.boot-panel { position: relative; min-width: 0; background: var(--boot-surface); border: 1px solid var(--boot-line); border-radius: var(--boot-panel-radius); overflow: hidden; backdrop-filter: blur(4px); box-shadow: inset 0 1px rgba(255,255,255,.025); }
 .boot-panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 17px 17px 14px; }
 .boot-panel-heading h2 { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 400; letter-spacing: .015em; }
 .boot-panel-heading h2 svg { color: var(--boot-primary); flex-shrink: 0; }

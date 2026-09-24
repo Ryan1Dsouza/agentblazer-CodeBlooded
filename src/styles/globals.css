@@ -64,13 +64,12 @@ button {
 
 .glass-panel {
   background: var(--surface);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
-  animation: ambient-glow 6s ease-in-out infinite alternate;
   box-shadow: 0 0 15px rgba(7,182,214,0.15);
 }
 
@@ -91,20 +90,18 @@ button {
   top: -50%; left: -50%;
   width: 200%; height: 200%;
   background: radial-gradient(circle at 30% 30%, rgba(0,212,255,0.08) 0%, transparent 60%);
-  animation: ambient-shift 10s ease-in-out infinite alternate;
   pointer-events: none;
   z-index: 0;
 }
 
 .glass-panel-elevated {
   background: var(--surface-elevated);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
-  animation: ambient-glow 6s ease-in-out infinite alternate;
 }
 
 .glass-panel-elevated::before {
@@ -113,7 +110,6 @@ button {
   top: -50%; left: -50%;
   width: 200%; height: 200%;
   background: radial-gradient(circle at 70% 70%, rgba(139,92,246,0.08) 0%, transparent 60%);
-  animation: ambient-shift 10s ease-in-out infinite alternate;
   pointer-events: none;
   z-index: 0;
 }
@@ -123,14 +119,9 @@ button {
   to { box-shadow: 0 0 25px rgba(0,212,255,0.25), 0 0 50px rgba(139,92,246,0.12); border-color: rgba(0,212,255,0.4); }
 }
 
-@keyframes ambient-shift {
-  from { transform: translate(0, 0) rotate(0deg); }
-  to { transform: translate(10%, 5%) rotate(3deg); }
-}
-
 .glass-panel-elevated {
   background: var(--surface-elevated);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.5rem;
@@ -391,7 +382,7 @@ button {
   gap: 1rem;
   padding: 0.75rem 1.25rem;
   background: var(--surface);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   border-radius: 12px;
   width: fit-content;
@@ -471,7 +462,7 @@ button {
   padding: 0.85rem 2rem;
   border-radius: 50px;
   background: var(--surface);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(4px);
   color: var(--text-primary);
   font-weight: 600;
   font-size: 0.95rem;
@@ -524,19 +515,19 @@ button {
 
 .logo-glow-violet {
   position: absolute; width: 320px; height: 320px; top: 30px; left: 30px;
-  border-radius: 50%; background: radial-gradient(circle at center, rgba(139,92,246,0.5), rgba(0,212,255,0.15), transparent 70%); filter: blur(50px); z-index: 0; animation: pulse 4s ease infinite;
+  border-radius: 50%; background: radial-gradient(circle at center, rgba(139,92,246,0.5), rgba(0,212,255,0.15), transparent 70%); z-index: 0; animation: pulse 4s ease infinite;
   pointer-events: none;
 }
 
 .logo-glow-inferno {
   position: absolute; width: 280px; height: 280px; top: 35px; left: 35px;
-  border-radius: 50%; background: rgba(255,107,53,0.35); filter: blur(60px); z-index: 0; animation: pulse 4s ease infinite;
+  border-radius: 50%; background: radial-gradient(circle at center, rgba(255,107,53,0.35), transparent 70%); z-index: 0; animation: pulse 4s ease infinite;
   pointer-events: none;
 }
 
 .logo-glow-frost {
   position: absolute; width: 280px; height: 280px; top: 35px; left: 35px;
-  border-radius: 50%; background: rgba(7,182,214,0.35); filter: blur(60px); z-index: 0; animation: pulse 4s ease infinite;
+  border-radius: 50%; background: radial-gradient(circle at center, rgba(7,182,214,0.35), transparent 70%); z-index: 0; animation: pulse 4s ease infinite;
   pointer-events: none;
 }
 
@@ -577,7 +568,7 @@ button {
   gap: 0;
   margin-top: 1rem;
   background: var(--surface-elevated);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 0.5rem;
@@ -711,8 +702,8 @@ button {
   height: 44px;
   border-radius: 50%;
   background: var(--surface-elevated);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border: 1.5px solid var(--border);
   color: var(--accent-primary);
   box-shadow: 0 0 15px var(--glow), 0 4px 12px rgba(0, 0, 0, 0.4);
@@ -994,8 +985,8 @@ button {
 /* ========== TEAM CARD ========== */
 .team-card {
   background: var(--surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.5rem;
@@ -1079,8 +1070,8 @@ button {
 
 .floating-preview-inner {
   background: var(--surface-elevated);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border: 1px solid var(--accent-primary);
   border-radius: 16px;
   padding: 8px;
@@ -1197,7 +1188,7 @@ button {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
   justify-content: center;
@@ -1292,7 +1283,7 @@ button {
 
 .event-card {
   background: var(--surface);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.5rem;
@@ -1964,7 +1955,7 @@ button {
   background: linear-gradient(180deg, rgba(10,10,26,0.4) 0%, rgba(5,5,13,0.7) 100%);
   border: 1px solid var(--border);
   border-radius: 24px;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(4px);
   overflow: visible;
 }
 
@@ -2110,7 +2101,7 @@ button {
   border-radius: 10px;
   padding: 0.35rem 0.6rem;
   min-width: 140px;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px);
 }
 
 .checkpoint-date {
@@ -2294,7 +2285,7 @@ button {
   right: -20px;
   width: 280px;
   background: var(--surface-elevated);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
@@ -2458,7 +2449,7 @@ button {
   position: relative;
   z-index: 1;
   background: var(--surface);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(4px);
   border-top: 1px solid var(--border);
   padding: 4rem 0 2.5rem;
   margin-top: 4rem;
@@ -2620,7 +2611,7 @@ button {
   font-weight: 600;
   letter-spacing: 0.04em;
   background: var(--surface);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   color: var(--accent-primary);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
@@ -3294,8 +3285,8 @@ button {
   top: 8px;
   left: 8px;
   background: rgba(139, 92, 246, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(139, 92, 246, 0.4);
   color: #c4b5fd;
   font-size: 0.65rem;
@@ -3381,8 +3372,8 @@ button {
   justify-content: space-between;
   padding: 10px 14px;
   background: rgba(6, 4, 16, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   gap: 12px;
 }
@@ -3502,7 +3493,7 @@ button {
   background: rgba(16, 12, 32, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(4px);
   display: flex;
   flex-direction: column;
   align-items: center;
