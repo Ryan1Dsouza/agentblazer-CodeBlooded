@@ -35,9 +35,8 @@ export function startBootResourceChecks(
   };
   const handleWindowLoad = () => settle('document');
   const logo = host.createImage();
-  // Attach handlers first: an image may be cached when its source is assigned.
-  logo.onload = () => settle('logo');
-  logo.onerror = () => settle('logo', true);
+  // Do not block the loading screen progress on the heavy logo download.
+  settle('logo');
   safetyTimer = host.window.setTimeout(() => {
     // Unlock stalled sessions, but retain the number of unavailable resources.
     RESOURCE_NAMES.forEach(name => settle(name, true));

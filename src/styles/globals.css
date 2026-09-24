@@ -217,7 +217,7 @@ button {
   align-items: center;
   padding: 0.75rem 2rem;
   background: var(--surface);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(4px);
   border-bottom: 1px solid var(--border);
   transition: all 0.5s ease;
 }
@@ -306,7 +306,6 @@ button {
   font-size: 0.9rem;
   transition: all 0.3s ease;
   border: 1px solid transparent;
-  animation: border-glow 3s ease-in-out infinite alternate;
 }
 
 .nav-pill:hover {
@@ -319,7 +318,6 @@ button {
   background: var(--surface-elevated);
   border-color: var(--border);
   box-shadow: 0 0 15px var(--glow);
-  animation: border-glow 2s ease-in-out infinite alternate;
 }
 
 .header-themes {
@@ -2674,7 +2672,7 @@ button {
     align-items: stretch;
     padding: 1rem 1.5rem;
     background: rgba(15, 15, 20, 0.95);
-    backdrop-filter: blur(25px);
+    backdrop-filter: blur(4px);
   }
 
   .header-top {
