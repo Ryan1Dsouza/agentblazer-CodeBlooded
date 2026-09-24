@@ -208,7 +208,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <div className="app-layout">
       {!isEventsPage && <BackgroundScene />}
       <CursorFollower />
-      {/* Exclude mobile header here to let pages provide their own, or include it if you want */}
+      <Header />
       <main className={`main-content ${isEventsPage ? 'events-main-override' : ''}`}>
         {children}
       </main>
