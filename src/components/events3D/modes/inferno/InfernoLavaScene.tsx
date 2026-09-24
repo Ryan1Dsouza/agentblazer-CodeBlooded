@@ -359,8 +359,8 @@ export default function InfernoLavaScene({
 function RailTrackStructure({ spline }: { spline: THREE.CatmullRomCurve3 }) {
   const ties = useMemo(() => {
     const items = [];
-    for (let i = 0; i < 80; i++) {
-      const t = i / 80;
+    for (let i = 0; i < 40; i++) {
+      const t = i / 40;
       const pt = spline.getPointAt(t);
       const tangent = spline.getTangentAt(t).normalize();
       const rotY = Math.atan2(tangent.x, tangent.z);
@@ -371,9 +371,9 @@ function RailTrackStructure({ spline }: { spline: THREE.CatmullRomCurve3 }) {
 
   return (
     <group>
-      {/* Left Glowing Rail */}
+      {/* Glowing Rail */}
       <mesh>
-        <tubeGeometry args={[spline, 160, 0.25, 8, true]} />
+        <tubeGeometry args={[spline, 80, 0.25, 6, true]} />
         <meshStandardMaterial
           color="#ea580c"
           emissive="#ff6b35"
@@ -390,7 +390,7 @@ function RailTrackStructure({ spline }: { spline: THREE.CatmullRomCurve3 }) {
             <meshStandardMaterial color="#292524" metalness={0.8} />
           </mesh>
           <mesh position={[0, -5, 0]}>
-            <cylinderGeometry args={[0.3, 0.4, 10, 8]} />
+            <cylinderGeometry args={[0.3, 0.4, 10, 6]} />
             <meshStandardMaterial color="#1c1917" metalness={0.8} />
           </mesh>
         </group>

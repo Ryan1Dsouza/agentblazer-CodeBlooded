@@ -25,8 +25,11 @@ export default function SpaceStationStation({
   const innerRingRef = useRef<THREE.Group>(null);
   const coreSpireRef = useRef<THREE.Group>(null);
   const solarWingsRef = useRef<THREE.Group>(null);
+  const shieldRingRef = useRef<THREE.Mesh>(null);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
+    const time = state.clock.elapsedTime;
+
     if (outerRingRef.current) {
       outerRingRef.current.rotation.z += delta * 0.35;
     }
@@ -40,6 +43,12 @@ export default function SpaceStationStation({
     if (solarWingsRef.current) {
       solarWingsRef.current.rotation.y -= delta * 0.1;
     }
+    // Shield ring pulse
+    if (shieldRingRef.current) {
+      const mat = shieldRingRef.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = isActive ? 0.12 + Math.sin(time * 2) * 0.05 : 0.06;
+      shieldRingRef.current.rotation.z += delta * 0.2;
+    }
   });
 
   const categoryColor =
@@ -51,71 +60,78 @@ export default function SpaceStationStation({
 
   return (
     <group position={position}>
-      {/* 
-        === CENTRAL QUANTUM REACTOR SPIRE === 
-      */}
+      {/* ═══ CENTRAL QUANTUM REACTOR SPIRE ═══ */}
       <group ref={coreSpireRef}>
         {/* Upper Reactor Crystal */}
-        <mesh position={[0, 1.4, 0]}>
-          <octahedronGeometry args={[0.9, 0]} />
+        <mesh position={[0, 1.5, 0]}>
+          <octahedronGeometry args={[1.0, 0]} />
           <meshStandardMaterial
             color={categoryColor}
             emissive={categoryColor}
-            emissiveIntensity={isActive ? 3.5 : 2.0}
+            emissiveIntensity={isActive ? 4.0 : 2.2}
             wireframe
           />
         </mesh>
         {/* Lower Reactor Crystal */}
-        <mesh position={[0, -1.4, 0]}>
-          <octahedronGeometry args={[0.9, 0]} />
+        <mesh position={[0, -1.5, 0]}>
+          <octahedronGeometry args={[1.0, 0]} />
           <meshStandardMaterial
             color={categoryColor}
             emissive={categoryColor}
-            emissiveIntensity={isActive ? 3.5 : 2.0}
+            emissiveIntensity={isActive ? 4.0 : 2.2}
             wireframe
           />
         </mesh>
         {/* Core Spindle Hub */}
         <mesh position={[0, 0, 0]}>
-          <cylinderGeometry args={[0.5, 0.5, 3.8, 16]} />
-          <meshStandardMaterial color="#0f172a" metalness={0.95} roughness={0.2} />
+          <cylinderGeometry args={[0.55, 0.55, 4.2, 16]} />
+          <meshStandardMaterial color="#0f172a" metalness={0.96} roughness={0.15} />
         </mesh>
+        {/* Hub detail rings */}
+        {[-1, 0, 1].map((y, i) => (
+          <mesh key={`ring-${i}`} position={[0, y * 0.8, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.6, 0.04, 8, 16]} />
+            <meshStandardMaterial
+              color={categoryColor}
+              emissive={categoryColor}
+              emissiveIntensity={1.5}
+            />
+          </mesh>
+        ))}
         {/* Inner Superheated Plasma Core */}
         <mesh>
-          <sphereGeometry args={[0.65, 16, 16]} />
+          <sphereGeometry args={[0.7, 20, 20]} />
           <meshBasicMaterial color="#ffffff" />
         </mesh>
       </group>
 
-      {/* 
-        === DUAL COUNTER-ROTATING HABITAT & DOCKING RINGS === 
-      */}
+      {/* ═══ DUAL COUNTER-ROTATING HABITAT & DOCKING RINGS ═══ */}
       {/* Outer Ring with Docking Bays */}
       <group ref={outerRingRef}>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[3.6, 0.28, 14, 40]} />
+          <torusGeometry args={[4.0, 0.32, 16, 48]} />
           <meshStandardMaterial
-            color="#181329"
-            metalness={0.92}
-            roughness={0.25}
+            color="#151025"
+            metalness={0.93}
+            roughness={0.2}
             emissive={categoryColor}
-            emissiveIntensity={0.6}
+            emissiveIntensity={0.7}
           />
         </mesh>
 
-        {/* Outer Ring Docking Clamps & Light Beacons */}
-        {[0, 1, 2, 3, 4, 5].map((i) => {
-          const angle = (i / 6) * Math.PI * 2;
-          const x = Math.cos(angle) * 3.6;
-          const y = Math.sin(angle) * 3.6;
+        {/* Outer Ring Docking Clamps & Light Beacons — 8 nodes */}
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
+          const angle = (i / 8) * Math.PI * 2;
+          const x = Math.cos(angle) * 4.0;
+          const y = Math.sin(angle) * 4.0;
           return (
             <group key={i} position={[x, y, 0]}>
               <mesh>
-                <boxGeometry args={[0.4, 0.4, 0.6]} />
-                <meshStandardMaterial color="#334155" metalness={0.9} />
+                <boxGeometry args={[0.45, 0.45, 0.7]} />
+                <meshStandardMaterial color="#2d2847" metalness={0.92} roughness={0.2} />
               </mesh>
-              <mesh position={[0, 0, 0.35]}>
-                <sphereGeometry args={[0.12, 8, 8]} />
+              <mesh position={[0, 0, 0.4]}>
+                <sphereGeometry args={[0.13, 8, 8]} />
                 <meshBasicMaterial color={categoryColor} />
               </mesh>
             </group>
@@ -126,57 +142,77 @@ export default function SpaceStationStation({
       {/* Inner Counter-Rotating Gimbal Ring */}
       <group ref={innerRingRef}>
         <mesh>
-          <torusGeometry args={[2.4, 0.14, 10, 32]} />
+          <torusGeometry args={[2.6, 0.16, 12, 36]} />
           <meshStandardMaterial
             color="#090d16"
-            metalness={0.95}
+            metalness={0.96}
             emissive="#38bdf8"
-            emissiveIntensity={0.8}
+            emissiveIntensity={0.9}
           />
         </mesh>
       </group>
 
-      {/* 
-        === 4 DEPLOYED PHOTOVOLTAIC SOLAR RADIATOR ARRAYS === 
-      */}
+      {/* Outer Shield / Energy Ring — translucent */}
+      <mesh ref={shieldRingRef} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[5.5, 0.08, 8, 48]} />
+        <meshBasicMaterial
+          color={categoryColor}
+          transparent
+          opacity={0.08}
+        />
+      </mesh>
+
+      {/* ═══ SOLAR RADIATOR ARRAYS — 4 wings ═══ */}
       <group ref={solarWingsRef}>
         {[0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2].map((angle, i) => (
           <group key={i} rotation={[0, angle, 0]}>
             {/* Strut Arm */}
-            <mesh position={[0, 0, 3.2]} rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.06, 0.06, 2.5, 8]} />
-              <meshStandardMaterial color="#475569" metalness={0.9} />
+            <mesh position={[0, 0, 3.5]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.07, 0.07, 2.8, 8]} />
+              <meshStandardMaterial color="#475569" metalness={0.92} />
             </mesh>
-            {/* Solar Panel Wing */}
-            <mesh position={[0, 0, 4.6]} rotation={[0, 0, 0]}>
-              <boxGeometry args={[1.6, 0.04, 1.2]} />
+            {/* Solar Panel Wing — larger */}
+            <mesh position={[0, 0, 5.0]} rotation={[0, 0, 0]}>
+              <boxGeometry args={[1.8, 0.04, 1.4]} />
               <meshStandardMaterial
                 color="#0369a1"
-                metalness={0.9}
-                roughness={0.1}
+                metalness={0.92}
+                roughness={0.08}
                 emissive="#0284c7"
-                emissiveIntensity={0.6}
+                emissiveIntensity={0.7}
               />
+            </mesh>
+            {/* Panel frame */}
+            <mesh position={[0, 0, 5.0]}>
+              <boxGeometry args={[1.9, 0.06, 0.04]} />
+              <meshStandardMaterial color="#1e3a5f" metalness={0.9} />
             </mesh>
           </group>
         ))}
       </group>
 
-      {/* Vertical Holographic Guidance Signal Beams */}
-      <mesh position={[0, 4.8, 0]}>
-        <cylinderGeometry args={[0.04, 0.04, 5, 6]} />
-        <meshBasicMaterial color={categoryColor} transparent opacity={0.6} />
+      {/* ═══ DOCKING GUIDE BEAMS ═══ */}
+      {/* Vertical Holographic Guidance Signal */}
+      <mesh position={[0, 5.2, 0]}>
+        <cylinderGeometry args={[0.04, 0.04, 5.5, 6]} />
+        <meshBasicMaterial color={categoryColor} transparent opacity={0.55} />
       </mesh>
-      <mesh position={[0, 7.2, 0]}>
-        <octahedronGeometry args={[0.3, 0]} />
+      <mesh position={[0, 8.0, 0]}>
+        <octahedronGeometry args={[0.35, 0]} />
         <meshBasicMaterial color={categoryColor} />
+      </mesh>
+      {/* Downward guidance beam */}
+      <mesh position={[0, -5.2, 0]}>
+        <cylinderGeometry args={[0.03, 0.03, 4, 6]} />
+        <meshBasicMaterial color={categoryColor} transparent opacity={0.3} />
       </mesh>
 
       {/* Station Omnidirectional Pulse Lighting */}
-      <pointLight color={categoryColor} intensity={isActive ? 16 : 7} distance={30} />
+      <pointLight color={categoryColor} intensity={isActive ? 18 : 8} distance={35} />
+      <pointLight color="#ffffff" intensity={isActive ? 3 : 1} distance={10} />
 
       {/* Compact In-World Station Beacon Marker */}
-      <Html position={[0, 4.8, 0]} center distanceFactor={20} zIndexRange={[50, 0]}>
+      <Html position={[0, 5.0, 0]} center distanceFactor={20} zIndexRange={[50, 0]}>
         <div
           onClick={onInspect}
           className={`px-3 py-2 rounded-xl backdrop-blur-md border text-center transition-all cursor-pointer select-none shadow-xl flex flex-col items-center gap-1 ${
@@ -213,4 +249,3 @@ export default function SpaceStationStation({
     </group>
   );
 }
-

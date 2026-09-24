@@ -23,238 +23,304 @@ export default function SpaceshipVehicle({
   const shockDiamondRightRef = useRef<THREE.Mesh>(null);
   const wingTrailLeftRef = useRef<THREE.Mesh>(null);
   const wingTrailRightRef = useRef<THREE.Mesh>(null);
+  const cockpitRef = useRef<THREE.Mesh>(null);
+  const neonStripRefs = useRef<(THREE.Mesh | null)[]>([]);
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
-    const basePulse = isBoosting ? 3.2 : 1.2;
+    const basePulse = isBoosting ? 3.5 : 1.2;
     const flicker = Math.sin(time * 35) * 0.25 + (speed / 15);
     const scaleZ = Math.max(0.8, basePulse + flicker);
 
+    // Engine exhaust scaling
     if (thrusterLeftRef.current && thrusterRightRef.current && thrusterCenterRef.current) {
-      thrusterLeftRef.current.scale.set(isBoosting ? 1.25 : 1, isBoosting ? 1.25 : 1, scaleZ * (isBoosting ? 1.3 : 1.0));
-      thrusterRightRef.current.scale.set(isBoosting ? 1.25 : 1, isBoosting ? 1.25 : 1, scaleZ * (isBoosting ? 1.3 : 1.0));
-      thrusterCenterRef.current.scale.set(isBoosting ? 1.5 : 1.1, isBoosting ? 1.5 : 1.1, scaleZ * (isBoosting ? 1.5 : 1.2));
+      thrusterLeftRef.current.scale.set(isBoosting ? 1.3 : 1, isBoosting ? 1.3 : 1, scaleZ * (isBoosting ? 1.4 : 1.0));
+      thrusterRightRef.current.scale.set(isBoosting ? 1.3 : 1, isBoosting ? 1.3 : 1, scaleZ * (isBoosting ? 1.4 : 1.0));
+      thrusterCenterRef.current.scale.set(isBoosting ? 1.6 : 1.1, isBoosting ? 1.6 : 1.1, scaleZ * (isBoosting ? 1.6 : 1.2));
     }
 
+    // Shock diamonds
     if (shockDiamondLeftRef.current && shockDiamondRightRef.current) {
-      shockDiamondLeftRef.current.scale.set(1, 1, isBoosting ? 1.4 + Math.sin(time * 40) * 0.2 : 0.6);
-      shockDiamondRightRef.current.scale.set(1, 1, isBoosting ? 1.4 + Math.sin(time * 40) * 0.2 : 0.6);
+      shockDiamondLeftRef.current.scale.set(1, 1, isBoosting ? 1.5 + Math.sin(time * 40) * 0.25 : 0.6);
+      shockDiamondRightRef.current.scale.set(1, 1, isBoosting ? 1.5 + Math.sin(time * 40) * 0.25 : 0.6);
     }
 
+    // Wing trails
     if (wingTrailLeftRef.current && wingTrailRightRef.current) {
-      const trailOpacity = isBoosting ? 0.35 : Math.min(0.12, speed / 30);
-      const trailLength = isBoosting ? 2.5 : 0.8;
+      const trailOpacity = isBoosting ? 0.4 : Math.min(0.15, speed / 25);
+      const trailLength = isBoosting ? 3.0 : 0.9;
       wingTrailLeftRef.current.scale.set(1, 1, trailLength);
       wingTrailRightRef.current.scale.set(1, 1, trailLength);
       (wingTrailLeftRef.current.material as THREE.MeshBasicMaterial).opacity = trailOpacity;
       (wingTrailRightRef.current.material as THREE.MeshBasicMaterial).opacity = trailOpacity;
     }
+
+    // Cockpit pulse
+    if (cockpitRef.current) {
+      const mat = cockpitRef.current.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = isBoosting ? 2.2 + Math.sin(time * 6) * 0.5 : 1.2 + Math.sin(time * 2) * 0.3;
+    }
+
+    // Neon strip animation
+    neonStripRefs.current.forEach((ref, i) => {
+      if (ref) {
+        const mat = ref.material as THREE.MeshStandardMaterial;
+        mat.emissiveIntensity = isBoosting
+          ? 3.0 + Math.sin(time * 8 + i * 1.5) * 1.0
+          : 1.5 + Math.sin(time * 3 + i * 1.5) * 0.5;
+      }
+    });
   });
 
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
       {/* 
         SPACESHIP COORDINATE SYSTEM:
-        - Forward direction is -Z
-        - Nose cone is at z = -1.6
-        - Engines & exhaust are at rear: z = +1.2 to +1.8 (exhaust shoots into +Z)
+        Forward = -Z, Nose = z ≈ -1.8, Engines = z ≈ +1.3
       */}
 
-      {/* Main Hull Body / Fuselage */}
+      {/* ═══ MAIN HULL — sleeker, angular fuselage ═══ */}
       <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <coneGeometry args={[0.55, 3.2, 8]} />
+        <coneGeometry args={[0.58, 3.6, 8]} />
         <meshStandardMaterial
-          color="#120e24"
-          metalness={0.92}
-          roughness={0.25}
+          color="#0e0a1f"
+          metalness={0.94}
+          roughness={0.2}
           emissive="#3b0764"
-          emissiveIntensity={isBoosting ? 0.8 : 0.4}
+          emissiveIntensity={isBoosting ? 0.9 : 0.4}
         />
       </mesh>
 
-      {/* Aerodynamic Cockpit Glass Canopy (forward sloped) */}
-      <mesh position={[0, 0.28, -0.4]} rotation={[-0.35, 0, 0]}>
-        <boxGeometry args={[0.36, 0.26, 1.1]} />
+      {/* Hull spine ridge */}
+      <mesh position={[0, 0.32, 0]}>
+        <boxGeometry args={[0.08, 0.12, 2.8]} />
+        <meshStandardMaterial
+          color="#7c3aed"
+          emissive="#8b5cf6"
+          emissiveIntensity={isBoosting ? 2.0 : 1.0}
+        />
+      </mesh>
+
+      {/* ═══ COCKPIT — holographic canopy ═══ */}
+      <mesh ref={cockpitRef} position={[0, 0.3, -0.5]} rotation={[-0.3, 0, 0]}>
+        <boxGeometry args={[0.38, 0.28, 1.2]} />
         <meshStandardMaterial
           color="#38bdf8"
-          roughness={0.1}
-          metalness={0.6}
+          roughness={0.08}
+          metalness={0.65}
           emissive={isBoosting ? '#38bdf8' : '#8b5cf6'}
-          emissiveIntensity={isBoosting ? 2.0 : 1.2}
+          emissiveIntensity={1.2}
         />
+      </mesh>
+      {/* Cockpit frame */}
+      <mesh position={[0, 0.32, -0.5]} rotation={[-0.3, 0, 0]}>
+        <boxGeometry args={[0.42, 0.03, 1.24]} />
+        <meshStandardMaterial color="#1e1b4b" metalness={0.95} />
       </mesh>
 
-      {/* Main Swept Delta Wings (Left) */}
-      <mesh position={[-0.95, -0.02, 0.3]} rotation={[0, -0.2, -0.08]}>
-        <boxGeometry args={[1.5, 0.05, 1.6]} />
+      {/* ═══ SWEPT DELTA WINGS — left ═══ */}
+      <mesh position={[-1.0, -0.02, 0.3]} rotation={[0, -0.2, -0.1]}>
+        <boxGeometry args={[1.6, 0.05, 1.7]} />
         <meshStandardMaterial
-          color="#181133"
-          metalness={0.88}
-          roughness={0.3}
+          color="#130e28"
+          metalness={0.9}
+          roughness={0.25}
           emissive="#2e1065"
-          emissiveIntensity={isBoosting ? 0.6 : 0.3}
+          emissiveIntensity={isBoosting ? 0.7 : 0.3}
         />
       </mesh>
-      {/* Left Wing Neon Blade Edge */}
-      <mesh position={[-1.72, 0.18, 0.3]} rotation={[0, -0.2, 0.1]}>
-        <boxGeometry args={[0.06, 0.45, 1.4]} />
+      {/* Left Wing Neon Edge */}
+      <mesh
+        ref={(el) => { neonStripRefs.current[0] = el; }}
+        position={[-1.82, 0.2, 0.3]}
+        rotation={[0, -0.2, 0.1]}
+      >
+        <boxGeometry args={[0.06, 0.48, 1.5]} />
         <meshStandardMaterial
           color={isBoosting ? '#38bdf8' : '#c084fc'}
           emissive={isBoosting ? '#0ea5e9' : '#a855f7'}
-          emissiveIntensity={isBoosting ? 2.5 : 1.5}
+          emissiveIntensity={1.5}
         />
       </mesh>
-      {/* Left Wingtip Warp Ribbon Trail */}
-      <mesh ref={wingTrailLeftRef} position={[-1.72, 0.18, 1.4]}>
-        <boxGeometry args={[0.03, 0.12, 1.8]} />
+      {/* Left wing tip nacelle */}
+      <mesh position={[-1.82, 0.0, 0.8]}>
+        <boxGeometry args={[0.18, 0.18, 0.5]} />
+        <meshStandardMaterial color="#1e1b4b" metalness={0.95} roughness={0.15} />
+      </mesh>
+      {/* Left Wingtip Trail */}
+      <mesh ref={wingTrailLeftRef} position={[-1.82, 0.18, 1.5]}>
+        <boxGeometry args={[0.03, 0.14, 2.0]} />
         <meshBasicMaterial color="#38bdf8" transparent opacity={0.25} />
       </mesh>
 
-      {/* Main Swept Delta Wings (Right) */}
-      <mesh position={[0.95, -0.02, 0.3]} rotation={[0, 0.2, 0.08]}>
-        <boxGeometry args={[1.5, 0.05, 1.6]} />
+      {/* ═══ SWEPT DELTA WINGS — right ═══ */}
+      <mesh position={[1.0, -0.02, 0.3]} rotation={[0, 0.2, 0.1]}>
+        <boxGeometry args={[1.6, 0.05, 1.7]} />
         <meshStandardMaterial
-          color="#181133"
-          metalness={0.88}
-          roughness={0.3}
+          color="#130e28"
+          metalness={0.9}
+          roughness={0.25}
           emissive="#2e1065"
-          emissiveIntensity={isBoosting ? 0.6 : 0.3}
+          emissiveIntensity={isBoosting ? 0.7 : 0.3}
         />
       </mesh>
-      {/* Right Wing Neon Blade Edge */}
-      <mesh position={[1.72, 0.18, 0.3]} rotation={[0, 0.2, -0.1]}>
-        <boxGeometry args={[0.06, 0.45, 1.4]} />
+      {/* Right Wing Neon Edge */}
+      <mesh
+        ref={(el) => { neonStripRefs.current[1] = el; }}
+        position={[1.82, 0.2, 0.3]}
+        rotation={[0, 0.2, -0.1]}
+      >
+        <boxGeometry args={[0.06, 0.48, 1.5]} />
         <meshStandardMaterial
           color={isBoosting ? '#38bdf8' : '#c084fc'}
           emissive={isBoosting ? '#0ea5e9' : '#a855f7'}
-          emissiveIntensity={isBoosting ? 2.5 : 1.5}
+          emissiveIntensity={1.5}
         />
       </mesh>
-      {/* Right Wingtip Warp Ribbon Trail */}
-      <mesh ref={wingTrailRightRef} position={[1.72, 0.18, 1.4]}>
-        <boxGeometry args={[0.03, 0.12, 1.8]} />
+      {/* Right wing tip nacelle */}
+      <mesh position={[1.82, 0.0, 0.8]}>
+        <boxGeometry args={[0.18, 0.18, 0.5]} />
+        <meshStandardMaterial color="#1e1b4b" metalness={0.95} roughness={0.15} />
+      </mesh>
+      {/* Right Wingtip Trail */}
+      <mesh ref={wingTrailRightRef} position={[1.82, 0.18, 1.5]}>
+        <boxGeometry args={[0.03, 0.14, 2.0]} />
         <meshBasicMaterial color="#38bdf8" transparent opacity={0.25} />
       </mesh>
 
-      {/* Forward Canards (Nose Stabilizers) */}
-      <mesh position={[-0.45, 0.05, -0.9]} rotation={[0, 0.3, 0]}>
-        <boxGeometry args={[0.5, 0.03, 0.35]} />
-        <meshStandardMaterial color="#2e1065" metalness={0.9} />
+      {/* ═══ CANARDS (nose stabilizers) ═══ */}
+      <mesh position={[-0.5, 0.06, -1.0]} rotation={[0, 0.3, 0]}>
+        <boxGeometry args={[0.55, 0.03, 0.38]} />
+        <meshStandardMaterial color="#2e1065" metalness={0.92} />
       </mesh>
-      <mesh position={[0.45, 0.05, -0.9]} rotation={[0, -0.3, 0]}>
-        <boxGeometry args={[0.5, 0.03, 0.35]} />
-        <meshStandardMaterial color="#2e1065" metalness={0.9} />
+      <mesh position={[0.5, 0.06, -1.0]} rotation={[0, -0.3, 0]}>
+        <boxGeometry args={[0.55, 0.03, 0.38]} />
+        <meshStandardMaterial color="#2e1065" metalness={0.92} />
       </mesh>
 
-      {/* Vertical Dorsal Tail Fin */}
-      <mesh position={[0, 0.45, 0.6]} rotation={[-0.25, 0, 0]}>
-        <boxGeometry args={[0.05, 0.65, 0.9]} />
+      {/* ═══ VERTICAL TAIL FIN — with neon accent ═══ */}
+      <mesh position={[0, 0.5, 0.65]} rotation={[-0.22, 0, 0]}>
+        <boxGeometry args={[0.05, 0.7, 1.0]} />
+        <meshStandardMaterial
+          color="#1e1b4b"
+          metalness={0.9}
+          roughness={0.2}
+        />
+      </mesh>
+      {/* Tail fin neon edge */}
+      <mesh
+        ref={(el) => { neonStripRefs.current[2] = el; }}
+        position={[0, 0.88, 0.65]}
+      >
+        <boxGeometry args={[0.06, 0.04, 0.9]} />
         <meshStandardMaterial
           color="#c084fc"
           emissive="#9333ea"
-          emissiveIntensity={isBoosting ? 2.0 : 1.2}
+          emissiveIntensity={1.5}
         />
       </mesh>
 
-      {/* 
-        === REAR ION THRUSTER ENGINES & PLASMATIC EXHAUST ===
-        Positioned at REAR (+Z = 1.3) pointing into +Z (backward)
-      */}
-
-      {/* Left Engine Nacelle */}
-      <group position={[-0.45, 0, 1.2]}>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.2, 0.22, 0.6, 16]} />
-          <meshStandardMaterial color="#1e1b4b" metalness={0.95} roughness={0.2} />
-        </mesh>
-        {/* Exhaust Cone (Points BACKWARD into +Z) */}
+      {/* ═══ UNDER-HULL NEON ACCENT STRIPS ═══ */}
+      {[-0.3, 0.3].map((x, i) => (
         <mesh
-          ref={thrusterLeftRef}
-          position={[0, 0, 0.6]}
-          rotation={[-Math.PI / 2, 0, 0]}
+          key={`understrip-${i}`}
+          ref={(el) => { neonStripRefs.current[3 + i] = el; }}
+          position={[x, -0.28, 0.1]}
         >
-          <coneGeometry args={[0.16, 1.4, 12]} />
+          <boxGeometry args={[0.03, 0.02, 2.0]} />
+          <meshStandardMaterial
+            color="#a855f7"
+            emissive="#7c3aed"
+            emissiveIntensity={1.0}
+          />
+        </mesh>
+      ))}
+
+      {/* ═══ ENGINE NACELLES & ION EXHAUST ═══ */}
+      {/* Left Engine */}
+      <group position={[-0.48, 0, 1.25]}>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.22, 0.24, 0.65, 16]} />
+          <meshStandardMaterial color="#1e1b4b" metalness={0.96} roughness={0.15} />
+        </mesh>
+        {/* Engine ring detail */}
+        <mesh position={[0, 0, 0.1]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.24, 0.02, 8, 16]} />
+          <meshStandardMaterial color="#7c3aed" emissive="#a855f7" emissiveIntensity={1.5} />
+        </mesh>
+        <mesh ref={thrusterLeftRef} position={[0, 0, 0.65]} rotation={[-Math.PI / 2, 0, 0]}>
+          <coneGeometry args={[0.18, 1.5, 12]} />
           <meshBasicMaterial
             color={isBoosting ? '#38bdf8' : '#a855f7'}
             transparent
-            opacity={0.8}
+            opacity={0.82}
           />
         </mesh>
-        {/* Shock Diamond Pulse */}
-        <mesh
-          ref={shockDiamondLeftRef}
-          position={[0, 0, 1.0]}
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
+        <mesh ref={shockDiamondLeftRef} position={[0, 0, 1.05]} rotation={[-Math.PI / 2, 0, 0]}>
           <octahedronGeometry args={[0.1, 0]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={isBoosting ? 0.5 : 0.2} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={isBoosting ? 0.55 : 0.2} />
         </mesh>
       </group>
 
-      {/* Right Engine Nacelle */}
-      <group position={[0.45, 0, 1.2]}>
+      {/* Right Engine */}
+      <group position={[0.48, 0, 1.25]}>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.2, 0.22, 0.6, 16]} />
-          <meshStandardMaterial color="#1e1b4b" metalness={0.95} roughness={0.2} />
+          <cylinderGeometry args={[0.22, 0.24, 0.65, 16]} />
+          <meshStandardMaterial color="#1e1b4b" metalness={0.96} roughness={0.15} />
         </mesh>
-        {/* Exhaust Cone (Points BACKWARD into +Z) */}
-        <mesh
-          ref={thrusterRightRef}
-          position={[0, 0, 0.6]}
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
-          <coneGeometry args={[0.16, 1.4, 12]} />
+        <mesh position={[0, 0, 0.1]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.24, 0.02, 8, 16]} />
+          <meshStandardMaterial color="#7c3aed" emissive="#a855f7" emissiveIntensity={1.5} />
+        </mesh>
+        <mesh ref={thrusterRightRef} position={[0, 0, 0.65]} rotation={[-Math.PI / 2, 0, 0]}>
+          <coneGeometry args={[0.18, 1.5, 12]} />
           <meshBasicMaterial
             color={isBoosting ? '#38bdf8' : '#a855f7'}
             transparent
-            opacity={0.8}
+            opacity={0.82}
           />
         </mesh>
-        {/* Shock Diamond Pulse */}
-        <mesh
-          ref={shockDiamondRightRef}
-          position={[0, 0, 1.0]}
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
+        <mesh ref={shockDiamondRightRef} position={[0, 0, 1.05]} rotation={[-Math.PI / 2, 0, 0]}>
           <octahedronGeometry args={[0.1, 0]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={isBoosting ? 0.5 : 0.2} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={isBoosting ? 0.55 : 0.2} />
         </mesh>
       </group>
 
-      {/* Center Main Afterburner Turbine */}
-      <group position={[0, -0.05, 1.4]}>
+      {/* Center Afterburner */}
+      <group position={[0, -0.05, 1.45]}>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.26, 0.28, 0.5, 16]} />
+          <cylinderGeometry args={[0.28, 0.3, 0.55, 16]} />
           <meshStandardMaterial
             color="#0f172a"
-            metalness={0.95}
+            metalness={0.96}
             emissive="#7e22ce"
-            emissiveIntensity={isBoosting ? 1.4 : 0.8}
+            emissiveIntensity={isBoosting ? 1.5 : 0.8}
           />
         </mesh>
-        {/* Center Main Exhaust Flame */}
-        <mesh
-          ref={thrusterCenterRef}
-          position={[0, 0, 0.7]}
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
-          <coneGeometry args={[0.22, 1.8, 12]} />
+        <mesh ref={thrusterCenterRef} position={[0, 0, 0.75]} rotation={[-Math.PI / 2, 0, 0]}>
+          <coneGeometry args={[0.24, 2.0, 12]} />
           <meshBasicMaterial
             color={isBoosting ? '#38bdf8' : '#c084fc'}
             transparent
-            opacity={0.85}
+            opacity={0.88}
           />
         </mesh>
       </group>
 
-      {/* Dynamic Engine Lighting in the Rear */}
+      {/* Dynamic Engine Lighting */}
       <pointLight
-        position={[0, 0, 2.0]}
+        position={[0, 0, 2.2]}
         color={isBoosting ? '#38bdf8' : '#a855f7'}
-        intensity={isBoosting ? 8.0 : 4.0}
-        distance={14}
+        intensity={isBoosting ? 10.0 : 4.5}
+        distance={16}
+      />
+      {/* Under-hull ambient glow */}
+      <pointLight
+        position={[0, -0.5, 0]}
+        color="#7c3aed"
+        intensity={isBoosting ? 2.0 : 0.8}
+        distance={6}
       />
     </group>
   );
 }
-
