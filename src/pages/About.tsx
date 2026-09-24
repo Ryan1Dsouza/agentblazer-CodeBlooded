@@ -66,7 +66,7 @@ function HoverableHonoredCard({ p, onSelect }: { p: any, onSelect: () => void })
       >
         <div className="honored-avatar">
           {p.photoPath ? (
-            <img src={p.photoPath} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'12px'}} />
+            <img src={p.photoPath} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'12px'}} loading="lazy" />
           ) : (
             <span className="honored-initials">{p.name.split(' ').slice(-1)[0][0]}{p.name.split(' ').slice(0, -1).pop()?.[0] || 'D'}</span>
           )}
@@ -113,7 +113,7 @@ function HoverableFacultyCard({ p, onSelect }: { p: any, onSelect: () => void })
       >
         <div className="faculty-avatar">
           {p.photoPath ? (
-            <img src={p.photoPath} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'10px'}} />
+            <img src={p.photoPath} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'10px'}} loading="lazy" />
           ) : (
             <span className="faculty-initials">{p.initials}</span>
           )}

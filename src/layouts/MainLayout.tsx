@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import BackgroundScene from '../three/BackgroundScene';
 import CursorFollower from '../components/CursorFollower';
 import NexusFloatingChat from '../components/NexusFloatingChat';
+
+import { lazy, Suspense } from 'react';
+const BackgroundScene = lazy(() => import('../three/BackgroundScene'));
 
 import Home from '../pages/Home';
 import About from '../pages/About';
@@ -93,7 +95,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   if (!isMobile) {
     return (
       <div className="app-layout">
-        {!isEventsPage && <BackgroundScene />}
+        {!isEventsPage && (
+          <Suspense fallback={null}>
+            <BackgroundScene />
+          </Suspense>
+        )}
         <CursorFollower />
         <Header />
         <main className={`main-content ${isEventsPage ? 'events-main-override' : ''}`}>
@@ -200,7 +206,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   // Fallback if none of the above conditions are met (e.g., /events or /admin on mobile)
   return (
     <div className="app-layout">
-      {!isEventsPage && <BackgroundScene />}
+      {!isEventsPage && (
+        <Suspense fallback={null}>
+          <BackgroundScene />
+        </Suspense>
+      )}
       <CursorFollower />
       <Header />
       <main className={`main-content ${isEventsPage ? 'events-main-override' : ''}`}>
