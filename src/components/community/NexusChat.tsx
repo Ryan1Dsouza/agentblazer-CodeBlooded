@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { signInWithRedirect, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { useAuth } from '../../hooks/useAuth';
 import { collection, addDoc, query, orderBy, onSnapshot, limit, serverTimestamp } from 'firebase/firestore';
-import { auth, db, googleProvider } from '../../lib/firebase';
+import { db } from '../../lib/firebase';
 
 interface ChatMessage {
   id: string;
@@ -13,14 +13,14 @@ interface ChatMessage {
 }
 
 export default function NexusChat() {
+  const { user, displayName, authError, isAuthenticating, handleSignIn, handleSignOut } = useAuth();
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
-  const [user, setUser] = useState<User | null>(null);
-  const [displayName, setDisplayName] = useState('');
-  const [authError, setAuthError] = useState('');
   const [cooldown, setCooldown] = useState(0);
   const [isSending, setIsSending] = useState(false);
   const [moderationWarning, setModerationWarning] = useState('');
+  const [chatError, setChatError] = useState('');
   
   // Mentions state
   const [showMentionMenu, setShowMentionMenu] = useState(false);
@@ -33,31 +33,16 @@ export default function NexusChat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages]);
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        const email = currentUser.email || '';
-        if (email.endsWith('@sjec.ac.in')) {
-          setUser(currentUser);
-          const localPart = email.split('@')[0];
-          const dotParts = localPart.split('.');
-          const extractedName = dotParts.length > 1 ? dotParts[dotParts.length - 1] : localPart;
-          setDisplayName(extractedName.charAt(0).toUpperCase() + extractedName.slice(1));
-        } else {
-          signOut(auth);
-          setAuthError('Please use your college Gmail ending with @sjec.ac.in');
-        }
-      } else {
-        setUser(null);
-        setDisplayName('');
-      }
-    });
-    return () => unsubscribe();
-  }, []);
 
   // Listen to Firestore Messages
   useEffect(() => {
-    if (!user) return;
+    setMessages([]);
+    setChatError('');
+    if (!user) {
+      setInput('');
+      setShowMentionMenu(false);
+      return;
+    }
     
     const q = query(collection(db, 'chat_messages'), orderBy('timestamp', 'asc'), limit(200));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -74,22 +59,13 @@ export default function NexusChat() {
         });
       });
       setMessages(msgs);
+      setChatError('');
+    }, () => {
+      setMessages([]);
+      setChatError('Could not load the chat. Please try signing in again.');
     });
     return () => unsubscribe();
   }, [user]);
-
-  const handleSignIn = async () => {
-    setAuthError('');
-    try {
-      await signInWithRedirect(auth, googleProvider);
-    } catch (err: any) {
-      setAuthError('Failed to sign in. Please try again.');
-    }
-  };
-
-  const handleSignOut = () => {
-    signOut(auth);
-  };
 
   // Client-side profanity filter (fallback when API is unreachable)
   const clientSideProfanityCheck = useCallback((text: string): boolean => {
@@ -271,18 +247,25 @@ export default function NexusChat() {
           <div className="chat-name-card glass-panel">
             <span className="chat-gate-icon">🤖</span>
             <h3>Welcome to AgentBlazer Chat</h3>
-            <p>Link your college Gmail to join the conversation</p>
+            <p>Sign in with your college Google account to join the conversation</p>
             <div className="name-form" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}>
               <button 
+                type="button"
                 onClick={handleSignIn} 
                 className="btn-primary"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: '#fff', color: '#000' }}
+                disabled={isAuthenticating}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                  background: '#fff', color: '#000',
+                  opacity: isAuthenticating ? 0.7 : 1,
+                  cursor: isAuthenticating ? 'not-allowed' : 'pointer'
+                }}
               >
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '18px', height: '18px' }} />
-                Sign in with sjec.ac.in
+                {isAuthenticating ? 'Signing in...' : 'Sign in with Google'}
               </button>
             </div>
-            {authError && <p className="email-error">{authError}</p>}
+            {authError && <p className="email-error" role="alert">{authError}</p>}
             <p className="email-hint">Only @sjec.ac.in emails are accepted. Your name will be auto-detected.</p>
           </div>
         </div>
@@ -327,6 +310,7 @@ export default function NexusChat() {
           {displayName}
           <button 
             onClick={handleSignOut}
+            disabled={isAuthenticating}
             style={{ 
               marginLeft: '0.75rem', 
               background: 'transparent', 
@@ -345,6 +329,7 @@ export default function NexusChat() {
       </div>
 
       {/* Messages */}
+      {(authError || chatError) && <p className="email-error" role="alert">{authError || chatError}</p>}
       <div className="chat-messages">
         {messages.length === 0 && (
           <div className="chat-welcome">

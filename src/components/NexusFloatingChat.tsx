@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { Bot, LogOut } from 'lucide-react';
-import { signInWithRedirect, signOut, onAuthStateChanged, User } from 'firebase/auth';
-import { auth, googleProvider } from '../lib/firebase';
+import { useAuth } from '../hooks/useAuth';
 
 interface ChatMessage {
   id: string;
@@ -28,46 +27,10 @@ export default function NexusFloatingChat() {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [displayName, setDisplayName] = useState('');
-  const [authError, setAuthError] = useState('');
+  const { user, displayName, authError, isAuthenticating, handleSignIn, handleSignOut } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        const email = currentUser.email || '';
-        if (email.endsWith('@sjec.ac.in')) {
-          setUser(currentUser);
-          const localPart = email.split('@')[0];
-          const dotParts = localPart.split('.');
-          const extractedName = dotParts.length > 1 ? dotParts[dotParts.length - 1] : localPart;
-          setDisplayName(extractedName.charAt(0).toUpperCase() + extractedName.slice(1));
-          setAuthError('');
-        } else {
-          signOut(auth);
-          setAuthError('Please use your college Gmail ending with @sjec.ac.in');
-        }
-      } else {
-        setUser(null);
-        setDisplayName('');
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleSignIn = async () => {
-    setAuthError('');
-    try {
-      await signInWithRedirect(auth, googleProvider);
-    } catch (err) {
-      setAuthError('Failed to sign in. Please try again.');
-    }
-  };
-
-  const handleSignOut = () => {
-    signOut(auth);
-  };
+  // Auth logic is now handled by useAuth hook
 
   useEffect(() => {
     if (isOpen) {
@@ -77,7 +40,7 @@ export default function NexusFloatingChat() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isTyping) return;
+    if (!input.trim() || isTyping || !user || isAuthenticating) return;
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -165,6 +128,7 @@ export default function NexusFloatingChat() {
               {user && (
                 <button 
                   onClick={handleSignOut} 
+                  disabled={isAuthenticating}
                   title="Sign Out"
                   style={{
                     background: 'transparent', border: 'none', color: 'var(--text-secondary)',
@@ -197,11 +161,11 @@ export default function NexusFloatingChat() {
               <Bot size={48} color="var(--primary)" style={{ marginBottom: '1rem' }} />
               <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>Sign In Required</h3>
               <p style={{ margin: '0 0 1.5rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                Please link your college Gmail to chat with the AgentBlazer AI.
+                Sign in with your @sjec.ac.in Google account to chat with the AgentBlazer AI.
               </p>
               
               {authError && (
-                <div style={{
+                <div role="alert" style={{
                   color: '#ff4d4f', background: 'rgba(255, 77, 79, 0.1)',
                   padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem',
                   marginBottom: '1rem', border: '1px solid rgba(255, 77, 79, 0.3)'
@@ -211,20 +175,25 @@ export default function NexusFloatingChat() {
               )}
 
               <button 
+                type="button"
                 onClick={handleSignIn}
+                disabled={isAuthenticating}
                 style={{
                   background: 'white', color: 'black', padding: '0.75rem 1.5rem',
                   borderRadius: '24px', border: 'none', fontWeight: 600,
                   display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  cursor: 'pointer', boxShadow: '0 4px 12px rgba(255,255,255,0.2)'
+                  cursor: isAuthenticating ? 'not-allowed' : 'pointer',
+                  boxShadow: '0 4px 12px rgba(255,255,255,0.2)',
+                  opacity: isAuthenticating ? 0.7 : 1
                 }}
               >
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" style={{ width: 18, height: 18 }} />
-                Sign in with sjec.ac.in
+                {isAuthenticating ? 'Signing in...' : 'Sign in with Google'}
               </button>
             </div>
           ) : (
             <>
+              {authError && <p className="email-error" role="alert">{authError}</p>}
               {/* Messages — this MUST flex-grow to fill all remaining space */}
               <div
                 className="nfc-messages"
