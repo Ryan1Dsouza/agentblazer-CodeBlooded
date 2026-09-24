@@ -134,8 +134,8 @@
 .boot-crosshair--bottom { bottom: 0; left: calc(50% - 4px); }
 .boot-crosshair--left { left: 1%; top: calc(50% - 8px); }
 .boot-crosshair--right { right: 1%; top: calc(50% - 8px); }
-.boot-logo-core { position: absolute; inset: 5%; display: grid; place-items: center; border: 1px solid rgba(var(--boot-rgb), .6); border-radius: 28%; background: radial-gradient(circle at 40% 30%, #27233f, #0c0b17 80%); box-shadow: 0 0 45px rgba(var(--boot-rgb), .18), inset 0 0 22px rgba(var(--boot-rgb), .08); transform: translateZ(35px); }
-.boot-logo-core::before { content: ''; position: absolute; inset: -7px; border-radius: 30%; border: 1px solid rgba(var(--boot-rgb), .2); }
+.boot-logo-core { position: absolute; inset: 13%; display: grid; place-items: center; transform: translateZ(35px); }
+.boot-logo-core::before { display: none; }
 .boot-logo-core img { width: 100%; height: 100%; object-fit: contain; }
 .boot-logo-fallback { font-size: 42px; font-weight: 600; color: #f0edf9; letter-spacing: -.08em; }
 .boot-logo-indicator { position: absolute; width: 7px; height: 7px; right: 9%; top: 7%; border-radius: 50%; background: var(--boot-secondary); border: 2px solid var(--boot-bg); box-shadow: 0 0 8px var(--boot-secondary); }
@@ -202,13 +202,12 @@
 .boot-screen--inferno .boot-station-heading h1 { font-weight: 600; text-transform: uppercase; letter-spacing: -.02em; }
 .boot-screen--inferno .boot-header::after { content: ''; position: absolute; top: 0; right: 44px; width: 180px; height: 5px; background: repeating-linear-gradient(120deg, var(--boot-primary) 0 7px, transparent 7px 14px); opacity: .7; }
 .boot-screen--inferno .boot-link-card { border-left: 3px solid var(--boot-primary); }
-.boot-screen--inferno .boot-logo-core { border-radius: 15%; background: radial-gradient(circle at 40% 30%, #3c251a, #100b08 80%); }
-.boot-screen--inferno .boot-logo-core::before { border-radius: 18%; }
+.boot-screen--inferno .boot-logo-core { background: transparent; }
 .boot-screen--inferno .boot-enter { border-radius: 0; border-bottom: 3px solid var(--boot-primary); }
 .boot-screen--inferno .boot-enter-hint::before { content: ''; display: inline-block; width: 29px; height: 5px; margin-right: 9px; background: repeating-linear-gradient(120deg, var(--boot-primary) 0 3px, transparent 3px 6px); }
 .boot-screen--frost .boot-panel { clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%); box-shadow: inset 0 0 26px rgba(255,255,255,.6); border-color: rgba(75, 137, 177, .3); background-image: linear-gradient(135deg, rgba(255,255,255,.5), transparent 60%); }
 .boot-screen--frost .boot-panel-heading { padding-top: 19px; }
-.boot-screen--frost .boot-logo-core { border-radius: 50%; inset: 5%; background: radial-gradient(circle at center, rgba(255, 255, 255, 0.9) 0%, rgba(210, 235, 252, 0.5) 45%, transparent 75%); border: none; box-shadow: 0 0 50px rgba(255, 255, 255, 0.7); clip-path: none; }
+.boot-screen--frost .boot-logo-core { background: transparent; border: none; box-shadow: none; clip-path: none; }
 .boot-screen--frost .boot-logo-core img { width: 100%; height: 100%; filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.15)) drop-shadow(0 0 25px rgba(255, 255, 255, 0.8)); }
 .boot-screen--frost .boot-enter { border-radius: 0; background: rgba(255,255,255,.65); clip-path: polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px); }
 .boot-screen--frost .boot-enter:focus-visible { outline-offset: -4px; }
