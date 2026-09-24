@@ -101,61 +101,13 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       '/logos/AgentBlazer_Frost.png'
     ];
 
-    let loadedCount = 1;
-    const totalAssets = criticalAssetUrls.length + 6;
+    let loadedCount = 0;
+    const totalAssets = criticalAssetUrls.length + 2; // +1 for fonts, +1 for window load
+    let hasCompleted = false;
 
-    const markLoaded = (stageName: string, telemetryPatch: Partial<typeof telemetry>) => {
-      loadedCount++;
-      const currentPct = Math.min(100, Math.round((loadedCount / totalAssets) * 100));
-      setProgress((prev) => Math.max(prev, currentPct));
-      setStatusStage(stageName);
-      setTelemetry((prev) => ({
-        ...prev,
-        ...telemetryPatch,
-        assetsLoaded: loadedCount,
-        assetsTotal: totalAssets
-      }));
-    };
-
-    // Stage 1: Core & Fonts
-    const t1 = setTimeout(() => {
-      if (document.fonts) {
-        document.fonts.ready
-          .then(() => {
-            markLoaded('LOADING 3D ENVIRONMENT...', { core: 'ONLINE', network: 'CONNECTED' });
-          })
-          .catch(() => {
-            markLoaded('LOADING 3D ENVIRONMENT...', { core: 'ONLINE', network: 'CONNECTED' });
-          });
-      } else {
-        markLoaded('LOADING 3D ENVIRONMENT...', { core: 'ONLINE', network: 'CONNECTED' });
-      }
-    }, 250);
-
-    // Stage 2: Preload critical image assets
-    criticalAssetUrls.forEach((url, idx) => {
-      const img = new Image();
-      img.src = url;
-      const onDone = () => {
-        const stageDescriptions = [
-          'LOADING VISUAL ASSETS...',
-          'INITIALIZING PARTICLE SYSTEM...',
-          'LOADING EVENT MODULES...',
-          'CALIBRATING INTERFACE...',
-          'FINALIZING SYSTEM...'
-        ];
-        const desc = stageDescriptions[idx % stageDescriptions.length];
-        markLoaded(desc, {
-          engine3D: idx >= 2 ? 'READY' : 'INITIALIZING',
-          network: 'CONNECTED'
-        });
-      };
-      img.onload = onDone;
-      img.onerror = onDone;
-    });
-
-    // Stage 3: Complete Sequence
-    const completionTimer = setTimeout(() => {
+    const completeLoading = () => {
+      if (hasCompleted) return;
+      hasCompleted = true;
       setProgress(100);
       setStatusStage('SYSTEM READY');
       setTelemetry((prev) => ({
@@ -172,18 +124,69 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       setTimeout(() => {
         setShowEnterPrompt(true);
       }, 400);
-    }, 2200);
+    };
 
-    // Safety timeout
+    const markLoaded = (stageName: string, telemetryPatch: Partial<typeof telemetry>) => {
+      if (hasCompleted) return;
+      loadedCount++;
+      const currentPct = Math.min(99, Math.round((loadedCount / totalAssets) * 100));
+      setProgress((prev) => Math.max(prev, currentPct));
+      setStatusStage(stageName);
+      setTelemetry((prev) => ({
+        ...prev,
+        ...telemetryPatch,
+        assetsLoaded: Math.min(loadedCount, totalAssets),
+        assetsTotal: totalAssets
+      }));
+
+      if (loadedCount >= totalAssets) {
+        completeLoading();
+      }
+    };
+
+    // Stage 1: Core & Fonts
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => markLoaded('FONTS LOADED...', { core: 'ONLINE' })).catch(() => markLoaded('FONTS LOADED...', { core: 'ONLINE' }));
+    } else {
+      markLoaded('FONTS LOADED...', { core: 'ONLINE' });
+    }
+
+    // Stage 2: Document Window Load
+    const handleWindowLoad = () => markLoaded('DOCUMENT READY...', { network: 'CONNECTED' });
+    if (document.readyState === 'complete') {
+      handleWindowLoad();
+    } else {
+      window.addEventListener('load', handleWindowLoad);
+    }
+
+    // Stage 3: Preload critical image assets
+    criticalAssetUrls.forEach((url, idx) => {
+      const img = new Image();
+      img.src = url;
+      const onDone = () => {
+        const stageDescriptions = [
+          'LOADING VISUAL ASSETS...',
+          'INITIALIZING PARTICLE SYSTEM...',
+          'LOADING EVENT MODULES...',
+          'CALIBRATING INTERFACE...',
+          'FINALIZING SYSTEM...'
+        ];
+        const desc = stageDescriptions[idx % stageDescriptions.length];
+        markLoaded(desc, {
+          engine3D: idx >= 2 ? 'READY' : 'INITIALIZING'
+        });
+      };
+      img.onload = onDone;
+      img.onerror = onDone;
+    });
+
+    // Safety timeout in case network hangs (10 seconds max)
     const safetyTimer = setTimeout(() => {
-      setProgress(100);
-      setShowEnterPrompt(true);
-      setIsSystemReady(true);
-    }, 6000);
+      completeLoading();
+    }, 10000);
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(completionTimer);
+      window.removeEventListener('load', handleWindowLoad);
       clearTimeout(safetyTimer);
       document.body.style.overflow = '';
     };
