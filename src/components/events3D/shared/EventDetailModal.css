@@ -24,8 +24,6 @@
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  transform: translateZ(0);
-  will-change: transform, opacity;
   user-select: none;
   animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -33,11 +31,11 @@
 @keyframes modalFadeIn {
   from {
     opacity: 0;
-    transform: scale(0.98) translateZ(0);
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateZ(0);
+    transform: scale(1);
   }
 }
 
@@ -80,7 +78,6 @@
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transform: translateZ(0);
   box-shadow: -10px 10px 25px rgba(0, 0, 0, 0.5);
   position: relative;
   box-sizing: border-box;
@@ -272,7 +269,6 @@
   gap: 4px;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transform: translateZ(0);
   box-sizing: border-box;
 }
 
@@ -498,7 +494,7 @@
 .event-modal-nav-btn {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%) translateZ(0);
+  transform: translateY(-50%);
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -546,7 +542,6 @@
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transform: translateZ(0);
   font-family: monospace;
   font-size: 10px;
   color: #ffffff;

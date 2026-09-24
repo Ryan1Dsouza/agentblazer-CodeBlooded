@@ -155,6 +155,8 @@ export default function VioletSpaceScene({
   // Main flight kinematics & proximity docking loop
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
+    // Keep the swept wings inside the narrower horizontal field of view on phones.
+    const framingScale = THREE.MathUtils.clamp(0.85 / (camera as THREE.PerspectiveCamera).aspect, 1, 2.4);
 
     // Only tick down cooldown during active GAMEPLAY exploration
     if (gameState === 'GAMEPLAY' && dockingCooldown.current > 0) {
@@ -190,8 +192,8 @@ export default function VioletSpaceScene({
       // Chase Camera smooth framing during docking
       const desiredCamPos = new THREE.Vector3(
         shipPos.current.x,
-        shipPos.current.y + 2.2,
-        shipPos.current.z + 6.5
+        shipPos.current.y + 2.2 * framingScale,
+        shipPos.current.z + 6.5 * framingScale
       );
       camera.position.lerp(desiredCamPos, dt * 5.5);
       camera.lookAt(targetStationPos);
@@ -244,7 +246,7 @@ export default function VioletSpaceScene({
 
       setTrailProgress(currP);
 
-      const camOffset = new THREE.Vector3(0, 2.8, 7.5);
+      const camOffset = new THREE.Vector3(0, 2.8, 7.5).multiplyScalar(framingScale);
       camOffset.applyEuler(new THREE.Euler(0, shipRotation.current.y, 0));
       const desiredCamPos = shipPos.current.clone().add(camOffset);
       camera.position.lerp(desiredCamPos, dt * 6);
@@ -356,7 +358,7 @@ export default function VioletSpaceScene({
     }
 
     // Chase Camera update
-    const camOffset = new THREE.Vector3(0, 2.6, boosting ? 9.5 : 7.0);
+    const camOffset = new THREE.Vector3(0, 2.6, boosting ? 9.5 : 7.0).multiplyScalar(framingScale);
     camOffset.applyEuler(new THREE.Euler(0, shipRotation.current.y, 0));
     const desiredCamPos = shipPos.current.clone().add(camOffset);
 
@@ -478,4 +480,3 @@ function DynamicDisappearingBeam({ spline, progress }: { spline: THREE.CatmullRo
     </group>
   );
 }
-

@@ -43,7 +43,7 @@ export default function InfernoLavaScene({
   const prevGameState = useRef(gameState);
 
   // Generate a winding monorail spline passing through the 3 depots
-  const { spline, stationTs, stationPositions } = useMemo(() => {
+  const { spline, stationTs, stationPositions, trackLength } = useMemo(() => {
     const rawPoints = [
       new THREE.Vector3(0, 0, 35),
       new THREE.Vector3(-30, 2, 8),
@@ -59,7 +59,7 @@ export default function InfernoLavaScene({
     const ts = [0.25, 0.50, 0.75];
     const stPositions = ts.map((t) => curve.getPointAt(t));
 
-    return { spline: curve, stationTs: ts, stationPositions: stPositions };
+    return { spline: curve, stationTs: ts, stationPositions: stPositions, trackLength: curve.getLength() };
   }, []);
 
   // Position train immediately on initial mount
@@ -68,13 +68,16 @@ export default function InfernoLavaScene({
       const pt = spline.getPointAt(currentProgress.current);
       const tangent = spline.getTangentAt(currentProgress.current).normalize();
       trainGroupRef.current.position.copy(pt);
-      const rotY = Math.atan2(tangent.x, tangent.z) + Math.PI;
+      const rotY = Math.atan2(tangent.x, tangent.z);
       trainGroupRef.current.rotation.set(0, rotY, 0);
 
       // Position camera
-      const camOffset = new THREE.Vector3(0, 5.5, 0).sub(tangent.clone().multiplyScalar(13));
+      const framingScale = THREE.MathUtils.clamp(0.7 / (camera as THREE.PerspectiveCamera).aspect, 1, 2.4);
+      const camOffset = new THREE.Vector3(tangent.z * 8, 7.2, -tangent.x * 8).addScaledVector(tangent, -16).multiplyScalar(framingScale);
       camera.position.copy(pt.clone().add(camOffset));
-      camera.lookAt(pt);
+      const lookTarget = pt.clone().addScaledVector(tangent, -3.2);
+      lookTarget.y += 0.9;
+      camera.lookAt(lookTarget);
     }
   }, [spline, camera]);
 
@@ -138,6 +141,7 @@ export default function InfernoLavaScene({
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
+    const framingScale = THREE.MathUtils.clamp(0.7 / (camera as THREE.PerspectiveCamera).aspect, 1, 2.4);
 
     // 1. AUTOMATIC DOCKING AT TRAIN PLATFORM
     if ((gameState === 'DOCKING' || dockingTargetIdx.current !== null) && dockingTargetIdx.current !== null) {
@@ -155,15 +159,16 @@ export default function InfernoLavaScene({
 
       if (trainGroupRef.current) {
         trainGroupRef.current.position.copy(pt);
-        const rotY = Math.atan2(tangent.x, tangent.z) + Math.PI;
+        const rotY = Math.atan2(tangent.x, tangent.z);
         trainGroupRef.current.rotation.set(0, rotY, 0);
       }
 
-      const lookAheadPt = spline.getPointAt((currentProgress.current + 0.03) % 1);
-      const camOffset = new THREE.Vector3(0, 5.5, 0).sub(tangent.clone().multiplyScalar(12));
-      const desiredCamPos = pt.clone().add(camOffset).add(new THREE.Vector3(tangent.z * 4, 0, -tangent.x * 4));
+      const lookTarget = pt.clone().addScaledVector(tangent, -3.2);
+      lookTarget.y += 0.9;
+      const camOffset = new THREE.Vector3(tangent.z * 8, 7.2, -tangent.x * 8).addScaledVector(tangent, -16).multiplyScalar(framingScale);
+      const desiredCamPos = pt.clone().add(camOffset);
       camera.position.lerp(desiredCamPos, dt * 5);
-      camera.lookAt(lookAheadPt);
+      camera.lookAt(lookTarget);
 
       // Update target HUD
       onTargetUpdate({
@@ -227,12 +232,19 @@ export default function InfernoLavaScene({
     
     const currP = currentProgress.current;
 
+    // World units/second, including scroll movement and reverse travel. The
+    // vehicle reads this ref directly instead of waiting for a React render.
+    let progressStep = currP - prevP;
+    if (progressStep > 0.5) progressStep -= 1;
+    if (progressStep < -0.5) progressStep += 1;
+    velocityRef.current = dt > 0 ? progressStep * trackLength / dt : 0;
+
     const pt = spline.getPointAt(currP);
     const tangent = spline.getTangentAt(currP).normalize();
 
     if (trainGroupRef.current) {
       trainGroupRef.current.position.copy(pt);
-      const rotY = Math.atan2(tangent.x, tangent.z) + Math.PI;
+      const rotY = Math.atan2(tangent.x, tangent.z);
       trainGroupRef.current.rotation.set(0, rotY, 0);
     }
 
@@ -311,13 +323,15 @@ export default function InfernoLavaScene({
     });
 
     // Dynamic Camera Chase & Boost Thrust
-    const lookAheadPt = spline.getPointAt((currP + (boosting ? 0.06 : 0.04)) % 1);
-    const camDistance = boosting ? 14 : 12;
-    const camOffset = new THREE.Vector3(0, boosting ? 4.5 : 5.0, 0).sub(tangent.clone().multiplyScalar(camDistance));
-    const desiredCamPos = pt.clone().add(camOffset).add(new THREE.Vector3(tangent.z * 3.5, 0, -tangent.x * 3.5));
+    // Frame the full consist, including the rear carriage, from the chase view.
+    const lookTarget = pt.clone().addScaledVector(tangent, boosting ? -2.5 : -3.2);
+    lookTarget.y += 0.9;
+    const camDistance = boosting ? 18 : 16;
+    const camOffset = new THREE.Vector3(tangent.z * 8, boosting ? 6.8 : 7.2, -tangent.x * 8).addScaledVector(tangent, -camDistance).multiplyScalar(framingScale);
+    const desiredCamPos = pt.clone().add(camOffset);
 
     camera.position.lerp(desiredCamPos, dt * 5);
-    camera.lookAt(lookAheadPt);
+    camera.lookAt(lookTarget);
   });
 
   return (
@@ -330,7 +344,7 @@ export default function InfernoLavaScene({
 
       {/* Train Locomotive & Carriages */}
       <group ref={trainGroupRef}>
-        <LavaTrainVehicle speed={velocityRef.current * 10} />
+        <LavaTrainVehicle speed={velocityRef} />
       </group>
 
       {/* Magma Depots at each Event Station */}
@@ -398,4 +412,3 @@ function RailTrackStructure({ spline }: { spline: THREE.CatmullRomCurve3 }) {
     </group>
   );
 }
-
