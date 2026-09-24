@@ -53,6 +53,8 @@ export default function NexusChat() {
 
     const updatePresence = async () => {
       try {
+        // Force token refresh so email_verified claim is present before writing presence
+        await user.getIdToken(true);
         await setDoc(presenceRef, {
           displayName,
           uid: user.uid,
@@ -65,7 +67,9 @@ export default function NexusChat() {
       try { await deleteDoc(presenceRef); } catch { /* ignore */ }
     };
 
+    // Write immediately (with fresh token), then retry once after 2s as safety net
     void updatePresence();
+    const retryTimeout = setTimeout(() => void updatePresence(), 2000);
     heartbeatRef.current = setInterval(updatePresence, HEARTBEAT_INTERVAL);
 
     // Clean up on tab close / navigation away
@@ -82,6 +86,7 @@ export default function NexusChat() {
     window.addEventListener('beforeunload', handleUnload);
 
     return () => {
+      clearTimeout(retryTimeout);
       if (heartbeatRef.current) clearInterval(heartbeatRef.current);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('beforeunload', handleUnload);
