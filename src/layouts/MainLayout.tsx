@@ -104,8 +104,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }
 
   // ── Mobile: one-page scrolling layout ─────────────────────────────────────
-  return (
-    <div className="app-layout mobile-onepage">
+  // Only use this layout for the core site pages; standalone tools like /events and /admin should render normally.
+  if (isMobile && location.pathname !== '/events' && location.pathname !== '/admin') {
+    return (
+      <div className="app-layout mobile-onepage">
       <CursorFollower />
 
       {/* Sticky mobile nav */}
@@ -196,7 +198,21 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <Footer />
       </main>
 
-      <NexusFloatingChat />
+        <NexusFloatingChat />
+      </div>
+    );
+  }
+
+  // Fallback if none of the above conditions are met (e.g., /events or /admin on mobile)
+  return (
+    <div className="app-layout">
+      {!isEventsPage && <BackgroundScene />}
+      <CursorFollower />
+      {/* Exclude mobile header here to let pages provide their own, or include it if you want */}
+      <main className={`main-content ${isEventsPage ? 'events-main-override' : ''}`}>
+        {children}
+      </main>
+      {!isEventsPage && <NexusFloatingChat />}
     </div>
   );
 }
