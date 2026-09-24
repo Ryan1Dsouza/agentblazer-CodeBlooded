@@ -19,10 +19,10 @@ interface InfernoSceneProps {
 
 export default function InfernoLavaScene({
   events,
-  activeIdx,
+  activeIdx: _activeIdx,
   gameState,
   onDockComplete,
-  onInspect,
+  onInspect: _onInspect,
   onTargetUpdate,
   mobileMove,
   mobileBoost

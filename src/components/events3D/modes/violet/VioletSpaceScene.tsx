@@ -20,10 +20,10 @@ interface VioletSceneProps {
 
 export default function VioletSpaceScene({
   events,
-  activeIdx,
+  activeIdx: _activeIdx,
   gameState,
   onDockComplete,
-  onInspect,
+  onInspect: _onInspect,
   onTargetUpdate,
   mobileMove,
   mobileLook,
