@@ -10,7 +10,7 @@ import '../styles/home.css';
 
 export default function Home() {
   const { theme } = useTheme();
-  const logoPath = '/AgentBlazer_Logo.png';
+  const logoPath = '/AgentBlazer_Logo.webp';
 
   return (
     <>
