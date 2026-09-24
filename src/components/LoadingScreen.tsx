@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Flame, Orbit, Pause, Play, Snowflake } from 'lucide-react';
+import { ArrowUpRight, Flame, Orbit, Snowflake } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import type { Theme } from '../types';
 import { useBootCanvas } from './loading/useBootCanvas';
@@ -52,8 +52,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const environment = ENVIRONMENTS[theme] || ENVIRONMENTS.violet;
   const EnvironmentIcon = environment.icon;
   const prefersReducedMotion = useReducedMotion();
-  const [motionPaused, setMotionPaused] = useState(false);
-  const quiet = prefersReducedMotion || motionPaused;
+  const quiet = prefersReducedMotion;
   const [resources, setResources] = useState({ settled: 0, failed: 0, finished: false });
   const [isExiting, setIsExiting] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
@@ -142,12 +141,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                 );
               })}
             </div>
-            <button type="button" className="boot-motion" aria-label={quiet ? 'Resume animations' : 'Pause animations'}
-              aria-pressed={quiet} disabled={prefersReducedMotion}
-              title={prefersReducedMotion ? 'Reduced motion follows your device preference' : quiet ? 'Resume animations' : 'Pause animations'}
-              onClick={() => setMotionPaused(previous => !previous)}>
-              {quiet ? <Play size={14} /> : <Pause size={14} />}
-            </button>
+
           </div>
         </header>
         <div className="boot-station-heading">
