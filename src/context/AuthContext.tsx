@@ -25,7 +25,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let unsubscribe: (() => void) | undefined;
 
     let interactionFired = false;
-    let timer: NodeJS.Timeout;
 
     const initFirebase = () => {
       if (interactionFired || !active) return;
@@ -65,14 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener('mousemove', initFirebase, { once: true });
     window.addEventListener('scroll', initFirebase, { once: true });
     window.addEventListener('touchstart', initFirebase, { once: true });
-    timer = setTimeout(initFirebase, 3000);
 
     return () => {
       active = false;
       window.removeEventListener('mousemove', initFirebase);
       window.removeEventListener('scroll', initFirebase);
       window.removeEventListener('touchstart', initFirebase);
-      clearTimeout(timer);
       if (unsubscribe) unsubscribe();
     };
   }, []);

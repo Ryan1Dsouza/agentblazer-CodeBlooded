@@ -53,12 +53,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     window.addEventListener('mousemove', enableBackground, { once: true });
     window.addEventListener('scroll', enableBackground, { once: true });
     window.addEventListener('touchstart', enableBackground, { once: true });
-    const timer = setTimeout(enableBackground, 3000);
+    
     return () => {
       window.removeEventListener('mousemove', enableBackground);
       window.removeEventListener('scroll', enableBackground);
       window.removeEventListener('touchstart', enableBackground);
-      clearTimeout(timer);
     };
   }, []);
 
