@@ -15,6 +15,10 @@ export default function CursorFollower() {
   const mouse = useRef({ x: -100, y: -100 });
   const trailHistory = useRef(Array(12).fill({ x: -100, y: -100 }));
 
+  if (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 1024) {
+    return null;
+  }
+
   useEffect(() => {
     const mobileCheck = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 1024;
     setIsMobile(mobileCheck);
