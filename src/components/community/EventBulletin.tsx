@@ -132,13 +132,62 @@ export default function EventBulletin({ isAdmin }: Props) {
               />
             </div>
             <div className="form-group">
-              <label>Poster Image URL</label>
-              <input
-                type="url"
-                value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                placeholder="https://..."
-              />
+              <label>Poster Image (Upload or URL)</label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="url"
+                  value={form.imageUrl}
+                  onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+                  placeholder="https://..."
+                  style={{ flex: 1 }}
+                />
+                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>OR</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        const img = new Image();
+                        img.onload = () => {
+                          const canvas = document.createElement('canvas');
+                          let width = img.width;
+                          let height = img.height;
+                          const MAX_WIDTH = 800;
+                          
+                          if (width > MAX_WIDTH) {
+                            height = Math.round((height * MAX_WIDTH) / width);
+                            width = MAX_WIDTH;
+                          }
+                          
+                          canvas.width = width;
+                          canvas.height = height;
+                          const ctx = canvas.getContext('2d');
+                          if (ctx) {
+                            ctx.drawImage(img, 0, 0, width, height);
+                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                            setForm({ ...form, imageUrl: compressedBase64 });
+                          }
+                        };
+                        img.src = reader.result as string;
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  style={{ 
+                    flex: 1, 
+                    fontSize: '12px', 
+                    color: '#fff',
+                    padding: '10px',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(168, 85, 247, 0.44)',
+                    borderRadius: '10px',
+                    cursor: 'pointer'
+                  }}
+                />
+              </div>
             </div>
             <div className="form-group full-width">
               <label>Video URL (YouTube or direct .mp4/.webm)</label>
