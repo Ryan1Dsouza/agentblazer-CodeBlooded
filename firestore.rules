@@ -12,5 +12,11 @@ service cloud.firestore {
       allow read, create: if isCollegeGoogleUser();
       allow update, delete: if false;
     }
+
+    // Presence: each signed-in user can write their own doc; anyone signed in can read all
+    match /presence/{userId} {
+      allow read: if isCollegeGoogleUser();
+      allow write: if isCollegeGoogleUser() && request.auth.uid == userId;
+    }
   }
 }
