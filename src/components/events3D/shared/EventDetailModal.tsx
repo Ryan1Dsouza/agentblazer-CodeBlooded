@@ -94,12 +94,12 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
     }
   };
 
-  // Keep active thumbnail in view
+  // Keep active thumbnail in view without smooth scrolling jank
   useEffect(() => {
     if (thumbnailScrollRef.current) {
       const activeThumb = thumbnailScrollRef.current.children[activePhotoIdx] as HTMLElement;
       if (activeThumb) {
-        activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        activeThumb.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
       }
     }
   }, [activePhotoIdx]);
@@ -296,6 +296,7 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
                   src={currentPhotoUrl}
                   alt={`${event.title} capture ${activePhotoIdx + 1}`}
                   className="event-modal-main-img"
+                  decoding="async"
                   style={{
                     width: isZoomed ? '100%' : 'auto',
                     height: isZoomed ? '100%' : 'auto',
@@ -371,7 +372,7 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
                       borderColor: activePhotoIdx === idx ? themeConfig.accent : undefined
                     }}
                   >
-                    <img src={photo} alt="" className="event-modal-thumb-img" />
+                    <img src={photo} alt="" className="event-modal-thumb-img" loading="lazy" decoding="async" />
                   </button>
                 ))}
               </div>
