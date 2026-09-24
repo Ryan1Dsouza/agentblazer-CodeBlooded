@@ -1,4 +1,6 @@
-export const BOOT_LOGO = '/AgentBlazer_Logo.png';
+import { AGENTBLAZER_LOGO } from '../../data/branding';
+
+export const BOOT_LOGO = AGENTBLAZER_LOGO;
 const RESOURCE_NAMES = ['logo', 'fonts', 'document'] as const;
 export const BOOT_RESOURCE_COUNT = RESOURCE_NAMES.length;
 

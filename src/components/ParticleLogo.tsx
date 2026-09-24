@@ -1,4 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { useReducedMotion } from '../hooks/useReducedMotion';
+import { useAnimationActivity } from '../hooks/useAnimationActivity';
 
 interface ParticleLogoProps {
   logoPath: string;
@@ -44,6 +46,15 @@ export default function ParticleLogo({ logoPath, alt = 'AgentBlazer Logo', theme
 
   const [isHovered, setIsHovered] = useState(false);
   const [isAssembled, setIsAssembled] = useState(false);
+
+  const reducedMotion = useReducedMotion();
+  const isActive = useAnimationActivity(containerRef, !reducedMotion);
+  const isActiveRef = useRef(isActive);
+
+  // Sync ref with hook so the requestAnimationFrame loop can access it
+  useEffect(() => {
+    isActiveRef.current = isActive;
+  }, [isActive]);
 
   useEffect(() => {
     // Assembly state is now managed perfectly by the render loop below
@@ -172,8 +183,8 @@ export default function ParticleLogo({ logoPath, alt = 'AgentBlazer Logo', theme
       const render = (now: number) => {
         if (!isMounted) return;
 
-        // Pause animation completely if the global loading screen is active
-        if ((window as any).isAppLoading) {
+        // Pause animation completely if the global loading screen is active or component is not active
+        if ((window as any).isAppLoading || !isActiveRef.current) {
           lastTime = now; // Prevent large dt spikes
           animFrameRef.current = requestAnimationFrame(render);
           return;

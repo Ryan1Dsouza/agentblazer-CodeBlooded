@@ -5,12 +5,15 @@ import StatPanel from '../components/StatPanel';
 import Badge from '../components/Badge';
 import ParticleLogo from '../components/ParticleLogo';
 import OrbitingSocials from '../components/OrbitingSocials';
+import FeaturedEvents from '../components/home/FeaturedEvents';
+import '../styles/home.css';
 
 export default function Home() {
   const { theme } = useTheme();
   const logoPath = '/AgentBlazer_Logo.png';
 
   return (
+    <>
     <section className="home-hero">
       <div className="container">
         <div className="hero-grid centered-layout">
@@ -63,5 +66,7 @@ export default function Home() {
         </div>
       </div>
     </section>
+    <FeaturedEvents />
+    </>
   );
 }
