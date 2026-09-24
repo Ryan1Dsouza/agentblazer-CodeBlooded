@@ -37,10 +37,10 @@ Switch between three distinct visual identities on the fly with synchronized 3D 
 *   **Inferno**: Magma orange accents, industrial carbon fibers, and volcanic ember effects.
 *   **Frost**: Ice-blue aurora tones, frosted translucent glassmorphism, and clean light-mode surfaces.
 
-### 🌐 4. Nexus Hub Community Platform
+### 🌐 4. Nexus Hub Community Platform (Discord-Style)
 *   **Real-Time Firebase Chat**: A live, multi-user chat room synchronized instantly across all connected users via Google Cloud Firestore.
-*   **Domain-Restricted Google Auth**: Secure login via Firebase Authentication, strictly limited to approved `@sjec.ac.in` college email addresses for a safe student environment.
-*   **Admin-Moderated Community Voice**: A dedicated space for sharing thoughts and experiences, where only authorized admins (via secure password portal) can broadcast announcements.
+*   **Discord-Style UI & Presence**: Features an "Online Members" sidebar with verified `@sjec.ac.in` college email badges and active presence heartbeat.
+*   **Domain-Restricted Google Auth**: Secure login via Firebase Authentication, strictly limited to approved college email addresses.
 *   **Integrated AI Moderation & Bot**: Tag `@agentblazer` in the real-time chat to get instant AI-generated responses visible to the entire community.
 
 ### 🤖 5. Nexus Floating AI Assistant
@@ -51,7 +51,9 @@ Switch between three distinct visual identities on the fly with synchronized 3D 
 *   Futuristic HUD-styled advisor and executive council cards.
 *   Dynamic photo popups, custom badge tags, and randomized inspiring tech quotes.
 
----
+### 📱 7. Responsive Mobile One-Page Architecture
+*   **Desktop vs. Mobile Rendering**: React Router powers the desktop SPA, while mobile users get a continuous vertical scroll layout.
+*   **IntersectionObserver Navigation**: The sticky mobile navbar tracks active sections dynamically as the user scrolls.
 
 ## 🛠️ Tech Stack & Architecture
 
