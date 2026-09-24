@@ -481,7 +481,7 @@
   height: auto;
   display: block;
   user-select: none;
-  transition: all 0.5s ease;
+  transition: all 0.2s ease;
 }
 
 .event-modal-empty-feed {

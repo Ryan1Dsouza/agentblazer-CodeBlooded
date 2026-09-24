@@ -71,11 +71,11 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
 
     const interval = setInterval(() => {
       const now = Date.now();
-      // Only auto-advance if not paused and at least 2.5s since last manual interaction
-      if (!isPaused && now - lastInteractionTime.current >= 2500) {
+      // Only auto-advance if not paused and at least 1.5s since last manual interaction
+      if (!isPaused && now - lastInteractionTime.current >= 1500) {
         nextPhoto();
       }
-    }, 3500);
+    }, 2500);
 
     return () => clearInterval(interval);
   }, [event, totalPhotos, isPaused, nextPhoto]);
@@ -84,7 +84,7 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
   const handlePhotoWheel = (e: React.WheelEvent) => {
     e.stopPropagation();
     const now = Date.now();
-    if (now - lastInteractionTime.current > 120) {
+    if (now - lastInteractionTime.current > 80) {
       lastInteractionTime.current = now;
       if (e.deltaY > 15 || e.deltaX > 15) {
         nextPhoto();
@@ -292,23 +292,35 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
             {/* Main Sized Image Viewport */}
             <div className="event-modal-image-viewport">
               {totalPhotos > 0 ? (
-                <img
-                  src={currentPhotoUrl}
-                  alt={`${event.title} capture ${activePhotoIdx + 1}`}
-                  className="event-modal-main-img"
-                  decoding="async"
-                  style={{
-                    width: isZoomed ? '100%' : 'auto',
-                    height: isZoomed ? '100%' : 'auto',
-                    objectFit: isZoomed ? 'cover' : 'contain'
-                  }}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    if (target.src.endsWith('.HEIC') || target.src.endsWith('.heic')) {
-                      target.src = target.src.replace(/\.(HEIC|heic)$/, '.JPG');
-                    }
-                  }}
-                />
+                <>
+                  <img
+                    src={currentPhotoUrl}
+                    alt={`${event.title} capture ${activePhotoIdx + 1}`}
+                    className="event-modal-main-img"
+                    decoding="async"
+                    loading="eager"
+                    fetchPriority="high"
+                    style={{
+                      width: isZoomed ? '100%' : 'auto',
+                      height: isZoomed ? '100%' : 'auto',
+                      objectFit: isZoomed ? 'cover' : 'contain'
+                    }}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (target.src.endsWith('.HEIC') || target.src.endsWith('.heic')) {
+                        target.src = target.src.replace(/\.(HEIC|heic)$/, '.JPG');
+                      }
+                    }}
+                  />
+                  {/* Preload next image for smoother transitions */}
+                  {totalPhotos > 1 && (
+                    <img
+                      src={gallery[(activePhotoIdx + 1) % totalPhotos]}
+                      alt="" aria-hidden="true"
+                      style={{ position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none' }}
+                    />
+                  )}
+                </>
               ) : (
                 <div className="event-modal-empty-feed">No visual feed found</div>
               )}
