@@ -107,12 +107,17 @@ export default function NexusChat() {
       return false;
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
     try {
       const res = await fetch('/api/moderate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       
       if (!res.ok) return true; // Allow if moderation service is down
       const data = await res.json();
@@ -122,7 +127,8 @@ export default function NexusChat() {
       }
       return true;
     } catch {
-      return true; // Allow if network error (client filter already ran)
+      clearTimeout(timeoutId);
+      return true; // Allow if network error or timeout (client filter already ran)
     }
   }, [clientSideProfanityCheck]);
 
@@ -189,41 +195,39 @@ export default function NexusChat() {
     // Start 2-second cooldown
     setCooldown(2000);
 
-    // Moderate in background
-    moderateMessage(text).then(async (allowed) => {
+    try {
+      const allowed = await moderateMessage(text);
       if (!allowed) {
         setModerationWarning('⚠️ Message blocked by AgentBlazer AI — please keep it respectful.');
-        setIsSending(false);
         return;
       }
 
-      try {
+      await addDoc(collection(db, 'chat_messages'), {
+        author: displayName,
+        content: text,
+        isBot: false,
+        isSystem: false,
+        timestamp: serverTimestamp(),
+      });
+
+      // Check for @agentblazer mention
+      if (text.toLowerCase().includes('@agentblazer')) {
+        const reply = await getAIResponse(text);
+        const botContent = reply || "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
+        
         await addDoc(collection(db, 'chat_messages'), {
-          author: displayName,
-          content: text,
-          isBot: false,
+          author: 'AgentBlazer AI',
+          content: botContent,
+          isBot: true,
           isSystem: false,
           timestamp: serverTimestamp(),
         });
-
-        // Check for @agentblazer mention
-        if (text.toLowerCase().includes('@agentblazer')) {
-          const reply = await getAIResponse(text);
-          const botContent = reply || "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
-          
-          await addDoc(collection(db, 'chat_messages'), {
-            author: 'AgentBlazer AI',
-            content: botContent,
-            isBot: true,
-            isSystem: false,
-            timestamp: serverTimestamp(),
-          });
-        }
-      } catch (error) {
-        console.error("Error sending message:", error);
       }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
       setIsSending(false);
-    });
+    }
   };
 
   const formatTime = (ts: number) => {
