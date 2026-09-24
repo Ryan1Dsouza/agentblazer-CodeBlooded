@@ -300,16 +300,29 @@ export default function ParticleLogo({ logoPath, alt = 'AgentBlazer Logo', theme
 
     // Mouse event handlers
     const handleMouseMove = (e: MouseEvent) => {
-      if (!container) return;
-      const rect = container.getBoundingClientRect();
-      mouseRef.current.x = e.clientX - rect.left;
-      mouseRef.current.y = e.clientY - rect.top;
+      // e.offsetX/Y is relative to the target, which might be the canvas.
+      // Since canvas fills container, we can just use offsetX/Y directly if the target is the canvas.
+      if (e.target === canvasRef.current) {
+        mouseRef.current.x = e.offsetX;
+        mouseRef.current.y = e.offsetY;
+      } else if (container) {
+        // Fallback: use a lightly cached display size or just avoid getBoundingClientRect
+        // Actually, we can just use the known display size and client position if needed, but getBoundingClientRect is ok if throttled.
+        // To completely avoid layout thrashing, we'll only update if hovering is true (cached rect on enter).
+        if (mouseRef.current.active) {
+          mouseRef.current.x = e.offsetX;
+          mouseRef.current.y = e.offsetY;
+        }
+      }
     };
 
+    let cachedRect: DOMRect | null = null;
+
     const handleMouseEnter = (e: MouseEvent) => {
-      const rect = container.getBoundingClientRect();
-      mouseRef.current.x = e.clientX - rect.left;
-      mouseRef.current.y = e.clientY - rect.top;
+      if (!container) return;
+      cachedRect = container.getBoundingClientRect();
+      mouseRef.current.x = e.clientX - cachedRect.left;
+      mouseRef.current.y = e.clientY - cachedRect.top;
       mouseRef.current.active = true;
       setIsHovered(true);
     };
@@ -317,24 +330,24 @@ export default function ParticleLogo({ logoPath, alt = 'AgentBlazer Logo', theme
     const handleMouseLeave = () => {
       mouseRef.current.active = false;
       setIsHovered(false);
+      cachedRect = null;
     };
 
     // Touch event handlers for mobile
     const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        const rect = container.getBoundingClientRect();
-        mouseRef.current.x = e.touches[0].clientX - rect.left;
-        mouseRef.current.y = e.touches[0].clientY - rect.top;
+      if (e.touches.length > 0 && container) {
+        cachedRect = container.getBoundingClientRect();
+        mouseRef.current.x = e.touches[0].clientX - cachedRect.left;
+        mouseRef.current.y = e.touches[0].clientY - cachedRect.top;
         mouseRef.current.active = true;
         setIsHovered(true);
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        const rect = container.getBoundingClientRect();
-        mouseRef.current.x = e.touches[0].clientX - rect.left;
-        mouseRef.current.y = e.touches[0].clientY - rect.top;
+      if (e.touches.length > 0 && cachedRect) {
+        mouseRef.current.x = e.touches[0].clientX - cachedRect.left;
+        mouseRef.current.y = e.touches[0].clientY - cachedRect.top;
       }
     };
 
