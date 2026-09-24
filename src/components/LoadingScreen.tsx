@@ -186,6 +186,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
             <span className="boot-enter-hint">{ready ? 'YOUR NEXT CHAPTER STARTS HERE' : 'ESTABLISHING YOUR CONNECTION'}</span>
           </section>
 
+        </div>
       </div>
       <span className="boot-sr-only" role="status" aria-live="polite">{ready ? 'System unlocked. Enter AgentBlazer is ready.' : 'Loading AgentBlazer resources.'}</span>
       {ready && <div className="boot-unlock-flash" aria-hidden="true"><div><span>ACCESS GRANTED / {environment.code}</span><strong>SYSTEM UNLOCKED</strong><span>WELCOME TO AGENTBLAZER</span></div></div>}
