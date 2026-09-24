@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import EventBulletin from '../components/community/EventBulletin';
 import CommunityVoice from '../components/community/CommunityVoice';
-import NexusChat from '../components/community/NexusChat';
+
+const NexusChat = lazy(() => import('../components/community/NexusChat'));
 
 type Tab = 'bulletin' | 'voice' | 'chat';
 
@@ -64,7 +65,11 @@ export default function Community() {
         <div className="community-content">
           {activeTab === 'bulletin' && <EventBulletin isAdmin={isAdmin} />}
           {activeTab === 'voice' && <CommunityVoice isAdmin={isAdmin} />}
-          {activeTab === 'chat' && <NexusChat />}
+          {activeTab === 'chat' && (
+            <Suspense fallback={<div className="loading-state">Loading chat environment...</div>}>
+              <NexusChat />
+            </Suspense>
+          )}
         </div>
       </div>
     </section>

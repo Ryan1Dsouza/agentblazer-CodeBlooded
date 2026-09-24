@@ -1,6 +1,5 @@
 import { createContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
-import { auth, googleProvider } from '../lib/firebase';
+import type { User } from 'firebase/auth';
 import { COLLEGE_ACCOUNT_ERROR, getAuthErrorMessage, getCollegeDisplayName, isCollegeGoogleUser } from '../lib/authPolicy';
 
 interface AuthContextValue {
@@ -23,34 +22,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (!active) return;
+    let unsubscribe: (() => void) | undefined;
 
-      // Validate restored sessions and new Google sign-ins before exposing a user to chat.
-      if (currentUser && isCollegeGoogleUser(currentUser)) {
-        setUser(currentUser);
-        setAuthError('');
-      } else {
-        setUser(null);
-        if (currentUser) {
-          setAuthError(COLLEGE_ACCOUNT_ERROR);
-          void signOut(auth).catch(() => {
-            // Keep chat locked even if clearing the rejected Firebase session fails.
-            if (active) setAuthError(COLLEGE_ACCOUNT_ERROR);
-          });
-        }
-      }
-      setIsInitializing(false);
-    }, (error) => {
-      if (!active) return;
-      setUser(null);
-      setAuthError(getAuthErrorMessage(error));
-      setIsInitializing(false);
-    });
+    // Defer the heavy Firebase SDK initialization to free up the main thread during initial load
+    const timer = setTimeout(() => {
+      Promise.all([
+        import('firebase/auth'),
+        import('../lib/firebase')
+      ]).then(([{ onAuthStateChanged, signOut }, { auth }]) => {
+        if (!active) return;
+        unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+          if (!active) return;
+          if (currentUser && isCollegeGoogleUser(currentUser)) {
+            setUser(currentUser);
+            setAuthError('');
+          } else {
+            setUser(null);
+            if (currentUser) {
+              setAuthError(COLLEGE_ACCOUNT_ERROR);
+              void signOut(auth).catch(() => {
+                if (active) setAuthError(COLLEGE_ACCOUNT_ERROR);
+              });
+            }
+          }
+          setIsInitializing(false);
+        }, (error) => {
+          if (!active) return;
+          setUser(null);
+          setAuthError(getAuthErrorMessage(error));
+          setIsInitializing(false);
+        });
+      }).catch((err) => {
+        console.warn('Failed to load Firebase auth:', err);
+        if (active) setIsInitializing(false);
+      });
+    }, 1000);
 
     return () => {
       active = false;
-      unsubscribe();
+      clearTimeout(timer);
+      if (unsubscribe) unsubscribe();
     };
   }, []);
 
@@ -61,8 +72,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthError('');
 
     try {
-      // Call directly from the click, before any await, to preserve the browser's popup permission.
-      // The shared auth observer validates the resulting account before unlocking either chat.
+      const [{ signInWithPopup }, { auth, googleProvider }] = await Promise.all([
+        import('firebase/auth'),
+        import('../lib/firebase')
+      ]);
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
       setAuthError(getAuthErrorMessage(error));
@@ -78,6 +91,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsPending(true);
     setAuthError('');
     try {
+      const [{ signOut }, { auth }] = await Promise.all([
+        import('firebase/auth'),
+        import('../lib/firebase')
+      ]);
       await signOut(auth);
     } catch {
       setAuthError('Could not sign out. Please try again.');
