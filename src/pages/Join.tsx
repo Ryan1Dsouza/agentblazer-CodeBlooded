@@ -5,7 +5,7 @@ import OrbitingSocials from '../components/OrbitingSocials';
 
 export default function Join() {
   const { theme } = useTheme();
-  const logoPath = '/AgentBlazer_Logo.png';
+  const logoPath = '/AgentBlazer_Logo.webp';
 
   return (
     <section className="join-page">
