@@ -169,7 +169,8 @@ npm run preview
 
 Developed with passion for **Build Blazer — Phase 2** by:
 
-*   **Team Lead**: Shaun / Ryan D'Souza
+*   **Team Lead**: Ryan David Dsouza
+*   **Team Members**: Kevin John Lewis and Shaun
 *   **Team CodeBlooded**: St Joseph Engineering College, Mangaluru
 *   **Event**: Build Blazer Phase 2 (Organized by **AgentBlazer Club** in collaboration with **CIPHER - CSE Association**)
 
