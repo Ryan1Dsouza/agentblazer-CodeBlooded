@@ -115,7 +115,7 @@
 .boot-core { display: flex; flex-direction: column; align-items: center; min-width: 0; position: relative; padding-top: 2px; }
 .boot-core-caption { display: flex; justify-content: space-between; gap: 12px; width: 100%; font: 8px var(--boot-mono); letter-spacing: .12em; color: var(--boot-dim); }
 .boot-core-caption > span:first-child { color: var(--boot-muted); }
-.boot-gyroscope { --gyro-angle: 0deg; width: min(100%, 750px); aspect-ratio: 1; margin: 15px 0 60px; position: relative; perspective: 750px; }
+.boot-gyroscope { --gyro-angle: 0deg; width: min(100%, 750px, 60vh); flex-shrink: 0; aspect-ratio: 1; margin: 15px 0 60px; position: relative; perspective: 750px; }
 .boot-core-aura { position: absolute; inset: 3%; border-radius: 50%; background: radial-gradient(circle, rgba(var(--boot-rgb), .19), rgba(var(--boot-rgb), .05) 45%, transparent 70%); }
 .boot-orbit-ticks { position: absolute; inset: 8%; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(var(--boot-rgb), .45) 0deg .4deg, transparent .4deg 5deg); mask-image: radial-gradient(closest-side, transparent 96%, #000 97%); transform: rotate(calc(var(--gyro-angle) * -.18)); }
 .boot-orbit-track { position: absolute; inset: 13%; border: 1px solid rgba(var(--boot-rgb), .18); border-radius: 50%; }
