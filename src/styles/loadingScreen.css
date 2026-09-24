@@ -134,7 +134,7 @@
 .boot-crosshair--bottom { bottom: 0; left: calc(50% - 4px); }
 .boot-crosshair--left { left: 1%; top: calc(50% - 8px); }
 .boot-crosshair--right { right: 1%; top: calc(50% - 8px); }
-.boot-logo-core { position: absolute; inset: 0; display: grid; place-items: center; transform: translateZ(35px); }
+.boot-logo-core { position: absolute; inset: 5%; display: grid; place-items: center; transform: translateZ(35px); }
 .boot-logo-core::before { display: none; }
 .boot-logo-core img { width: 100%; height: 100%; object-fit: contain; }
 .boot-logo-fallback { font-size: 42px; font-weight: 600; color: #f0edf9; letter-spacing: -.08em; }
@@ -145,7 +145,7 @@
 .boot-core-state { display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--boot-secondary); font: 8px var(--boot-mono); letter-spacing: .17em; }
 .boot-core-message h2 { font-size: clamp(25px, 2.4vw, 35px); font-weight: 400; letter-spacing: -.04em; margin-top: 8px; }
 .boot-core-message p { color: var(--boot-muted); font-size: 12px; margin: 7px 0 19px; }
-.boot-enter { position: relative; display: flex; justify-content: center; align-items: center; gap: 14px; width: min(100%, 275px); margin: 0 auto; min-height: 49px; padding: 12px 19px; border: 1px solid rgba(var(--boot-rgb), .8); border-radius: 5px; background: rgba(var(--boot-rgb), .1); overflow: hidden; font-size: 13px !important; font-weight: 500 !important; transition: background .2s, border-color .2s; }
+.boot-enter { position: relative; display: flex; justify-content: center; align-items: center; gap: 14px; width: min(100%, 275px); margin: 60px auto 0; min-height: 49px; padding: 12px 19px; border: 1px solid rgba(var(--boot-rgb), .8); border-radius: 5px; background: rgba(var(--boot-rgb), .1); overflow: hidden; font-size: 13px !important; font-weight: 500 !important; transition: background .2s, border-color .2s; }
 .boot-enter > span, .boot-enter > svg { position: relative; z-index: 1; }
 .boot-enter > svg { color: var(--boot-secondary); }
 .boot-enter:disabled { cursor: wait; opacity: .6; }
