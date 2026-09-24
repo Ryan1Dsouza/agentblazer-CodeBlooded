@@ -1,0 +1,102 @@
+.expedition-hud {
+  --hud-accent: #c6a6ff;
+  --hud-rgb: 173, 132, 255;
+  position: fixed;
+  z-index: 35;
+  box-sizing: border-box;
+  isolation: isolate;
+  overflow: hidden;
+  color: #ecf7ff;
+  background: linear-gradient(135deg, rgba(var(--hud-rgb), 0.09), transparent 65%), rgba(8, 18, 30, 0.82);
+  border: 1px solid rgba(var(--hud-rgb), 0.26);
+  border-top-color: rgba(var(--hud-rgb), 0.52);
+  border-radius: 18px;
+  box-shadow: 0 14px 44px #0004, inset 0 1px 0 #ffffff0a;
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  backdrop-filter: blur(22px) saturate(145%);
+  font-family: 'Outfit', system-ui, sans-serif;
+  pointer-events: none;
+  user-select: none;
+  animation: expedition-hud-enter 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.expedition-hud[data-mode='frost'] { --hud-accent: #86ecff; --hud-rgb: 92, 221, 250; }
+.expedition-hud[data-mode='inferno'] { --hud-accent: #ffb189; --hud-rgb: 255, 143, 85; }
+.expedition-hud::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 22px;
+  width: 46px;
+  height: 2px;
+  background: var(--hud-accent);
+  box-shadow: 0 0 14px rgba(var(--hud-rgb), 0.6);
+}
+.expedition-controls { bottom: max(24px, env(safe-area-inset-bottom)); left: max(24px, env(safe-area-inset-left)); width: 304px; padding: 18px; }
+.expedition-hud__header { display: flex; align-items: center; gap: 11px; margin-bottom: 17px; }
+.expedition-hud__icon { display: grid; place-items: center; flex: 0 0 36px; height: 36px; color: var(--hud-accent); background: rgba(var(--hud-rgb), 0.08); border: 1px solid rgba(var(--hud-rgb), 0.2); border-radius: 11px; }
+.expedition-hud__eyebrow { display: block; margin-bottom: 3px; color: var(--hud-accent); font: 9px/1.4 'Space Mono', monospace; letter-spacing: 1.8px; text-transform: uppercase; }
+.expedition-hud .expedition-hud__title { margin: 0; color: #f2faff; font: 500 18px/1.15 'Outfit', sans-serif; letter-spacing: -0.3px; }
+.expedition-hud__signal { margin-left: auto; display: flex; align-items: end; gap: 3px; height: 13px; opacity: 0.8; }
+.expedition-hud__signal i { width: 3px; height: 5px; border-radius: 1px; background: var(--hud-accent); }
+.expedition-hud__signal i:nth-child(2) { height: 9px; }
+.expedition-hud__signal i:nth-child(3) { height: 13px; animation: expedition-signal 3s ease-in-out infinite; }
+.expedition-controls__list { display: grid; gap: 0; margin: 0; }
+.expedition-controls__row { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; border-top: 1px solid rgba(var(--hud-rgb), 0.1); }
+.expedition-controls__row dt { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 400; line-height: 1.3; }
+.expedition-controls__row dt > svg { color: var(--hud-accent); opacity: 0.8; flex-shrink: 0; }
+.expedition-controls__row small { display: block; margin-top: 3px; color: #9ab0c0; font-size: 10px; }
+.expedition-controls__row dd { margin: 0; flex-shrink: 0; }
+.expedition-controls__keys { display: flex; gap: 3px; }
+.expedition-controls kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 21px; height: 24px; box-sizing: border-box; padding: 0 5px; color: #d8edf5; background: rgba(198, 225, 244, 0.065); border: 1px solid rgba(198, 225, 244, 0.17); border-bottom-width: 2px; border-radius: 5px; font: 10px/1 'Space Mono', monospace; }
+.expedition-controls kbd.expedition-controls__boost-key { gap: 12px; color: var(--hud-accent); border-color: rgba(var(--hud-rgb), 0.35); background: rgba(var(--hud-rgb), 0.09); }
+.expedition-controls__footer { display: flex; gap: 7px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(var(--hud-rgb), 0.14); color: #aac0cd; font-size: 10px; line-height: 1.5; }
+.expedition-hud__dot { display: inline-block; flex: 0 0 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--hud-accent); box-shadow: 0 0 8px rgba(var(--hud-rgb), 0.4); }
+.expedition-controls__docking { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 0 20px; color: var(--hud-accent); }
+.expedition-controls__docking strong { display: block; color: #e5faff; font-size: 13px; font-weight: 500; }
+.expedition-controls__docking span { display: block; margin-top: 4px; color: #a6bfce; font-size: 11px; }
+.expedition-controls__scan { position: absolute; inset: auto 0 0; height: 2px; background: rgba(var(--hud-rgb), 0.1); overflow: hidden; }
+.expedition-controls__scan::after { content: ''; position: absolute; width: 40%; height: 100%; background: var(--hud-accent); animation: expedition-scan 1.8s ease-in-out infinite; }
+.expedition-controls__touch { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 11px; }
+.expedition-controls__touch > span { display: flex; align-items: center; gap: 5px; }
+.expedition-controls__touch svg, .expedition-controls__touch strong { color: var(--hud-accent); }
+.expedition-controls[data-touch='true'] { bottom: 194px; }
+
+.expedition-target { top: 84px; right: max(24px, env(safe-area-inset-right)); width: 258px; padding: 17px 18px 14px; }
+.expedition-target__label { display: flex; align-items: center; gap: 8px; color: var(--hud-accent); font: 9px/1.4 'Space Mono', monospace; letter-spacing: 1.6px; text-transform: uppercase; }
+.expedition-target__label .expedition-hud__dot { margin-left: auto; }
+.expedition-hud .expedition-target__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; margin: 10px 0 14px; color: #ecf7ff; font: 500 15px/1.35 'Outfit', sans-serif; overflow-wrap: anywhere; }
+.expedition-target__telemetry { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.expedition-target__distance { display: flex; align-items: center; gap: 6px; }
+.expedition-target__distance strong { font: 400 29px/1 'Outfit', sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -1px; }
+.expedition-target__distance > span { font-size: 11px; color: var(--hud-accent); }
+.expedition-target__distance small { display: block; margin-top: 2px; font-size: 8px; letter-spacing: 0.4px; color: #a5becd; text-transform: uppercase; }
+.expedition-target__status { display: inline-flex; align-items: center; gap: 5px; color: var(--hud-accent); padding: 5px 7px; border: 1px solid rgba(var(--hud-rgb), 0.18); border-radius: 6px; font-size: 9px; }
+.expedition-target__track { height: 2px; margin-top: 15px; background: rgba(var(--hud-rgb), 0.13); }
+.expedition-target__track > span { display: block; height: 100%; background: var(--hud-accent); transition: width 0.3s linear; }
+.expedition-target[data-docking='true'] .expedition-target__status { color: #94f5c1; border-color: #94f5c133; background: #94f5c10a; }
+.expedition-target[data-docking='true'] .expedition-hud__dot { animation: expedition-signal 1.2s ease-in-out infinite; }
+
+@keyframes expedition-hud-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes expedition-signal { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+@keyframes expedition-scan { from { transform: translateX(-100%); } to { transform: translateX(350%); } }
+
+@media (max-width: 767px) {
+  .expedition-controls, .expedition-controls[data-touch='true'] { top: 116px; right: 12px; left: 12px; bottom: auto; width: auto; padding: 11px 13px; border-radius: 12px; }
+  .expedition-controls .expedition-hud__header, .expedition-controls__footer { display: none; }
+  .expedition-controls__list { display: none; }
+  .expedition-controls__docking { padding: 0 0 10px; }
+  .expedition-target { top: 178px; right: 12px; width: 222px; padding: 12px 14px; border-radius: 13px; }
+  .expedition-hud .expedition-target__name { font-size: 13px; margin: 8px 0 10px; }
+  .expedition-target__distance strong { font-size: 24px; }
+}
+@media (max-height: 560px) and (min-width: 768px) {
+  .expedition-controls { padding: 12px 15px; bottom: 14px; width: 282px; }
+  .expedition-controls .expedition-hud__header { display: none; }
+  .expedition-controls__row { min-height: 32px; }
+  .expedition-controls__row small { display: none; }
+  .expedition-controls__footer { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .expedition-hud, .expedition-hud *, .expedition-hud *::after { animation: none !important; transition: none !important; }
+}

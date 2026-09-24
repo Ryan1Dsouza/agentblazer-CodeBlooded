@@ -1,53 +1,72 @@
+import { Compass, Keyboard, Mouse, Navigation, Radio, Zap } from 'lucide-react';
+import './ExpeditionHUD.css';
+
 interface ModeHUDProps {
   theme: string;
   gameState: 'GAMEPLAY' | 'DOCKING' | 'HUD_OPEN';
+  isMobile?: boolean;
 }
 
-export default function ModeHUD({ theme, gameState }: ModeHUDProps) {
-  const themeAccent =
-    theme === 'inferno' ? '#ff6b35' : theme === 'frost' ? '#0ea5e9' : '#a855f7';
-
+export default function ModeHUD({ theme, gameState, isMobile = false }: ModeHUDProps) {
   if (gameState === 'HUD_OPEN') return null;
+  const frost = theme === 'frost';
+  const inferno = theme === 'inferno';
+  const docking = gameState === 'DOCKING';
+  const destination = frost ? 'outpost' : inferno ? 'depot' : 'station';
 
   return (
-    <div className="hidden sm:flex fixed bottom-6 left-6 pointer-events-none z-30 select-none">
-      <div
-        className="backdrop-blur-md bg-black/75 px-4 py-3 rounded-2xl border shadow-2xl flex flex-col gap-1.5"
-        style={{
-          borderColor: `${themeAccent}55`,
-          boxShadow: `0 0 20px ${themeAccent}33`
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <span
-            className="w-2 h-2 rounded-full animate-pulse"
-            style={{ backgroundColor: themeAccent, boxShadow: `0 0 8px ${themeAccent}` }}
-          />
-          <span className="text-[11px] font-mono font-bold tracking-wider text-white uppercase">
-            {gameState === 'DOCKING' ? 'AUTOPILOT DOCKING...' : 'EXPEDITION CONTROLS'}
-          </span>
+    <aside className="expedition-hud expedition-controls" data-mode={theme} data-touch={isMobile} data-docking={docking} aria-label="Expedition instructions">
+      <div className="expedition-hud__header">
+        <span className="expedition-hud__icon"><Compass size={18} strokeWidth={1.5} /></span>
+        <div>
+          <span className="expedition-hud__eyebrow">{frost ? 'Arctic explorer' : inferno ? 'Magma expedition' : 'Orbital explorer'}</span>
+          <h3 className="expedition-hud__title">Pilot's guide</h3>
         </div>
-
-        {theme === 'inferno' ? (
-          <div className="text-[11px] text-gray-300 font-mono space-y-0.5">
-            <div><span className="text-white font-bold">Scroll / W S:</span> Drive Train along Spline</div>
-            <div><span className="text-white font-bold">Shift:</span> Overdrive Boost</div>
-            <div><span className="text-white font-bold">Approach Depot:</span> Automatic Docking</div>
-          </div>
-        ) : theme === 'frost' ? (
-          <div className="text-[11px] text-gray-300 font-mono space-y-0.5">
-            <div><span className="text-white font-bold">Scroll Wheel:</span> Auto-Travel to Next Outpost</div>
-            <div><span className="text-white font-bold">WASD / Shift:</span> Drive & Sprint Zoom</div>
-            <div><span className="text-white font-bold">Approach Outpost:</span> Automatic Parking</div>
-          </div>
-        ) : (
-          <div className="text-[11px] text-gray-300 font-mono space-y-0.5">
-            <div><span className="text-white font-bold">Scroll Wheel:</span> Auto-Travel to Next Station</div>
-            <div><span className="text-white font-bold">WASD / Shift:</span> Free Flight & Hyper Boost</div>
-            <div><span className="text-white font-bold">Approach Station:</span> Automatic Docking</div>
-          </div>
-        )}
+        <span className="expedition-hud__signal" aria-hidden="true"><i /><i /><i /></span>
       </div>
-    </div>
+
+      {docking ? (
+        <div className="expedition-controls__docking" role="status">
+          <Radio size={20} />
+          <div><strong>Autopilot engaged</strong><span>Parking at the {destination}…</span></div>
+          <div className="expedition-controls__scan" aria-hidden="true" />
+        </div>
+      ) : isMobile ? (
+        <div className="expedition-controls__touch">
+          <span><Navigation size={15} /> Joystick to {inferno ? 'drive' : frost ? 'drive & steer' : 'fly'}</span>
+          <span><Zap size={15} /> Hold <strong>BOOST</strong></span>
+        </div>
+      ) : (
+        <dl className="expedition-controls__list">
+          <div className="expedition-controls__row">
+            <dt><Keyboard size={15} /><span>{inferno ? 'Drive train' : frost ? 'Drive & steer' : 'Free flight'}<small>Arrow keys also work</small></span></dt>
+            <dd className="expedition-controls__keys" aria-label={inferno ? 'W and S' : 'W A S D'}>
+              {(inferno ? ['W', 'S'] : ['W', 'A', 'S', 'D']).map((key) => <kbd key={key}>{key}</kbd>)}
+            </dd>
+          </div>
+          <div className="expedition-controls__row">
+            <dt><Zap size={15} /><span>{frost ? 'Polar boost' : inferno ? 'Overdrive' : 'Hyper boost'}</span></dt>
+            <dd><kbd className="expedition-controls__boost-key">Shift <span>↗</span></kbd></dd>
+          </div>
+          <div className="expedition-controls__row">
+            <dt><Mouse size={15} /><span>Follow the route</span></dt>
+            <dd><kbd>Scroll</kbd></dd>
+          </div>
+          {frost && (
+            <div className="expedition-controls__row">
+              <dt><Navigation size={15} /><span>Park at outpost<small>Within 25 m</small></span></dt>
+              <dd><kbd>E</kbd></dd>
+            </div>
+          )}
+        </dl>
+      )}
+
+      {!docking && (
+        <div className="expedition-controls__footer">
+          <span className="expedition-hud__dot" />
+          Approach the {destination} to {frost ? 'park' : 'dock'} automatically
+        </div>
+      )}
+    </aside>
   );
 }

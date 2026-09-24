@@ -159,7 +159,7 @@ export default function Events3DCanvas({
       )}
 
       {/* Minimal Bottom-Left Controls HUD only */}
-      <ModeHUD theme={theme} gameState={gameState} />
+      <ModeHUD theme={theme} gameState={gameState} isMobile={isMobile} />
 
       {/* Mobile Virtual Controls when in GAMEPLAY mode */}
       {isMobile && gameState === 'GAMEPLAY' && (

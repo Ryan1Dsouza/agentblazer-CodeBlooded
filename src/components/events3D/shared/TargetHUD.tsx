@@ -1,3 +1,6 @@
+import { Crosshair, Radio } from 'lucide-react';
+import './ExpeditionHUD.css';
+
 interface TargetHUDProps {
   targetName: string | null;
   distance: number;
@@ -7,58 +10,23 @@ interface TargetHUDProps {
 
 export default function TargetHUD({ targetName, distance, status, theme }: TargetHUDProps) {
   if (!targetName || status === 'IDLE') return null;
-
-  const accent =
-    theme === 'inferno' ? '#ff6b35' : theme === 'frost' ? '#0ea5e9' : '#8b5cf6';
-
-  const modeLabel =
-    theme === 'inferno' ? 'DEPOT' : theme === 'frost' ? 'OUTPOST' : 'STATION';
+  const docking = status === 'DOCKING';
+  const label = theme === 'inferno' ? 'Depot' : theme === 'frost' ? 'Research outpost' : 'Orbital station';
+  const metres = Number.isFinite(distance) ? Math.max(0, Math.round(distance)) : 0;
 
   return (
-    <div
-      className="fixed top-24 sm:top-20 right-4 sm:right-6 z-40 pointer-events-none select-none scale-75 sm:scale-100 origin-top-right"
-      style={{ fontFamily: 'monospace' }}
-    >
-      <div
-        className="px-4 py-3 rounded-2xl border backdrop-blur-md flex flex-col gap-1"
-        style={{
-          backgroundColor: 'rgba(0,0,0,0.75)',
-          borderColor: `${accent}66`,
-          boxShadow: `0 0 18px ${accent}33`,
-          minWidth: '180px'
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <span
-            className="w-2 h-2 rounded-full"
-            style={{
-              backgroundColor: accent,
-              boxShadow: `0 0 6px ${accent}`,
-              animation: status === 'DOCKING' ? 'pulse 0.6s infinite' : 'none'
-            }}
-          />
-          <span
-            className="text-[10px] font-bold uppercase tracking-widest"
-            style={{ color: accent }}
-          >
-            TARGET {modeLabel}
-          </span>
-        </div>
-        <span className="text-sm font-bold text-white truncate max-w-[200px]">
-          {targetName}
-        </span>
-        <div className="flex items-center justify-between gap-3 text-[11px]">
-          <span className="text-gray-400">
-            DIST <span className="text-white font-bold">{Math.round(distance)}m</span>
-          </span>
-          <span
-            className="font-bold uppercase tracking-wider"
-            style={{ color: status === 'DOCKING' ? '#22c55e' : accent }}
-          >
-            {status === 'DOCKING' ? 'DOCKING...' : 'APPROACHING'}
-          </span>
-        </div>
+    <aside className="expedition-hud expedition-target" data-mode={theme} data-docking={docking} aria-label="Navigation target">
+      <div className="expedition-target__label">
+        <Crosshair size={15} strokeWidth={1.5} />
+        <span>{label}</span>
+        <span className="expedition-hud__dot" aria-hidden="true" />
       </div>
-    </div>
+      <h3 className="expedition-target__name" title={targetName}>{targetName}</h3>
+      <div className="expedition-target__telemetry">
+        <div className="expedition-target__distance"><strong>{metres}</strong><span>m<small>Distance</small></span></div>
+        <span className="expedition-target__status" role="status"><Radio size={12} />{docking ? 'Docking' : 'Approaching'}</span>
+      </div>
+      <div className="expedition-target__track" aria-hidden="true"><span style={{ width: docking ? '100%' : Math.max(4, Math.min(100, (1 - metres / 60) * 100)) + '%' }} /></div>
+    </aside>
   );
 }

@@ -5,6 +5,7 @@ import { Event } from '../../../../types';
 import ArcticRoverVehicle from './ArcticRoverVehicle';
 import ArcticTundraTerrain from './ArcticTundraTerrain';
 import ArcticResearchOutpost from './ArcticResearchOutpost';
+import { getFrostCameraRig } from './frostCamera';
 
 interface FrostSceneProps {
   events: Event[];
@@ -39,7 +40,42 @@ export default function FrostLodgeScene({
   const roverYaw = useRef(0);
   const [speedVal, setSpeedVal] = useState(0);
   const [steerVal, setSteerVal] = useState(0);
+  const [boostVal, setBoostVal] = useState(0);
   const [trailProgress, setTrailProgress] = useState(0);
+  const boostBlend = useRef(0);
+  const cameraAnchor = useRef(new THREE.Vector3(0, 0, 10));
+  const cameraYaw = useRef(0);
+  const cameraLookTarget = useRef(new THREE.Vector3());
+
+  // Restore the shared canvas lens when leaving Frost or changing missions.
+  useEffect(() => {
+    const perspective = camera as THREE.PerspectiveCamera;
+    if (!perspective.isPerspectiveCamera) return;
+    const initialFov = perspective.fov;
+    return () => {
+      perspective.fov = initialFov;
+      perspective.updateProjectionMatrix();
+    };
+  }, [camera]);
+
+  const updateChaseCamera = (dt: number) => {
+    const rig = getFrostCameraRig(boostBlend.current);
+    const followAlpha = 1 - Math.exp(-8 * dt);
+    cameraAnchor.current.lerp(roverPos.current, followAlpha);
+    const yawDelta = Math.atan2(
+      Math.sin(roverYaw.current - cameraYaw.current),
+      Math.cos(roverYaw.current - cameraYaw.current)
+    );
+    cameraYaw.current += yawDelta * (1 - Math.exp(-6 * dt));
+    const sinYaw = Math.sin(cameraYaw.current);
+    const cosYaw = Math.cos(cameraYaw.current);
+    const anchor = cameraAnchor.current;
+
+    // Share one smoothed anchor for camera and aim; independent lag makes boost pitch downward.
+    camera.position.set(anchor.x + sinYaw * rig.distance, anchor.y + rig.height, anchor.z + cosYaw * rig.distance);
+    cameraLookTarget.current.set(anchor.x - sinYaw * rig.lookAhead, anchor.y + rig.lookHeight, anchor.z - cosYaw * rig.lookAhead);
+    camera.lookAt(cameraLookTarget.current);
+  };
 
   // Smooth Scroll Autopilot state
   const currentScrollProgress = useRef(0);
@@ -141,16 +177,34 @@ export default function FrostLodgeScene({
       keys.current[e.key.toLowerCase()] = false;
       if (e.key === 'Shift') keys.current['shift'] = false;
     };
+    const clearKeys = () => { keys.current = {}; };
     window.addEventListener('keydown', onDown);
     window.addEventListener('keyup', onUp);
+    window.addEventListener('blur', clearKeys);
     return () => {
       window.removeEventListener('keydown', onDown);
       window.removeEventListener('keyup', onUp);
+      window.removeEventListener('blur', clearKeys);
     };
   }, [gameState, outpostPositions, onDockComplete]);
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
+    const boostRequested = gameState === 'GAMEPLAY' && !isScrollNavigating.current
+      && (!!keys.current['shift'] || !!mobileBoost);
+    const boostTarget = boostRequested ? THREE.MathUtils.clamp(roverVelocity.current.length() / 12, 0, 1) : 0;
+    boostBlend.current = THREE.MathUtils.damp(boostBlend.current, boostTarget, 4, dt);
+    setBoostVal(boostBlend.current);
+
+    // Also settle the lens during autopilot, docking, and the event modal.
+    const perspective = camera as THREE.PerspectiveCamera;
+    if (perspective.isPerspectiveCamera) {
+      const targetFov = getFrostCameraRig(boostBlend.current).fov;
+      if (Math.abs(perspective.fov - targetFov) > 0.001) {
+        perspective.fov = targetFov;
+        perspective.updateProjectionMatrix();
+      }
+    }
 
     // Only tick down cooldown during active GAMEPLAY exploration
     if (gameState === 'GAMEPLAY' && dockingCooldown.current > 0) {
@@ -188,6 +242,8 @@ export default function FrostLodgeScene({
       );
       camera.position.lerp(desiredCamPos, dt * 5);
       camera.lookAt(targetOutpost);
+      cameraAnchor.current.copy(roverPos.current);
+      cameraYaw.current = roverYaw.current;
 
       // Update target HUD
       const dist = roverPos.current.distanceTo(targetOutpost);
@@ -243,15 +299,7 @@ export default function FrostLodgeScene({
         onSpeedUpdate(18, false);
       }
 
-      const camOffset = new THREE.Vector3(
-        Math.sin(roverYaw.current) * 7.5,
-        2.8,
-        Math.cos(roverYaw.current) * 7.5
-      );
-      const desiredCamPos = roverPos.current.clone().add(camOffset);
-      camera.position.lerp(desiredCamPos, dt * 6);
-      const lookTarget = roverPos.current.clone().add(splineTangent.clone().multiplyScalar(4));
-      camera.lookAt(lookTarget);
+      updateChaseCamera(dt);
 
       // GUARANTEED OUTPOST INTERCEPT: Check if progress interval [prevP, currP] crosses outpost
       outpostSplineTs.forEach((stT, idx) => {
@@ -318,9 +366,9 @@ export default function FrostLodgeScene({
     }
 
     const curSpeed = roverVelocity.current.length();
-    setSpeedVal(curSpeed);
+    setSpeedVal(roverVelocity.current.dot(forwardDir));
     if (onSpeedUpdate) {
-      onSpeedUpdate(curSpeed, boosting);
+      onSpeedUpdate(curSpeed, boosting && curSpeed > 1);
     }
 
     const zProgress = Math.max(0, Math.min(0.98, (10 - roverPos.current.z) / 102));
@@ -330,30 +378,7 @@ export default function FrostLodgeScene({
     currentScrollProgress.current = zProgress;
     targetScrollProgress.current = zProgress;
 
-    // Dynamic Camera FOV & Zoom-In on Shift Boost
-    const targetFov = boosting ? 54 : 60; // 54deg zooms in on the rover
-    if ((camera as THREE.PerspectiveCamera).fov !== targetFov) {
-      (camera as THREE.PerspectiveCamera).fov = THREE.MathUtils.lerp(
-        (camera as THREE.PerspectiveCamera).fov,
-        targetFov,
-        dt * 4
-      );
-      (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
-    }
-
-    // Chase Camera update (pulled in closer on Shift boost)
-    const camDistance = boosting ? 6.2 : 7.5;
-    const camHeight = boosting ? 2.3 : 2.8;
-    const camOffset = new THREE.Vector3(
-      Math.sin(roverYaw.current) * camDistance,
-      camHeight,
-      Math.cos(roverYaw.current) * camDistance
-    );
-    const desiredCamPos = roverPos.current.clone().add(camOffset);
-    camera.position.lerp(desiredCamPos, dt * (boosting ? 7.5 : 6.0));
-
-    const lookTarget = roverPos.current.clone().add(forwardDir.clone().multiplyScalar(4));
-    camera.lookAt(lookTarget);
+    updateChaseCamera(dt);
 
     // PROXIMITY DETECTION — find nearest outpost & update target HUD
     let nearestIdx = -1;
@@ -404,7 +429,7 @@ export default function FrostLodgeScene({
 
       {/* Player Arctic Rover Vehicle */}
       <group ref={roverGroupRef}>
-        <ArcticRoverVehicle speed={speedVal} steering={steerVal} />
+        <ArcticRoverVehicle speed={speedVal} steering={steerVal} boost={boostVal} />
       </group>
 
       {/* 3 Research Outposts at Event Coordinates */}
