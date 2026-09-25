@@ -14,6 +14,10 @@ service cloud.firestore {
       allow delete: if isCollegeGoogleUser();
     }
 
+    match /bulletin_posts/{postId} {
+      allow read, write: if true;
+    }
+
     // Presence: each signed-in user can write their own doc; anyone signed in can read all
     match /presence/{userId} {
       allow read: if isCollegeGoogleUser();

@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 interface BulletinPost {
   id: string;
@@ -15,18 +17,7 @@ interface Props {
   isAdmin: boolean;
 }
 
-function getStoredPosts(): BulletinPost[] {
-  try {
-    const raw = localStorage.getItem('nexus_bulletin_posts');
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
 
-function savePosts(posts: BulletinPost[]) {
-  localStorage.setItem('nexus_bulletin_posts', JSON.stringify(posts));
-}
 
 function getYouTubeEmbedUrl(url: string): string | null {
   if (!url) return null;
@@ -43,7 +34,7 @@ function getYouTubeEmbedUrl(url: string): string | null {
 }
 
 export default function EventBulletin({ isAdmin }: Props) {
-  const [posts, setPosts] = useState<BulletinPost[]>(getStoredPosts);
+  const [posts, setPosts] = useState<BulletinPost[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedPost, setSelectedPost] = useState<BulletinPost | null>(null);
   const [form, setForm] = useState({
@@ -55,26 +46,50 @@ export default function EventBulletin({ isAdmin }: Props) {
     videoUrl: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const q = query(collection(db, 'bulletin_posts'), orderBy('createdAt', 'desc'));
+    const unsub = onSnapshot(q, (snapshot) => {
+      const loaded: BulletinPost[] = [];
+      snapshot.forEach((d) => {
+        const data = d.data();
+        loaded.push({
+          id: d.id,
+          title: data.title || '',
+          date: data.date || '',
+          description: data.description || '',
+          location: data.location || '',
+          imageUrl: data.imageUrl || '',
+          videoUrl: data.videoUrl || '',
+          createdAt: data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now(),
+        });
+      });
+      setPosts(loaded);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim() || !form.date.trim()) return;
 
-    const newPost: BulletinPost = {
-      id: Date.now().toString(36),
-      ...form,
-      createdAt: Date.now(),
-    };
-    const updated = [newPost, ...posts];
-    setPosts(updated);
-    savePosts(updated);
-    setForm({ title: '', date: '', description: '', location: '', imageUrl: '', videoUrl: '' });
-    setShowForm(false);
+    try {
+      await addDoc(collection(db, 'bulletin_posts'), {
+        ...form,
+        createdAt: serverTimestamp(),
+      });
+      setForm({ title: '', date: '', description: '', location: '', imageUrl: '', videoUrl: '' });
+      setShowForm(false);
+    } catch (err) {
+      console.error('Error adding bulletin post:', err);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    const updated = posts.filter((p) => p.id !== id);
-    setPosts(updated);
-    savePosts(updated);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'bulletin_posts', id));
+    } catch (err) {
+      console.error('Error deleting bulletin post:', err);
+    }
   };
 
   const isDirectVideo = (url: string) => {

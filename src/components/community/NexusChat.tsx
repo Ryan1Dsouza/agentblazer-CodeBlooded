@@ -40,9 +40,20 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
   const [chatError, setChatError] = useState('');
   const [showMentionMenu, setShowMentionMenu] = useState(false);
   const [mentionFilter, setMentionFilter] = useState('');
+  const [lastMessageTime, setLastMessageTime] = useState(0);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // ── Cooldown timer ───────────────────────────────────────────────────────
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return;
+    const timer = setTimeout(() => {
+      setCooldownRemaining(prev => prev - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [cooldownRemaining]);
 
   // ── Auto-scroll ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -131,10 +142,10 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
     if (!user) { setInput(''); setShowMentionMenu(false); return; }
 
     // Only fetch messages from the last 24 hours (86400000 ms)
-    const twentyFourHoursAgo = Date.now() - 86400000;
+    const twentyFourHoursAgoDate = new Date(Date.now() - 86400000);
     const q = query(
       collection(db, 'chat_messages'), 
-      where('timestamp', '>=', twentyFourHoursAgo),
+      where('timestamp', '>=', twentyFourHoursAgoDate),
       orderBy('timestamp', 'asc'), 
       limit(200)
     );
@@ -167,10 +178,10 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
     if (!isAdmin || !user) return;
     const cleanupOldMessages = async () => {
       try {
-        const twentyFourHoursAgo = Date.now() - 86400000;
+        const twentyFourHoursAgoDate = new Date(Date.now() - 86400000);
         const oldQuery = query(
           collection(db, 'chat_messages'),
-          where('timestamp', '<', twentyFourHoursAgo),
+          where('timestamp', '<', twentyFourHoursAgoDate),
           limit(50) 
         );
         const snapshot = await getDocs(oldQuery);
@@ -264,7 +275,16 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !user) return;
+    if (!input.trim() || !user || cooldownRemaining > 0) return;
+    
+    // 2-second cooldown
+    if (Date.now() - lastMessageTime < 2000) {
+      setModerationWarning('⏳ Please wait 2 seconds before sending another message.');
+      return;
+    }
+    setLastMessageTime(Date.now());
+    setCooldownRemaining(2);
+    
     const text = input.trim();
     setInput('');
     setModerationWarning('');
@@ -272,12 +292,12 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
 
     (async () => {
       try {
-        const allowed = await moderateMessage(text);
-        if (!allowed) {
+        if (clientSideProfanityCheck(text)) {
           setModerationWarning('⚠️ Message blocked — please keep it respectful.');
           return;
         }
-        await addDoc(collection(db, 'chat_messages'), {
+
+        const docRef = await addDoc(collection(db, 'chat_messages'), {
           author: displayName,
           authorUid: user.uid,
           content: text,
@@ -285,6 +305,14 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
           isSystem: false,
           timestamp: serverTimestamp(),
         });
+        
+        // Run AI moderation in the background so it doesn't block the UI
+        moderateMessage(text).then((allowed) => {
+          if (!allowed) {
+            deleteDoc(doc(db, 'chat_messages', docRef.id)).catch(() => {});
+          }
+        });
+
         if (text.toLowerCase().includes('@agentblazer')) {
           const reply = await getAIResponse(text);
           await addDoc(collection(db, 'chat_messages'), {
@@ -523,7 +551,19 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
               placeholder="Message #community-chat"
               maxLength={500}
             />
-            <button type="submit" className="btn-send" disabled={!input.trim()}>➤</button>
+            <button 
+              type="submit" 
+              className="btn-send" 
+              disabled={!input.trim() || cooldownRemaining > 0}
+              style={{ 
+                opacity: cooldownRemaining > 0 ? 0.7 : 1, 
+                transition: 'all 0.2s ease',
+                width: cooldownRemaining > 0 ? 'auto' : undefined,
+                padding: cooldownRemaining > 0 ? '0 1rem' : undefined
+              }}
+            >
+              {cooldownRemaining > 0 ? `${cooldownRemaining}s` : '➤'}
+            </button>
           </form>
         </div>
       </div>
