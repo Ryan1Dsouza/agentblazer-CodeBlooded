@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { officers } from '../data/team';
 import { committeeMembers } from '../data/committee';
 import { siteConfig } from '../data/config';
@@ -108,14 +109,20 @@ function BehindTheScenes({ onClose }: { onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = dialogRef.current;
-    if (dialog && !dialog.open) dialog.showModal();
+    if (dialog && !dialog.open) {
+      const scrollY = window.scrollY;
+      dialog.showModal();
+      dialog.focus({ preventScroll: true });
+      window.scrollTo(0, scrollY);
+      requestAnimationFrame(() => window.scrollTo(0, scrollY));
+    }
     return () => { if (dialog?.open) dialog.close(); };
   }, []);
 
-  return (
+  const dialogContent = (
     <dialog
       ref={dialogRef}
-      className="about-secret-dialog about-surface"
+      className="about-secret-dialog about-surface about-low-poly"
       aria-labelledby="about-secret-title"
       onCancel={onClose}
       onClick={event => { if (event.target === event.currentTarget) onClose(); }}
@@ -127,6 +134,8 @@ function BehindTheScenes({ onClose }: { onClose: () => void }) {
       <p>You found the Easter egg created by <strong>Ryan</strong> and <strong>Kevin</strong>. Welcome to the people behind AgentBlazer.</p>
     </dialog>
   );
+  
+  return createPortal(dialogContent, document.body);
 }
 
 export default function About() {

@@ -45,6 +45,7 @@ function getYouTubeEmbedUrl(url: string): string | null {
 export default function EventBulletin({ isAdmin }: Props) {
   const [posts, setPosts] = useState<BulletinPost[]>(getStoredPosts);
   const [showForm, setShowForm] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<BulletinPost | null>(null);
   const [form, setForm] = useState({
     title: '',
     date: '',
@@ -82,6 +83,31 @@ export default function EventBulletin({ isAdmin }: Props) {
 
   return (
     <div className="bulletin-section">
+      {selectedPost && (
+        <div 
+          className="bulletin-modal-overlay" 
+          onClick={() => setSelectedPost(null)} 
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
+        >
+          <div 
+            className="bulletin-modal-content glass-panel" 
+            onClick={e => e.stopPropagation()} 
+            style={{ padding: '2rem', borderRadius: '12px', maxWidth: '800px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}
+          >
+            <button 
+              onClick={() => setSelectedPost(null)} 
+              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer', zIndex: 10 }}
+            >✕</button>
+            <img src={selectedPost.imageUrl} alt={selectedPost.title} style={{ width: '100%', height: 'auto', borderRadius: '8px', marginBottom: '1.5rem', maxHeight: '60vh', objectFit: 'contain' }} />
+            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: '#fff' }}>{selectedPost.title}</h2>
+            <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+              📅 {new Date(selectedPost.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} 
+              {selectedPost.location && ` • 📍 ${selectedPost.location}`}
+            </p>
+            {selectedPost.description && <p style={{ lineHeight: 1.6, color: '#fff', whiteSpace: 'pre-wrap' }}>{selectedPost.description}</p>}
+          </div>
+        </div>
+      )}
       <div className="bulletin-header">
         <div>
           <h2 className="section-title">
@@ -229,7 +255,7 @@ export default function EventBulletin({ isAdmin }: Props) {
               <div key={post.id} className="bulletin-card glass-panel">
                 {/* Media */}
                 {post.imageUrl && (
-                  <div className="bulletin-media">
+                  <div className="bulletin-media" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
                     <img src={post.imageUrl} alt={post.title} loading="lazy" />
                   </div>
                 )}

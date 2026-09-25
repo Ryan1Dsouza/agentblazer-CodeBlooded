@@ -14,7 +14,7 @@ export default function BackgroundScene() {
       zIndex: -1,
       opacity: 0.6
     }}>
-      <Canvas camera={{ position: [0, 0, 50], fov: 60 }}>
+      <Canvas camera={{ position: [0, 0, 50], fov: 60 }} dpr={[1, 1.5]} gl={{ powerPreference: "low-power", antialias: false, stencil: false, depth: false }}>
         <ParticleField />
         <NetworkNodes />
         <FloatingGeometry />

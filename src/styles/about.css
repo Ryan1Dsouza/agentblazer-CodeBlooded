@@ -170,7 +170,7 @@
 }
 
 .about-profile-dialog,
-.about-secret-dialog { width: min(760px, calc(100vw - 32px)); max-height: calc(100svh - 48px); margin: auto; padding: 2.25rem; overflow-y: auto; }
+.about-secret-dialog { position: fixed; inset: 0; width: min(760px, calc(100vw - 32px)); max-height: calc(100svh - 48px); margin: auto; padding: 2.25rem; overflow-y: auto; }
 .about-profile-dialog::backdrop,
 .about-secret-dialog::backdrop { background: var(--about-backdrop); }
 .about-low-poly .about-dialog-close { position: absolute; z-index: 2; top: 0.7rem; right: 0.85rem; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; background: var(--about-facet); border: 1px solid var(--about-line); color: var(--about-accent); font-size: 1.35rem; line-height: 1; }

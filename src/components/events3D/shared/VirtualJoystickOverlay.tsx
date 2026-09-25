@@ -112,6 +112,7 @@ export default function VirtualJoystickOverlay({
           onTouchStart={handleStickStart}
           onTouchMove={handleStickMove}
           onTouchEnd={handleStickEnd}
+          onTouchCancel={handleStickEnd}
           className="relative w-28 h-28 rounded-full border-2 bg-black/40 backdrop-blur-md flex items-center justify-center transition-shadow shadow-lg touch-none"
           style={{
             borderColor: active ? themeAccent : 'rgba(255,255,255,0.2)',

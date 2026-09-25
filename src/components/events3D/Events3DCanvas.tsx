@@ -69,6 +69,9 @@ export default function Events3DCanvas({
 
   // Handle docking sequence callback from 3D scene
   const handleDockComplete = (idx: number) => {
+    setMobileMove({ x: 0, y: 0 });
+    setMobileLook({ x: 0, y: 0 });
+    setMobileBoost(false);
     if (idx === -1) {
       // Transitioning to docking sequence
       setGameState('DOCKING');
@@ -81,11 +84,17 @@ export default function Events3DCanvas({
   };
 
   const handleInspect = (event: Event) => {
+    setMobileMove({ x: 0, y: 0 });
+    setMobileLook({ x: 0, y: 0 });
+    setMobileBoost(false);
     setGameState('HUD_OPEN');
     setModalEvent(event);
   };
 
   const handleCloseHUD = () => {
+    setMobileMove({ x: 0, y: 0 });
+    setMobileLook({ x: 0, y: 0 });
+    setMobileBoost(false);
     setModalEvent(null);
     setGameState('GAMEPLAY');
   };

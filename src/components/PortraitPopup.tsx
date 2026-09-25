@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { TeamMember } from '../types';
 
 interface Props {
@@ -14,16 +15,22 @@ export default function PortraitPopup({ member, onClose }: Props) {
     const dialog = dialogRef.current;
     if (!member || !dialog) return;
     setImageError(false);
-    if (!dialog.open) dialog.showModal();
+    if (!dialog.open) {
+      const scrollY = window.scrollY;
+      dialog.showModal();
+      dialog.focus({ preventScroll: true });
+      window.scrollTo(0, scrollY);
+      requestAnimationFrame(() => window.scrollTo(0, scrollY));
+    }
     return () => { if (dialog.open) dialog.close(); };
   }, [member]);
 
   if (!member) return null;
 
-  return (
+  const dialogContent = (
     <dialog
       ref={dialogRef}
-      className="about-profile-dialog about-surface"
+      className="about-profile-dialog about-surface about-low-poly"
       aria-labelledby="about-profile-name"
       onCancel={onClose}
       onClick={event => { if (event.target === event.currentTarget) onClose(); }}
@@ -48,4 +55,6 @@ export default function PortraitPopup({ member, onClose }: Props) {
       </div>
     </dialog>
   );
+
+  return createPortal(dialogContent, document.body);
 }

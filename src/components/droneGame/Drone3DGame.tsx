@@ -303,6 +303,7 @@ export default function Drone3DGame({ events }: Props) {
       <Canvas
         ref={canvasRef}
         camera={{ position: [0, 5, 20], fov: 60 }}
+        dpr={[1, 1.5]}
         gl={{ 
           antialias: true, 
           alpha: false,

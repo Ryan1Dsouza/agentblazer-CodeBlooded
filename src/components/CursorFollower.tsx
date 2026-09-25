@@ -100,8 +100,13 @@ export default function CursorFollower() {
 
   return (
     <>
-      <style>{`@media (pointer: fine) { * { cursor: none !important; } }`}</style>
-      <div aria-hidden="true" style={{ pointerEvents: 'none', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 999999 }}>
+      <style>{`
+        @media (pointer: fine) { 
+          body:not(:has(dialog[open])) * { cursor: none !important; } 
+          body:has(dialog[open]) .custom-cursor-container { display: none !important; }
+        }
+      `}</style>
+      <div className="custom-cursor-container" aria-hidden="true" style={{ pointerEvents: 'none', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 999999 }}>
         {/* Trail dots */}
         {Array.from({ length: 12 }).map((_, i) => (
           <div
