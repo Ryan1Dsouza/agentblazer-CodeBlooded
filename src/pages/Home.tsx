@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { siteConfig } from '../data/config';
 import StatPanel from '../components/StatPanel';
-import Badge from '../components/Badge';
 import ParticleLogo from '../components/ParticleLogo';
 import OrbitingSocials from '../components/OrbitingSocials';
 import FeaturedEvents from '../components/home/FeaturedEvents';
@@ -14,7 +13,7 @@ export default function Home() {
 
   return (
     <>
-    <section className="home-hero">
+    <section className="home-hero" aria-labelledby="home-heading">
       <div className="container">
         <div className="hero-grid centered-layout">
           <div className="hero-visual">
@@ -31,25 +30,20 @@ export default function Home() {
           </div>
 
           <div className="hero-content centered-content">
-            <div className="hero-badge-wrapper">
-              <Badge text={siteConfig.club.badge} />
-            </div>
+            <p className="hero-eyebrow">{siteConfig.club.badge}</p>
 
-            <h1 className="hero-title">
-              Pioneering Autonomous<br />
-              <span className="accent-text">and Agentic</span> AI Systems
+            <h1 id="home-heading" className="hero-title">
+              Pioneering autonomous and agentic AI systems
             </h1>
 
-            <div className="hero-dept-card">
-              <div className="dept-indicator" aria-hidden="true" />
-              <p className="hero-dept">
-                <span className="hero-dept-main">{siteConfig.department.name}</span>
-                <span className="hero-dept-sub">{siteConfig.department.college}</span>
-              </p>
-            </div>
+            <p className="hero-affiliation">
+              <span>{siteConfig.department.name}</span>
+              <span>{siteConfig.department.college}</span>
+            </p>
 
             <p className="hero-description">
-              {siteConfig.club.description}
+              We bring engineering students together to learn about autonomous and agentic AI
+              through practical workshops, collaborative projects, and mentorship.
             </p>
 
             <div className="hero-buttons">

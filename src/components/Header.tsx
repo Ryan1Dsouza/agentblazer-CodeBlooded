@@ -36,10 +36,6 @@ export default function Header() {
             alt="AgentBlazer"
             className="header-logo"
           />
-          <div className="header-brand">
-            <span className="header-title">{siteConfig.club.name}</span>
-            <span className="header-subtitle">collective</span>
-          </div>
           <span className="header-dept">{siteConfig.department.name}</span>
         </div>
         

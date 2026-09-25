@@ -1,8 +1,9 @@
 import { useState, lazy, Suspense, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { ThemeProvider } from './hooks/useTheme'
 import MainLayout from './layouts/MainLayout'
 import LoadingScreen from './components/LoadingScreen'
+import PageLoading from './components/PageLoading'
 
 const Home = lazy(() => import('./pages/Home'))
 const About = lazy(() => import('./pages/About'))
@@ -13,6 +14,7 @@ const AdminGate = lazy(() => import('./components/community/AdminGate'))
 
 function App() {
   const [loading, setLoading] = useState(true)
+  const location = useLocation()
 
   useEffect(() => {
     (window as any).isAppLoading = loading;
@@ -22,7 +24,7 @@ function App() {
     <ThemeProvider>
       {loading && <LoadingScreen onComplete={() => setLoading(false)} />}
       <MainLayout>
-        <Suspense fallback={null}>
+        <Suspense key={location.pathname} fallback={<PageLoading />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />

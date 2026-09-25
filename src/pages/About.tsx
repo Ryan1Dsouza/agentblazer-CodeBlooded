@@ -1,326 +1,225 @@
-import { useState, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { officers } from '../data/team';
 import { committeeMembers } from '../data/committee';
 import { siteConfig } from '../data/config';
 import { TeamMember } from '../types';
-import TeamCard from '../components/TeamCard';
 import PortraitPopup from '../components/PortraitPopup';
+import AboutPortraitPreview from '../components/AboutPortraitPreview';
 import testcaseImg from '../../assets/Photos/testcase.jpg';
+import '../styles/about.css';
 
-// Mini component for adding hover previews to non-TeamCard elements
-function FloatingPreview({ member, isHovered, side }: { member: any, isHovered: boolean, side: string }) {
+const honoredMembers: TeamMember[] = [
+  {
+    id: 'honored-santosh', name: 'Mr. Santosh Rebello', role: 'Guest of Honor',
+    organization: 'Salesforce', department: 'Keynote Speaker', category: 'Leadership',
+    photoPath: '/Photos/santhoshRebello.jpg',
+    quote: "A language that doesn't affect the way you think about programming is not worth knowing.",
+  },
+  {
+    id: 'honored-stephen', name: 'Mr. Stephen Pinto', role: 'Technical Mentor',
+    organization: 'Salesforce & SJEC Alumnus', department: 'Alumni Guide', category: 'Leadership',
+    photoPath: '',
+    quote: 'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
+  },
+  {
+    id: 'honored-rio', name: "Dr. Rio D'Souza", role: 'Presidential Address',
+    organization: 'Principal, SJEC', department: 'Patron', category: 'Leadership',
+    photoPath: '/Photos/principal.jpg',
+    quote: "One man's crappy software is another man's full-time job.",
+  },
+  {
+    id: 'honored-melwyn', name: "Dr. Melwyn D'Souza", role: 'Program Chair',
+    organization: 'HOD, Computer Science & Engineering', department: 'Department Head', category: 'Leadership',
+    photoPath: '/Photos/Melwyn.jpg', quote: 'Make it work, make it right, make it fast.',
+  },
+];
+
+const facultyMembers: TeamMember[] = [
+  {
+    id: 'faculty-nisha', name: 'Ms. Nisha Roche',
+    role: 'Assistant Professor, CSE · Faculty Coordinator',
+    department: 'CSE', category: 'Faculty', organization: siteConfig.department.college,
+    photoPath: '/Photos/ms-nisha-jenifer-roche.jpg',
+    quote: 'If debugging is the process of removing software bugs, then programming must be the process of putting them in.',
+  },
+  {
+    id: 'faculty-keith', name: 'Mr. Keith Fernandes',
+    role: 'Assistant Professor, CSE · Faculty Coordinator',
+    department: 'CSE', category: 'Faculty', organization: siteConfig.department.college,
+    photoPath: '/Photos/mr-keith-raymond-fernandes.jpg',
+    quote: 'Sometimes it pays to stay in bed on Monday, rather than spending the rest of the week debugging Monday’s code.',
+  },
+];
+
+const peopleSections = [
+  { id: 'honored', title: 'Honored guests & college leadership', members: honoredMembers, wide: true },
+  { id: 'faculty', title: 'Faculty advisory council', members: facultyMembers, wide: true },
+  { id: 'officers', title: 'Student core team & officers', members: officers, wide: false },
+  { id: 'committee', title: 'Core working committee', members: committeeMembers, wide: false },
+];
+
+function PersonCard({ member, onSelect, isSelected, onPreview, onPreviewEnd }: {
+  member: TeamMember;
+  onSelect: (member: TeamMember) => void;
+  isSelected: boolean;
+  onPreview: (member: TeamMember, anchor: HTMLButtonElement) => void;
+  onPreviewEnd: () => void;
+}) {
   const [imageError, setImageError] = useState(false);
-  const hasValidImage = Boolean(member.photoPath) && !imageError;
-  
-  if (!hasValidImage) return null;
+  const initials = member.name.replace(/^(Mr\.|Ms\.|Dr\.)\s*/, '').split(' ').filter(Boolean).slice(0, 2).map(word => word[0]).join('');
+  const showPreview = (anchor: HTMLButtonElement) => {
+    if (member.photoPath && !imageError && !isSelected) onPreview(member, anchor);
+    else onPreviewEnd();
+  };
 
   return (
-    <div 
-      className={`team-card-floating-preview side-${side} ${isHovered ? 'visible' : ''}`}
-      aria-hidden={!isHovered}
+    <button
+      type="button"
+      className="about-person about-surface"
+      onClick={() => onSelect(member)}
+      onPointerEnter={event => { if (event.pointerType !== 'touch') showPreview(event.currentTarget); }}
+      onPointerLeave={onPreviewEnd}
+      onFocus={event => { if (event.currentTarget.matches(':focus-visible')) showPreview(event.currentTarget); }}
+      onBlur={onPreviewEnd}
+      data-selected={isSelected}
+      aria-label={`View ${member.name}'s profile`}
+      aria-haspopup="dialog"
     >
-      <div className="floating-preview-inner">
-        <div className="floating-preview-img-wrapper">
-          <img 
-            src={member.photoPath} 
-            alt={member.name}
-            className="floating-preview-img"
-            onError={() => setImageError(true)}
-            loading="lazy"
-          />
-        </div>
-        <div className="floating-preview-caption">
-          <span className="floating-preview-name">{member.name}</span>
-          <span className="floating-preview-role">{member.role}</span>
-          {member.quote && <span className="floating-preview-quote">"{member.quote}"</span>}
-        </div>
-      </div>
-    </div>
+      <span className="about-person__portrait" aria-hidden="true">
+        {member.photoPath && !imageError ? (
+          <img src={member.photoPath} alt="" loading="lazy" onError={() => setImageError(true)} />
+        ) : (
+          <span className="about-person__initials">{initials}</span>
+        )}
+      </span>
+      <span className="about-person__body">
+        <span className="about-person__category">{member.category === 'Leadership' ? member.department : member.category}</span>
+        <span className="about-person__name">{member.name}</span>
+        <span className="about-person__role">{member.role}</span>
+        <span className="about-person__detail">{member.organization || member.department}</span>
+      </span>
+      {member.quote && <span className="about-person__quote">“{member.quote}”</span>}
+      <span className="about-person__action">View profile <span aria-hidden="true">↗</span></span>
+    </button>
   );
 }
 
-function HoverableHonoredCard({ p, onSelect }: { p: any, onSelect: () => void }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [side, setSide] = useState<'left' | 'right'>('right');
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseEnter = useCallback(() => {
-    if (cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      setSide(rect.right + 260 <= window.innerWidth ? 'right' : 'left');
-    }
-    setIsHovered(true);
+function BehindTheScenes({ onClose }: { onClose: () => void }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) dialog.showModal();
+    return () => { if (dialog?.open) dialog.close(); };
   }, []);
 
   return (
-    <div 
-      className="card-wrapper"
-      ref={cardRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={() => setIsHovered(false)}
+    <dialog
+      ref={dialogRef}
+      className="about-secret-dialog about-surface"
+      aria-labelledby="about-secret-title"
+      onCancel={onClose}
+      onClick={event => { if (event.target === event.currentTarget) onClose(); }}
     >
-      <div 
-        className="honored-card hud-panel"
-        onClick={onSelect}
-        style={{ cursor: 'pointer' }}
-      >
-        <div className="honored-avatar">
-          {p.photoPath ? (
-            <img src={p.photoPath} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'12px'}} loading="lazy" />
-          ) : (
-            <span className="honored-initials">{p.name.split(' ').slice(-1)[0][0]}{p.name.split(' ').slice(0, -1).pop()?.[0] || 'D'}</span>
-          )}
-        </div>
-        <div className="honored-body">
-          <h4 className="honored-name">{p.name}</h4>
-          <p className="honored-org">{p.org}</p>
-          <div className="honored-footer">
-            <span className="honored-designation">{p.design}</span>
-            <span className="honored-tag hud-status-tag">{p.tag}</span>
-          </div>
-          {p.quote && <p className="team-quote honored-quote">"{p.quote}"</p>}
-        </div>
-      </div>
-      <FloatingPreview member={{ name: p.name, role: p.design, photoPath: p.photoPath }} isHovered={isHovered} side={side} />
-    </div>
-  );
-}
-
-function HoverableFacultyCard({ p, onSelect }: { p: any, onSelect: () => void }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [side, setSide] = useState<'left' | 'right'>('right');
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseEnter = useCallback(() => {
-    if (cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      setSide(rect.right + 260 <= window.innerWidth ? 'right' : 'left');
-    }
-    setIsHovered(true);
-  }, []);
-
-  return (
-    <div 
-      className="card-wrapper"
-      ref={cardRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div 
-        className="faculty-card hud-panel" 
-        onClick={onSelect}
-        style={{ cursor: 'pointer' }}
-      >
-        <div className="faculty-avatar">
-          {p.photoPath ? (
-            <img src={p.photoPath} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'10px'}} loading="lazy" />
-          ) : (
-            <span className="faculty-initials">{p.initials}</span>
-          )}
-        </div>
-        <div className="faculty-body">
-          <h4 className="faculty-name">{p.name}</h4>
-          <p className="faculty-designation">{p.role}</p>
-          {p.quote && <p className="team-quote faculty-quote">"{p.quote}"</p>}
-        </div>
-      </div>
-      <FloatingPreview member={{ name: p.name, role: p.role, photoPath: p.photoPath }} isHovered={isHovered} side={side} />
-    </div>
+      <button type="button" className="about-dialog-close" onClick={onClose} aria-label="Close behind the scenes">×</button>
+      <p className="about-eyebrow">A hidden corner of the club</p>
+      <h2 id="about-secret-title">Behind the scenes</h2>
+      <img src={testcaseImg} alt="Core developers" />
+      <p>You found the Easter egg created by <strong>Ryan</strong> and <strong>Kevin</strong>. Welcome to the people behind AgentBlazer.</p>
+    </dialog>
   );
 }
 
 export default function About() {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [preview, setPreview] = useState<{ member: TeamMember; anchor: HTMLButtonElement } | null>(null);
+  const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [easterEggClicks, setEasterEggClicks] = useState(0);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
 
-  const handleAdvisorSelect = (name: string, role: string, photo: string) => {
-    setSelectedMember({
-      id: `faculty-${name}`,
-      name,
-      role,
-      department: 'CSE',
-      category: 'Faculty',
-      photoPath: photo,
-      organization: siteConfig.department.college
-    });
+  const keepPreviewOpen = useCallback(() => {
+    if (previewTimer.current !== null) clearTimeout(previewTimer.current);
+    previewTimer.current = null;
+  }, []);
+  const closePreview = useCallback(() => {
+    keepPreviewOpen();
+    setPreview(null);
+  }, [keepPreviewOpen]);
+  const schedulePreviewClose = () => {
+    keepPreviewOpen();
+    // Allow the pointer to cross the gap between a card and its portrait.
+    previewTimer.current = setTimeout(closePreview, 140);
   };
-  
-  const handleHonoredSelect = (name: string, role: string, org: string, photo: string, tag: string) => {
-    setSelectedMember({
-      id: `honored-${name}`,
-      name,
-      role,
-      department: tag,
-      category: 'Leadership' as const,
-      photoPath: photo,
-      organization: org
-    });
+  const showPreview = (member: TeamMember, anchor: HTMLButtonElement) => {
+    keepPreviewOpen();
+    setPreview({ member, anchor });
+  };
+  const selectMember = (member: TeamMember) => {
+    closePreview();
+    setSelectedMember(member);
+  };
+  useEffect(() => keepPreviewOpen, [keepPreviewOpen]);
+
+  const revealBehindTheScenes = () => {
+    const count = easterEggClicks + 1;
+    setEasterEggClicks(count >= 3 ? 0 : count);
+    if (count >= 3) {
+      closePreview();
+      setShowEasterEgg(true);
+    }
   };
 
   return (
-    <section className="about-page">
-      <div className="container">
-        <div className="hud-section-header">
-          <div className="drone-beacon-indicator" aria-hidden="true" />
-          <h2 className="hud-section-label">Foundations & Leadership</h2>
-        </div>
-        
-        <div className="inauguration-card glass-panel-elevated">
-          <h3>Inauguration & Mentorship Council</h3>
-          <p>The Agentblazer Club was inaugurated on August 25, 2025, with the mission of fostering a culture of innovation in AI and machine learning. Our mentorship council guides students through their journey in building autonomous and agentic AI systems.</p>
-          <p>{siteConfig.department.name}<br />{siteConfig.department.college}</p>
-        </div>
-        
-        <div className="hud-section-header">
-          <div className="drone-beacon-indicator" aria-hidden="true" />
-          <h3 className="hud-section-label">Honored Guests & College Leadership</h3>
-        </div>
-        <div className="honored-grid">
-          {[
-            { name: 'Mr. Santosh Rebello', org: 'Salesforce', design: 'Guest of Honor', tag: 'Keynote Speaker', photoPath: '/Photos/santhoshRebello.jpg', quote: 'A language that doesn\'t affect the way you think about programming is not worth knowing.' },
-            { name: 'Mr. Stephen Pinto', org: 'Salesforce & SJEC Alumnus', design: 'Technical Mentor', tag: 'Alumni Guide', photoPath: '', quote: 'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.' },
-            { name: "Dr. Rio D'Souza", org: 'Principal, SJEC', design: 'Presidential Address', tag: 'Patron', photoPath: '/Photos/principal.jpg', quote: 'One man\'s crappy software is another man\'s full-time job.' },
-            { name: "Dr. Melwyn D'Souza", org: 'HOD, Computer Science & Engineering', design: 'Program Chair', tag: 'Department Head', photoPath: '/Photos/Melwyn.jpg', quote: 'Make it work, make it right, make it fast.' },
-          ].map((p, i) => (
-            <HoverableHonoredCard 
-              key={i} 
-              p={p} 
-              onSelect={() => handleHonoredSelect(p.name, p.design, p.org, p.photoPath, p.tag)} 
-            />
-          ))}
-        </div>
-        
-        <div className="hud-section-header">
-          <div className="drone-beacon-indicator" aria-hidden="true" />
-          <h3 className="hud-section-label">Faculty Advisory Council</h3>
-        </div>
-        <div className="faculty-council">
-          <div className="faculty-row">
-            {[
-              { name: 'Ms. Nisha Roche', role: 'Assistant Professor, CSE • Faculty Coordinator', initials: 'NR', photoPath: '/Photos/ms-nisha-jenifer-roche.jpg', quote: 'If debugging is the process of removing software bugs, then programming must be the process of putting them in.' },
-              { name: 'Mr. Keith Fernandes', role: 'Assistant Professor, CSE • Faculty Coordinator', initials: 'KF', photoPath: '/Photos/mr-keith-raymond-fernandes.jpg', quote: 'Sometimes it pays to stay in bed on Monday, rather than spending the rest of the week debugging Monday’s code.' }
-            ].map((p, i) => (
-              <HoverableFacultyCard 
-                key={i} 
-                p={p} 
-                onSelect={() => handleAdvisorSelect(p.name, p.role, p.photoPath)} 
-              />
-            ))}
+    <section className="about-page about-low-poly" aria-labelledby="about-heading">
+      <div className="about-shell">
+        <header className="about-intro">
+          <p className="about-eyebrow">People & purpose</p>
+          <h1 id="about-heading">About AgentBlazer</h1>
+          <p className="about-lead">A student-led AI community bringing students and mentors together to learn, build, and share.</p>
+        </header>
+
+        <article className="about-inauguration about-surface" aria-labelledby="club-charter">
+          <div className="about-inauguration__copy">
+            <p className="about-eyebrow">Established <time dateTime="2025-08-25">25 August 2025</time></p>
+            <h2 id="club-charter">Inauguration & mentorship</h2>
+            <p>The club supports hands-on learning in AI and machine learning. Our mentorship council guides students as they explore and build autonomous and agentic AI systems.</p>
+            <p className="about-affiliation">{siteConfig.department.name}<br />{siteConfig.department.college}</p>
           </div>
-        </div>
-        
-        <div className="hud-section-header">
-          <div className="drone-beacon-indicator" aria-hidden="true" />
-          <h3 className="hud-section-label">Student Core Team & Officers</h3>
-        </div>
-        <div className="team-grid">
-          {officers.map((member) => (
-            <TeamCard 
-              key={member.id} 
-              member={{ ...member, category: 'Officer' }} 
-              onSelect={setSelectedMember} 
-              isSelected={selectedMember?.id === member.id}
+          <figure className="about-inauguration__photo">
+            <img
+              src="/Photos/inauguration.jpeg"
+              alt="Guests on stage at the AgentBlazer Club inauguration"
+              width={1080}
+              height={730}
+              decoding="async"
             />
-          ))}
-        </div>
+            <figcaption>Club inauguration · <time dateTime="2025-08-25">25 August 2025</time></figcaption>
+          </figure>
+        </article>
 
-        <div className="hud-section-header">
-          <div className="drone-beacon-indicator" aria-hidden="true" />
-          <h3 
-            className="hud-section-label" 
-            onClick={() => {
-              const newClicks = easterEggClicks + 1;
-              setEasterEggClicks(newClicks);
-              if (newClicks >= 3) {
-                setShowEasterEgg(true);
-                setEasterEggClicks(0);
-              }
-            }}
-            style={{ cursor: 'pointer', userSelect: 'none' }}
-          >
-            Core Working Committee
-          </h3>
-        </div>
-        <div className="committee-grid">
-          {committeeMembers.map((member) => (
-            <TeamCard 
-              key={member.id} 
-              member={{ ...member, category: 'Committee' }} 
-              onSelect={setSelectedMember} 
-              isSelected={selectedMember?.id === member.id}
-            />
-          ))}
-        </div>
-      </div>
-      
-      <PortraitPopup 
-        member={selectedMember} 
-        onClose={() => setSelectedMember(null)} 
-      />
-
-      {/* Easter Egg Modal */}
-      {showEasterEgg && (
-        <div 
-          onClick={() => setShowEasterEgg(false)}
-          style={{ 
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.85)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 999999,
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            padding: '1rem'
-          }}
-        >
-          <div 
-            className="hud-panel" 
-            onClick={e => e.stopPropagation()}
-            style={{ 
-              maxWidth: '550px', 
-              width: '90%', 
-              maxHeight: '85vh',
-              overflowY: 'auto',
-              padding: '2rem',
-              textAlign: 'center',
-              border: '2px solid var(--primary)',
-              background: 'rgba(10, 15, 30, 0.95)',
-              boxShadow: '0 0 40px rgba(0, 243, 255, 0.3), inset 0 0 20px rgba(0, 243, 255, 0.1)',
-              borderRadius: '16px',
-              position: 'relative'
-            }}
-          >
-            <button 
-              onClick={() => setShowEasterEgg(false)}
-              style={{
-                position: 'absolute',
-                top: '15px', right: '15px',
-                background: 'transparent', border: 'none',
-                color: 'var(--text-dim)', fontSize: '1.5rem', cursor: 'pointer',
-                zIndex: 10
-              }}
-            >✕</button>
-            
-            <h2 style={{ color: 'var(--primary)', marginBottom: '1rem', marginTop: '0.5rem', fontSize: '1.6rem', textTransform: 'uppercase', letterSpacing: '3px', textShadow: '0 0 10px var(--primary)' }}>
-              SYSTEM OVERRIDE
-            </h2>
-            
-            <div style={{ borderRadius: '8px', overflow: 'hidden', marginBottom: '1.5rem', border: '2px solid rgba(255,255,255,0.1)' }}>
-              <img 
-                src={testcaseImg} 
-                alt="Core Developers" 
-                style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} 
-              />
+        {peopleSections.map((section, index) => (
+          <section key={section.id} className="about-people-section" aria-labelledby={`about-${section.id}-title`}>
+            <div className="about-section-head">
+              <span className="about-section-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+              <h2 id={`about-${section.id}-title`}>
+                {section.id === 'committee' ? (
+                  <button type="button" className="about-section-trigger" onClick={revealBehindTheScenes}>{section.title}</button>
+                ) : section.title}
+              </h2>
             </div>
-            
-            <p style={{ color: 'var(--text)', fontSize: '1.15rem', lineHeight: '1.7', textAlign: 'justify' }}>
-              Shh... you found our hidden override terminal. This is a secret Easter egg planted by <strong style={{ color: 'var(--primary)' }}>Ryan</strong> and <strong style={{ color: 'var(--primary)' }}>Kevin</strong>. No one else knows this exists. Welcome to the true core of AgentBlazer!
-            </p>
-          </div>
-        </div>
+            <div className={`about-people-grid ${section.wide ? 'about-people-grid--wide' : ''}`}>
+              {section.members.map(member => (
+                <PersonCard key={member.id} member={member} onSelect={selectMember} isSelected={selectedMember?.id === member.id} onPreview={showPreview} onPreviewEnd={schedulePreviewClose} />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      {preview && !selectedMember && !showEasterEgg && (
+        <AboutPortraitPreview key={preview.member.id} member={preview.member} anchor={preview.anchor} onClose={closePreview} onPointerEnter={keepPreviewOpen} onPointerLeave={schedulePreviewClose} />
       )}
+      <PortraitPopup member={selectedMember} onClose={() => setSelectedMember(null)} />
+      {showEasterEgg && <BehindTheScenes onClose={() => setShowEasterEgg(false)} />}
     </section>
   );
 }

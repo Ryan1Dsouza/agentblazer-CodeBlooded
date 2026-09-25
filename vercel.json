@@ -1,7 +1,11 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/events", "destination": "/index.html" },
+    { "source": "/join", "destination": "/index.html" },
+    { "source": "/community", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" }
   ],
   "headers": [
     {

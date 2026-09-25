@@ -26,7 +26,7 @@ export default function MissionSelector({ onSelectMission }: MissionSelectorProp
       id: 'frost',
       name: 'Cryo Outpost',
       theme: 'frost' as Theme,
-      description: 'Sub-zero frozen wasteland. Deploy drones to survey the ice caverns.',
+      description: 'Follow snowy trails through pine groves and frozen lakes to discover event outposts.',
       color: '#0ea5e9',
       image: '/modes/frost.jpg'
     }

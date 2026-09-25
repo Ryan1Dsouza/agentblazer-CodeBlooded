@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
-import { Bot, LogOut } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { Bot } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -27,10 +26,7 @@ export default function NexusFloatingChat() {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const { user, displayName, authError, isAuthenticating, handleSignIn, handleSignOut } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Auth logic is now handled by useAuth hook
 
   useEffect(() => {
     if (isOpen) {
@@ -40,7 +36,7 @@ export default function NexusFloatingChat() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isTyping || !user || isAuthenticating) return;
+    if (!input.trim() || isTyping) return;
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -91,6 +87,7 @@ export default function NexusFloatingChat() {
     <div className="nexus-floating-chat" style={{ bottom: bottomPos }}>
       {isOpen && (
         <div
+          id="agentblazer-ai-chat"
           className="nfc-window"
           style={{
             width: '370px',
@@ -121,24 +118,11 @@ export default function NexusFloatingChat() {
               <span className="nfc-avatar">🤖</span>
               <div>
                 <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>AgentBlazer AI</h4>
-                <p className="nfc-status" style={{ margin: 0 }}>Online {displayName && `• ${displayName}`}</p>
+                <p className="nfc-status" style={{ margin: 0 }}>Club information assistant</p>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {user && (
-                <button 
-                  onClick={handleSignOut} 
-                  disabled={isAuthenticating}
-                  title="Sign Out"
-                  style={{
-                    background: 'transparent', border: 'none', color: 'var(--text-secondary)',
-                    cursor: 'pointer', display: 'flex', alignItems: 'center'
-                  }}
-                >
-                  <LogOut size={16} />
-                </button>
-              )}
-              <button className="nfc-close" onClick={() => setIsOpen(false)} style={{
+              <button className="nfc-close" aria-label="Close AI chat" onClick={() => setIsOpen(false)} style={{
                 background: 'transparent',
                 border: 'none',
                 color: 'var(--text-secondary)',
@@ -148,55 +132,13 @@ export default function NexusFloatingChat() {
             </div>
           </div>
           
-          {!user ? (
-            <div style={{ 
-              flex: 1, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              padding: '2rem',
-              textAlign: 'center'
-            }}>
-              <Bot size={48} color="var(--primary)" style={{ marginBottom: '1rem' }} />
-              <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>Sign In Required</h3>
-              <p style={{ margin: '0 0 1.5rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                Sign in with your @sjec.ac.in Google account to chat with the AgentBlazer AI.
-              </p>
-              
-              {authError && (
-                <div role="alert" style={{
-                  color: '#ff4d4f', background: 'rgba(255, 77, 79, 0.1)',
-                  padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem',
-                  marginBottom: '1rem', border: '1px solid rgba(255, 77, 79, 0.3)'
-                }}>
-                  {authError}
-                </div>
-              )}
-
-              <button 
-                type="button"
-                onClick={handleSignIn}
-                disabled={isAuthenticating}
-                style={{
-                  background: 'white', color: 'black', padding: '0.75rem 1.5rem',
-                  borderRadius: '24px', border: 'none', fontWeight: 600,
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  cursor: isAuthenticating ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 4px 12px rgba(255,255,255,0.2)',
-                  opacity: isAuthenticating ? 0.7 : 1
-                }}
-              >
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" style={{ width: 18, height: 18 }} />
-                {isAuthenticating ? 'Signing in...' : 'Sign in with Google'}
-              </button>
-            </div>
-          ) : (
-            <>
-              {authError && <p className="email-error" role="alert">{authError}</p>}
+          <>
               {/* Messages — this MUST flex-grow to fill all remaining space */}
               <div
                 className="nfc-messages"
+                role="log"
+                aria-label="AI conversation"
+                aria-live="polite"
                 style={{
                   flex: 1,
                   minHeight: 0,
@@ -240,17 +182,17 @@ export default function NexusFloatingChat() {
               >
                 <input 
                   type="text" 
+                  aria-label="Question for AgentBlazer AI"
                   placeholder="Ask about AgentBlazer..." 
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   disabled={isTyping}
                 />
-                <button type="submit" disabled={!input.trim() || isTyping}>
+                <button type="submit" aria-label="Send message" disabled={!input.trim() || isTyping}>
                   ➤
                 </button>
               </form>
-            </>
-          )}
+          </>
         </div>
       )}
 
@@ -258,6 +200,8 @@ export default function NexusFloatingChat() {
         className={`nfc-toggle-btn ${isOpen ? 'open' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle AI Chat"
+        aria-expanded={isOpen}
+        aria-controls="agentblazer-ai-chat"
         style={{ position: 'relative' }}
       >
         {/* Close Icon (Visible when open) */}

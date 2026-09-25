@@ -40,8 +40,6 @@ export default function FrostLodgeScene({
   const roverYaw = useRef(0);
   const [speedVal, setSpeedVal] = useState(0);
   const [steerVal, setSteerVal] = useState(0);
-  const [boostVal, setBoostVal] = useState(0);
-  const [trailProgress, setTrailProgress] = useState(0);
   const boostBlend = useRef(0);
   const cameraAnchor = useRef(new THREE.Vector3(0, 0, 10));
   const cameraYaw = useRef(0);
@@ -194,7 +192,6 @@ export default function FrostLodgeScene({
       && (!!keys.current['shift'] || !!mobileBoost);
     const boostTarget = boostRequested ? THREE.MathUtils.clamp(roverVelocity.current.length() / 12, 0, 1) : 0;
     boostBlend.current = THREE.MathUtils.damp(boostBlend.current, boostTarget, 4, dt);
-    setBoostVal(boostBlend.current);
 
     // Also settle the lens during autopilot, docking, and the event modal.
     const perspective = camera as THREE.PerspectiveCamera;
@@ -294,7 +291,6 @@ export default function FrostLodgeScene({
 
       setSpeedVal(18);
       setSteerVal(0);
-      setTrailProgress(currP);
       if (onSpeedUpdate) {
         onSpeedUpdate(18, false);
       }
@@ -372,7 +368,6 @@ export default function FrostLodgeScene({
     }
 
     const zProgress = Math.max(0, Math.min(0.98, (10 - roverPos.current.z) / 102));
-    setTrailProgress(zProgress);
 
     // Synchronize scroll progress tracker so scrolling can pick up smoothly
     currentScrollProgress.current = zProgress;
@@ -424,12 +419,12 @@ export default function FrostLodgeScene({
 
   return (
     <group>
-      {/* Frozen Tundra Snow Terrain & Aurora Sky */}
-      <ArcticTundraTerrain />
+      {/* Flat-shaded winter landscape and a marked snow trail. */}
+      <ArcticTundraTerrain stations={outpostPositions} route={groundSpline} />
 
       {/* Player Arctic Rover Vehicle */}
       <group ref={roverGroupRef}>
-        <ArcticRoverVehicle speed={speedVal} steering={steerVal} boost={boostVal} />
+        <ArcticRoverVehicle speed={speedVal} steering={steerVal} />
       </group>
 
       {/* 3 Research Outposts at Event Coordinates */}
@@ -452,37 +447,6 @@ export default function FrostLodgeScene({
         );
       })}
 
-      {/* Dynamic Forward-Only Disappearing Ground Energy Trail */}
-      <DynamicDisappearingGroundBeam spline={groundSpline} progress={trailProgress} />
-    </group>
-  );
-}
-
-function DynamicDisappearingGroundBeam({ spline, progress }: { spline: THREE.CatmullRomCurve3; progress: number }) {
-  const forwardSpline = useMemo(() => {
-    const startT = Math.min(0.96, Math.max(0, progress));
-    const subPoints: THREE.Vector3[] = [];
-    const steps = 30;
-    for (let i = 0; i <= steps; i++) {
-      const t = startT + (i / steps) * (1.0 - startT);
-      const pt = spline.getPointAt(t);
-      subPoints.push(new THREE.Vector3(pt.x, 0.05, pt.z)); // Snag directly to snow surface
-    }
-    return new THREE.CatmullRomCurve3(subPoints, false, 'catmullrom', 0.2);
-  }, [spline, progress]);
-
-  if (progress >= 0.97) return null;
-
-  return (
-    <group>
-      <mesh>
-        <tubeGeometry args={[forwardSpline, 60, 0.16, 8, false]} />
-        <meshBasicMaterial color="#0ea5e9" transparent opacity={0.65} />
-      </mesh>
-      <mesh>
-        <tubeGeometry args={[forwardSpline, 60, 0.04, 6, false]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.85} />
-      </mesh>
     </group>
   );
 }

@@ -3485,7 +3485,7 @@ button {
 
 /* Main scroll container */
 .mobile-onepage-main {
-  padding-top: 58px; /* clear the fixed header */
+  padding-top: 80px; /* clear the fixed header */
 }
 
 /* Each page's section wrapper */
@@ -3493,7 +3493,7 @@ button {
   width: 100%;
   min-height: 100svh;
   position: relative;
-  scroll-margin-top: 58px; /* account for sticky header */
+  scroll-margin-top: 80px; /* account for sticky header */
 }
 
 /* Thin gradient divider between sections */

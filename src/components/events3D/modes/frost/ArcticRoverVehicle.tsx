@@ -6,7 +6,6 @@ import * as THREE from 'three';
 interface RoverProps {
   speed: number;
   steering: number;
-  boost?: number;
 }
 
 // Clipped corners and a tapered upper deck create a machined, faceted silhouette.
@@ -18,6 +17,8 @@ function createHull(width: number, height: number, length: number, taper = 0.86,
   ]));
 }
 
+const matte = (color: string) => new THREE.MeshStandardMaterial({ color, metalness: 0, roughness: 1, flatShading: true });
+
 function useRoverParts() {
   const parts = useMemo(() => ({
     hull: createHull(1.68, 0.48, 3.35),
@@ -26,15 +27,15 @@ function useRoverParts() {
     fender: createHull(0.55, 0.16, 1.27, 0.8),
     tread: new THREE.BoxGeometry(0.155, 0.085, 0.12),
     spoke: new THREE.BoxGeometry(0.035, 0.34, 0.065),
-    armor: new THREE.MeshStandardMaterial({ color: '#d8e6ed', metalness: 0.6, roughness: 0.32 }),
-    graphite: new THREE.MeshStandardMaterial({ color: '#152734', metalness: 0.8, roughness: 0.4 }),
-    titanium: new THREE.MeshStandardMaterial({ color: '#8ca8ba', metalness: 0.9, roughness: 0.25 }),
-    rubber: new THREE.MeshStandardMaterial({ color: '#101920', metalness: 0.12, roughness: 0.9 }),
-    treadMaterial: new THREE.MeshStandardMaterial({ color: '#283640', metalness: 0.32, roughness: 0.75 }),
-    glass: new THREE.MeshPhysicalMaterial({ color: '#123e51', metalness: 0.6, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.08 }),
-    cyan: new THREE.MeshBasicMaterial({ color: '#72edff', toneMapped: false }),
-    white: new THREE.MeshBasicMaterial({ color: '#e4fcff', toneMapped: false }),
-    amber: new THREE.MeshBasicMaterial({ color: '#ffac70', toneMapped: false }),
+    armor: matte('#e1ebf1'),
+    graphite: matte('#405363'),
+    titanium: matte('#9eb3c1'),
+    rubber: matte('#3b4851'),
+    treadMaterial: matte('#536571'),
+    glass: matte('#789eaf'),
+    cyan: matte('#9bc2d2'),
+    white: matte('#f5f9fb'),
+    marker: matte('#bdcdd7'),
   }), []);
   useEffect(() => () => Object.values(parts).forEach((part) => part.dispose()), [parts]);
   return parts;
@@ -90,15 +91,15 @@ function RoverWheel({ position, side, front, speed, steering, parts }: {
     <group ref={knuckle} position={position}>
       <group ref={rolling}>
         <mesh rotation={[0, 0, Math.PI / 2]} material={parts.rubber}>
-          <cylinderGeometry args={[0.465, 0.465, 0.36, 24]} />
+          <cylinderGeometry args={[0.465, 0.465, 0.36, 12]} />
         </mesh>
         <instancedMesh ref={treads} args={[parts.tread, parts.treadMaterial, 40]} />
         <mesh rotation={[0, 0, Math.PI / 2]} material={parts.graphite}>
-          <cylinderGeometry args={[0.29, 0.29, 0.39, 24]} />
+          <cylinderGeometry args={[0.29, 0.29, 0.39, 12]} />
         </mesh>
         <instancedMesh ref={spokes} args={[parts.spoke, parts.titanium, 6]} />
         <mesh position={[side * 0.208, 0, 0]} rotation={[0, Math.PI / 2, 0]} material={parts.cyan}>
-          <torusGeometry args={[0.245, 0.018, 6, 24]} />
+          <torusGeometry args={[0.245, 0.018, 4, 12]} />
         </mesh>
         <mesh position={[side * 0.22, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={parts.titanium}>
           <cylinderGeometry args={[0.105, 0.105, 0.065, 6]} />
@@ -108,17 +109,10 @@ function RoverWheel({ position, side, front, speed, steering, parts }: {
   );
 }
 
-export default function ArcticRoverVehicle({ speed, steering, boost = 0 }: RoverProps) {
+export default function ArcticRoverVehicle({ speed, steering }: RoverProps) {
   const parts = useRoverParts();
   const body = useRef<THREE.Group>(null);
   const scanner = useRef<THREE.Group>(null);
-  const exhaust = useRef<THREE.Group>(null);
-  const driveLight = useRef<THREE.PointLight>(null);
-  const headlightTarget = useMemo(() => {
-    const target = new THREE.Object3D();
-    target.position.set(0, 0.2, -18);
-    return target;
-  }, []);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
@@ -128,12 +122,14 @@ export default function ArcticRoverVehicle({ speed, steering, boost = 0 }: Rover
       body.current.rotation.z = THREE.MathUtils.damp(body.current.rotation.z, -steering * moving * 0.035, 7, dt);
     }
     if (scanner.current) scanner.current.rotation.y += dt * 0.8;
-    if (exhaust.current) exhaust.current.scale.z = 0.55 + boost * 1.8;
-    if (driveLight.current) driveLight.current.intensity = 1.3 + boost * 2;
   });
 
   return (
     <group>
+      <mesh position={[0, -0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[0.62, 1, 1]}>
+        <circleGeometry args={[2.1, 8]} />
+        <meshBasicMaterial color="#b7cbd6" toneMapped={false} />
+      </mesh>
       {/* Forward is -Z, matching the scene's drive vector and steering axle. */}
       {[-1.08, 1.08].map((z) => (
         <mesh key={z} position={[0, 0.55, z]} rotation={[0, 0, Math.PI / 2]} material={parts.titanium}>
@@ -194,14 +190,14 @@ export default function ArcticRoverVehicle({ speed, steering, boost = 0 }: Rover
             <mesh position={[side * 0.58, 0.99, -1.59]} material={parts.white}>
               <boxGeometry args={[0.22, 0.1, 0.08]} />
             </mesh>
-            <mesh position={[side * 0.63, 1.07, 1.52]} material={parts.amber}>
+            <mesh position={[side * 0.63, 1.07, 1.52]} material={parts.marker}>
               <boxGeometry args={[0.2, 0.045, 0.05]} />
             </mesh>
             <mesh position={[side * 0.42, 0.83, 1.58]} rotation={[Math.PI / 2, 0, 0]} material={parts.graphite}>
               <cylinderGeometry args={[0.2, 0.24, 0.28, 12]} />
             </mesh>
             <mesh position={[side * 0.42, 0.83, 1.73]} material={parts.cyan}>
-              <torusGeometry args={[0.145, 0.025, 6, 20]} />
+              <torusGeometry args={[0.145, 0.025, 4, 10]} />
             </mesh>
           </group>
         ))}
@@ -219,7 +215,7 @@ export default function ArcticRoverVehicle({ speed, steering, boost = 0 }: Rover
         </mesh>
         <group ref={scanner} position={[0, 1.67, 0.56]}>
           <mesh material={parts.graphite}>
-            <cylinderGeometry args={[0.23, 0.25, 0.12, 16]} />
+            <cylinderGeometry args={[0.23, 0.25, 0.12, 8]} />
           </mesh>
           <mesh position={[0, 0, -0.232]} material={parts.cyan}>
             <boxGeometry args={[0.2, 0.045, 0.025]} />
@@ -228,22 +224,11 @@ export default function ArcticRoverVehicle({ speed, steering, boost = 0 }: Rover
         <mesh position={[-0.57, 1.59, 1.03]} material={parts.titanium}>
           <cylinderGeometry args={[0.009, 0.022, 0.67, 6]} />
         </mesh>
-        <mesh position={[-0.57, 1.935, 1.03]} material={parts.amber}>
-          <sphereGeometry args={[0.035, 8, 6]} />
+        <mesh position={[-0.57, 1.935, 1.03]} material={parts.marker}>
+          <octahedronGeometry args={[0.045, 0]} />
         </mesh>
       </group>
 
-      <group ref={exhaust} position={[0, 0.83, 1.73]}>
-        {[-0.42, 0.42].map((x) => (
-          <mesh key={x} position={[x, 0, 0.23]} rotation={[Math.PI / 2, 0, 0]}>
-            <coneGeometry args={[0.12, 0.46, 12]} />
-            <meshBasicMaterial color="#72edff" transparent opacity={0.12 + boost * 0.53} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
-          </mesh>
-        ))}
-      </group>
-      <primitive object={headlightTarget} />
-      <spotLight position={[0, 1.05, -1.6]} target={headlightTarget} color="#d5f6ff" intensity={7} distance={28} angle={0.6} penumbra={0.6} />
-      <pointLight ref={driveLight} position={[0, 0.65, 1.8]} color="#31d8ff" intensity={1.3} distance={4} />
     </group>
   );
 }
