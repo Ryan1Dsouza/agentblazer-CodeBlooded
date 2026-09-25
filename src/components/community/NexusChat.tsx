@@ -328,25 +328,34 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
     })();
   };
 
-  const handleDeleteMessage = async (id: string) => {
+  const handleDeleteMessage = async (id: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!isAdmin) return;
     try {
       await deleteDoc(doc(db, 'chat_messages', id));
     } catch (err) {
       console.error('Error deleting message:', err);
+      alert('Failed to delete message. You may not have the required permissions.');
     }
   };
 
-  const handleClearAllMessages = async () => {
+  const handleClearAllMessages = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!isAdmin || !user) return;
     if (!window.confirm('⚠️ Are you sure you want to permanently delete ALL chat messages? This cannot be undone.')) return;
     try {
       const snapshot = await getDocs(collection(db, 'chat_messages'));
-      snapshot.forEach((d) => {
-        deleteDoc(doc(db, 'chat_messages', d.id)).catch(() => {});
-      });
+      const deletePromises = snapshot.docs.map((d) => deleteDoc(doc(db, 'chat_messages', d.id)));
+      await Promise.all(deletePromises);
     } catch (err) {
       console.error('Failed to clear all messages:', err);
+      alert('Failed to clear chat. You may not have the required permissions.');
     }
   };
 
@@ -424,6 +433,7 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
           <div className="chat-user-badge">
             {isAdmin && (
               <button
+                type="button"
                 onClick={handleClearAllMessages}
                 className="chat-signout-btn"
                 title="Wipe Chat History"
@@ -485,7 +495,8 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
                         {formatTime(msg.timestamp)}
                         {isAdmin && (
                           <button
-                            onClick={() => handleDeleteMessage(msg.id)}
+                            type="button"
+                            onClick={(e) => handleDeleteMessage(msg.id, e)}
                             className="chat-msg-delete"
                             title="Delete Message"
                             style={{ background: 'transparent', border: 'none', color: '#ff4444', cursor: 'pointer', marginLeft: '8px', fontSize: '14px', verticalAlign: 'middle', opacity: 0.7 }}

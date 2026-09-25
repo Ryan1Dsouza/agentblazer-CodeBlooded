@@ -84,11 +84,16 @@ export default function EventBulletin({ isAdmin }: Props) {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     try {
       await deleteDoc(doc(db, 'bulletin_posts', id));
     } catch (err) {
       console.error('Error deleting bulletin post:', err);
+      alert('Failed to delete post. You may not have the required permissions.');
     }
   };
 
@@ -312,8 +317,9 @@ export default function EventBulletin({ isAdmin }: Props) {
                 {/* Admin Controls */}
                 {isAdmin && (
                   <button
+                    type="button"
                     className="btn-delete-post"
-                    onClick={() => handleDelete(post.id)}
+                    onClick={(e) => handleDelete(post.id, e)}
                     title="Delete post"
                   >
                     🗑️
