@@ -67,7 +67,7 @@ export default function Community() {
           {activeTab === 'voice' && <CommunityVoice isAdmin={isAdmin} />}
           {activeTab === 'chat' && (
             <Suspense fallback={<div className="loading-state">Loading chat environment...</div>}>
-              <NexusChat />
+              <NexusChat isAdmin={isAdmin} />
             </Suspense>
           )}
         </div>

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import {
   collection, addDoc, query, orderBy, onSnapshot,
-  limit, serverTimestamp, doc, setDoc, deleteDoc, Timestamp
+  limit, serverTimestamp, doc, setDoc, deleteDoc, Timestamp, getDocs, where
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
@@ -26,7 +26,11 @@ interface OnlineUser {
 const PRESENCE_TIMEOUT = 90_000;
 const HEARTBEAT_INTERVAL = 30_000;
 
-export default function NexusChat() {
+interface NexusChatProps {
+  isAdmin?: boolean;
+}
+
+export default function NexusChat({ isAdmin }: NexusChatProps) {
   const { user, displayName, authError, isAuthenticating, handleSignIn, handleSignOut } = useAuth();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -126,7 +130,14 @@ export default function NexusChat() {
     setChatError('');
     if (!user) { setInput(''); setShowMentionMenu(false); return; }
 
-    const q = query(collection(db, 'chat_messages'), orderBy('timestamp', 'asc'), limit(200));
+    // Only fetch messages from the last 24 hours (86400000 ms)
+    const twentyFourHoursAgo = Date.now() - 86400000;
+    const q = query(
+      collection(db, 'chat_messages'), 
+      where('timestamp', '>=', twentyFourHoursAgo),
+      orderBy('timestamp', 'asc'), 
+      limit(200)
+    );
     const unsub = onSnapshot(q, (snapshot) => {
       const msgs: ChatMessage[] = [];
       snapshot.forEach((d) => {
@@ -138,7 +149,7 @@ export default function NexusChat() {
           content: data.content,
           isBot: data.isBot || false,
           isSystem: data.isSystem || false,
-          timestamp: data.timestamp?.toMillis() || Date.now(),
+          timestamp: data.timestamp?.toMillis ? data.timestamp.toMillis() : (data.timestamp || Date.now()),
         });
       });
       setMessages(msgs);
@@ -150,6 +161,29 @@ export default function NexusChat() {
 
     return () => unsub();
   }, [user]);
+
+  // ── Admin Auto-Cleanup (Deletes messages older than 24h from DB) ──
+  useEffect(() => {
+    if (!isAdmin || !user) return;
+    const cleanupOldMessages = async () => {
+      try {
+        const twentyFourHoursAgo = Date.now() - 86400000;
+        const oldQuery = query(
+          collection(db, 'chat_messages'),
+          where('timestamp', '<', twentyFourHoursAgo),
+          limit(50) 
+        );
+        const snapshot = await getDocs(oldQuery);
+        snapshot.forEach((d) => {
+          deleteDoc(doc(db, 'chat_messages', d.id)).catch(() => {});
+        });
+      } catch (err) {
+        console.error('Cleanup failed:', err);
+      }
+    };
+    // Run cleanup once on mount
+    cleanupOldMessages();
+  }, [isAdmin, user]);
 
   // ── Moderation ────────────────────────────────────────────────────────────
   const clientSideProfanityCheck = useCallback((text: string): boolean => {
@@ -266,6 +300,28 @@ export default function NexusChat() {
     })();
   };
 
+  const handleDeleteMessage = async (id: string) => {
+    if (!isAdmin) return;
+    try {
+      await deleteDoc(doc(db, 'chat_messages', id));
+    } catch (err) {
+      console.error('Error deleting message:', err);
+    }
+  };
+
+  const handleClearAllMessages = async () => {
+    if (!isAdmin || !user) return;
+    if (!window.confirm('⚠️ Are you sure you want to permanently delete ALL chat messages? This cannot be undone.')) return;
+    try {
+      const snapshot = await getDocs(collection(db, 'chat_messages'));
+      snapshot.forEach((d) => {
+        deleteDoc(doc(db, 'chat_messages', d.id)).catch(() => {});
+      });
+    } catch (err) {
+      console.error('Failed to clear all messages:', err);
+    }
+  };
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   const formatTime = (ts: number) =>
     new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
@@ -338,6 +394,21 @@ export default function NexusChat() {
             </span>
           </div>
           <div className="chat-user-badge">
+            {isAdmin && (
+              <button
+                onClick={handleClearAllMessages}
+                className="chat-signout-btn"
+                title="Wipe Chat History"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  color: '#ef4444',
+                  borderColor: 'rgba(239, 68, 68, 0.4)',
+                  marginRight: '0.5rem',
+                }}
+              >
+                Clear Chat
+              </button>
+            )}
             <span className="user-dot" />
             {displayName}
             <button
@@ -382,7 +453,21 @@ export default function NexusChat() {
                         {msg.isBot && <span className="bot-tag">BOT</span>}
                         {!msg.isBot && <span className="verified-tag" title="Verified @sjec.ac.in">✓</span>}
                       </span>
-                      <span className="chat-msg-time">{formatTime(msg.timestamp)}</span>
+                      <span className="chat-msg-time">
+                        {formatTime(msg.timestamp)}
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            className="chat-msg-delete"
+                            title="Delete Message"
+                            style={{ background: 'transparent', border: 'none', color: '#ff4444', cursor: 'pointer', marginLeft: '8px', fontSize: '14px', verticalAlign: 'middle', opacity: 0.7 }}
+                            onMouseOver={(e) => (e.currentTarget.style.opacity = '1')}
+                            onMouseOut={(e) => (e.currentTarget.style.opacity = '0.7')}
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </span>
                     </div>
                     <div className="chat-msg-content">{msg.content}</div>
                   </div>
