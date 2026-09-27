@@ -85,8 +85,9 @@ export default function EventBulletin({ isAdmin }: Props) {
       });
       setForm({ title: '', date: '', description: '', location: '', imageUrl: '', videoUrl: '' });
       setShowForm(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error adding bulletin post:', err);
+      alert('Failed to post: ' + err.message + '\n\nCheck your Firebase Firestore Database Rules. Make sure your account has write access to the bulletin_posts collection!');
     }
   };
 
