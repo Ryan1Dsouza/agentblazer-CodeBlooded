@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db, auth } from '../../lib/firebase';
+import { db } from '../../lib/firebase';
 
 interface BulletinPost {
   id: string;
@@ -37,6 +37,7 @@ export default function EventBulletin({ isAdmin }: Props) {
   const [posts, setPosts] = useState<BulletinPost[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedPost, setSelectedPost] = useState<BulletinPost | null>(null);
+  const [sortMode, setSortMode] = useState<'latest' | 'oldest' | 'upcoming' | 'past'>('latest');
   const [form, setForm] = useState({
     title: '',
     date: '',
@@ -68,26 +69,38 @@ export default function EventBulletin({ isAdmin }: Props) {
     return () => unsub();
   }, []);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title.trim() || !form.date.trim()) return;
+    if (!form.title.trim() || !form.date.trim()) {
+      alert('Please fill in both the Event Title and Date fields.');
+      return;
+    }
     
-    // The user must be authenticated with Firebase to write to Firestore
-    if (!auth.currentUser) {
-      alert("You must sign in with your SJEC email (via the 'SIGN IN' button in the navbar or Community chat) before you can post to the Bulletin Board.");
+    // Check if the image data is too large for Firestore (max ~1MB per document)
+    const formData = { ...form };
+    if (formData.imageUrl && formData.imageUrl.length > 900000) {
+      // Re-compress the image to a smaller size
+      alert('The uploaded image is too large. Please use a smaller image or provide a URL instead.');
       return;
     }
 
+    setIsSubmitting(true);
     try {
+      console.log('[EventBulletin] Attempting to post:', { title: formData.title, date: formData.date, imageLength: formData.imageUrl.length });
       await addDoc(collection(db, 'bulletin_posts'), {
-        ...form,
+        ...formData,
         createdAt: serverTimestamp(),
       });
+      console.log('[EventBulletin] Post successful!');
       setForm({ title: '', date: '', description: '', location: '', imageUrl: '', videoUrl: '' });
       setShowForm(false);
     } catch (err: any) {
-      console.error('Error adding bulletin post:', err);
-      alert('Failed to post: ' + err.message + '\n\nCheck your Firebase Firestore Database Rules. Make sure your account has write access to the bulletin_posts collection!');
+      console.error('[EventBulletin] Error adding bulletin post:', err);
+      alert('Failed to post: ' + (err.message || err.code || 'Unknown error') + '\n\nThis is likely a Firebase permissions issue. Make sure Firestore rules allow writes to the bulletin_posts collection.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -96,21 +109,33 @@ export default function EventBulletin({ isAdmin }: Props) {
       e.preventDefault();
       e.stopPropagation();
     }
-    if (!auth.currentUser) {
-      alert("You must sign in with your SJEC email to delete posts.");
-      return;
-    }
     try {
       await deleteDoc(doc(db, 'bulletin_posts', id));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error deleting bulletin post:', err);
-      alert('Failed to delete post. You may not have the required permissions.');
+      alert('Failed to delete post: ' + (err.code || '') + ' — ' + (err.message || 'Unknown error'));
     }
   };
 
   const isDirectVideo = (url: string) => {
     return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
   };
+
+  // Sort/filter posts based on selected mode
+  const now = new Date();
+  const sortedPosts = [...posts].sort((a, b) => {
+    switch (sortMode) {
+      case 'latest': return b.createdAt - a.createdAt;
+      case 'oldest': return a.createdAt - b.createdAt;
+      case 'upcoming': return new Date(a.date).getTime() - new Date(b.date).getTime();
+      case 'past': return new Date(b.date).getTime() - new Date(a.date).getTime();
+      default: return 0;
+    }
+  }).filter((post) => {
+    if (sortMode === 'upcoming') return new Date(post.date) >= now;
+    if (sortMode === 'past') return new Date(post.date) < now;
+    return true;
+  });
 
   return (
     <div className="bulletin-section">
@@ -155,6 +180,38 @@ export default function EventBulletin({ isAdmin }: Props) {
           </button>
         )}
       </div>
+
+      {/* Filter Bar */}
+      {posts.length > 0 && (
+        <div className="bulletin-filters" style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          {(['latest', 'oldest', 'upcoming', 'past'] as const).map((mode) => (
+            <button
+              key={mode}
+              className={`btn-filter ${sortMode === mode ? 'active' : ''}`}
+              onClick={() => setSortMode(mode)}
+              style={{
+                padding: '6px 16px',
+                borderRadius: '20px',
+                border: sortMode === mode ? '1px solid var(--accent, #a855f7)' : '1px solid rgba(255,255,255,0.15)',
+                background: sortMode === mode ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255,255,255,0.05)',
+                color: sortMode === mode ? 'var(--accent, #a855f7)' : 'rgba(255,255,255,0.6)',
+                fontSize: '12px',
+                fontWeight: 600,
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              {mode === 'latest' && '🕐 '}
+              {mode === 'oldest' && '📜 '}
+              {mode === 'upcoming' && '🔜 '}
+              {mode === 'past' && '📁 '}
+              {mode}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Admin Post Form */}
       {isAdmin && showForm && (
@@ -265,25 +322,36 @@ export default function EventBulletin({ isAdmin }: Props) {
               />
             </div>
           </div>
-          <button type="submit" className="btn-primary btn-post">
-            Publish Event Post
+          <button type="submit" className="btn-primary btn-post" disabled={isSubmitting}>
+            {isSubmitting ? '⏳ Posting...' : 'Publish Event Post'}
           </button>
         </form>
       )}
 
       {/* Posts Grid */}
-      {posts.length === 0 ? (
+      {sortedPosts.length === 0 ? (
         <div className="bulletin-empty">
           <span className="empty-icon">📭</span>
-          <p>No events posted yet.</p>
-          {isAdmin && <p className="empty-hint">Click "New Post" to create the first bulletin.</p>}
+          <p>{posts.length === 0 ? 'No events posted yet.' : `No ${sortMode} events found.`}</p>
+          {isAdmin && posts.length === 0 && <p className="empty-hint">Click "New Post" to create the first bulletin.</p>}
         </div>
       ) : (
         <div className="bulletin-grid">
-          {posts.map((post) => {
+          {sortedPosts.map((post) => {
             const ytEmbed = getYouTubeEmbedUrl(post.videoUrl);
             return (
               <div key={post.id} className="bulletin-card glass-panel">
+                {/* Admin Controls - rendered first so it's on top */}
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className="btn-delete-post"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(post.id, e); }}
+                    title="Delete post"
+                  >
+                    🗑️
+                  </button>
+                )}
                 {/* Media */}
                 {post.imageUrl && (
                   <div className="bulletin-media" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
@@ -324,18 +392,6 @@ export default function EventBulletin({ isAdmin }: Props) {
                     <p className="bulletin-desc">{post.description}</p>
                   )}
                 </div>
-
-                {/* Admin Controls */}
-                {isAdmin && (
-                  <button
-                    type="button"
-                    className="btn-delete-post"
-                    onClick={(e) => handleDelete(post.id, e)}
-                    title="Delete post"
-                  >
-                    🗑️
-                  </button>
-                )}
               </div>
             );
           })}
