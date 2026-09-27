@@ -46,7 +46,7 @@ export default function AdminGate() {
     } catch (err: any) {
       setIsAuthenticating(false);
       setShake(true);
-      setError('ACCESS DENIED — Invalid credentials');
+      setError(err.message || 'ACCESS DENIED — Invalid credentials');
       setPassword('');
       setTimeout(() => setShake(false), 500);
     }
