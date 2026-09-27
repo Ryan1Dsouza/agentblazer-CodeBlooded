@@ -36,6 +36,7 @@ Switch between three distinct visual themes with synchronized 3D scene lighting 
 *   **Discord-Style UI & Presence**: Features an "Online Members" sidebar with verified `@sjec.ac.in` email badges.
 *   **Domain-Restricted Google Auth**: Secure login strictly limited to approved college email addresses.
 *   **Integrated Bot**: Tag `@agentblazer` in the chat to get automated responses.
+*   **Secure Admin Portal**: Firebase Authenticated dashboard (`/admin`) for moderation and managing dynamic Bulletin Board events without exposing credentials.
 
 ### 🤖 5. Floating Assistant
 *   An on-screen interactive floating chat widget.
@@ -75,17 +76,16 @@ agentblazer-CodeBlooded/
 │   └── Photos/                   # Executive council & mentor portraits
 ├── src/
 │   ├── components/               # Reusable UI components
-│   │   ├── events3D/             # 3D interactive gamified canvas & scenes
-│   │   │   ├── modes/            # Mode scenes (Violet, Inferno, Frost)
-│   │   │   └── shared/           # Virtual joystick, HUD overlays, docking logic
-│   │   ├── community/            # Nexus Hub forum components & channel views
-│   │   ├── Header.tsx            # Clean Linear-style header with mode selector
-│   │   ├── Footer.tsx            # Portal footer with social links & branding
-│   │   ├── NexusFloatingChat.tsx # Floating AI companion widget
-│   │   ├── OrbitingSocials.tsx   # Interactive social ring widget
-│   │   ├── ParticleLogo.tsx      # Interactive particle mesh animation
-│   │   └── LoadingScreen.tsx     # Futuristic portal boot sequence
-│   ├── context/                  # Global React contexts (ThemeContext, etc.)
+│   │   ├── about/                # TeamCards, Portrait popups, Advisor components
+│   │   ├── community/            # Nexus Hub forum, Chat overlays, Event Bulletin Board
+│   │   ├── droneGame/            # Vehicle controllers, timelines, and game mechanics
+│   │   ├── events/               # Event cards, Gallery previews
+│   │   ├── events3D/             # 3D interactive gamified canvas & scenes (Violet, Inferno, Frost)
+│   │   ├── home/                 # FeaturedEvents, Hero sections
+│   │   ├── layout/               # Header, Footer, CursorFollower
+│   │   ├── loading/              # LoadingScreen, PageLoading animations
+│   │   └── shared/               # Badges, OrbitingSocials, StatPanels, ParticleLogo
+│   ├── context/                  # Global React contexts (ThemeContext, AuthContext)
 │   ├── data/                     # Data stores (events, team, advisors, config)
 │   ├── hooks/                    # Custom React hooks (useTheme, useGamepad, etc.)
 │   ├── pages/                    # Route pages (Home, About, Events, Join, Community)
