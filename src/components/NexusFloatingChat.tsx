@@ -196,49 +196,28 @@ export default function NexusFloatingChat() {
         </div>
       )}
 
-      <button 
-        className={`nfc-toggle-btn ${isOpen ? 'open' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label="Toggle AI Chat"
-        aria-expanded={isOpen}
-        aria-controls="agentblazer-ai-chat"
-        style={{ position: 'relative' }}
-      >
-        {/* Close Icon (Visible when open) */}
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="28" height="28" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2.5" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-          style={{
-            position: 'absolute',
-            opacity: isOpen ? 1 : 0,
-            transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
-            transition: 'all 0.3s ease'
-          }}
+      {!isOpen && (
+        <button 
+          className="nfc-toggle-btn"
+          onClick={() => setIsOpen(true)}
+          aria-label="Toggle AI Chat"
+          aria-expanded={isOpen}
+          aria-controls="agentblazer-ai-chat"
+          style={{ position: 'relative' }}
         >
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-
-        {/* Bot Icon (Visible when closed) */}
-        <Bot 
-          size={28}
-          style={{
-            position: 'absolute',
-            top: '14px',
-            left: '14px',
-            opacity: isOpen ? 0 : 1,
-            transform: isOpen ? 'rotate(90deg) scale(0.5)' : 'rotate(0deg) scale(1)',
-            transition: 'all 0.3s ease',
-            pointerEvents: 'none'
-          }} 
-        />
-      </button>
+          {/* Bot Icon (Visible when closed) */}
+          <Bot 
+            size={28}
+            style={{
+              position: 'absolute',
+              top: '14px',
+              left: '14px',
+              transition: 'all 0.3s ease',
+              pointerEvents: 'none'
+            }} 
+          />
+        </button>
+      )}
     </div>
   );
 }
