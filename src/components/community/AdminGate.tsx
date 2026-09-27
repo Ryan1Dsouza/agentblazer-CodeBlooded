@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
 
-const ADMIN_PASSWORD = 'agent@2025';
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'fallback_password';
 
 export default function AdminGate() {
   const navigate = useNavigate();
