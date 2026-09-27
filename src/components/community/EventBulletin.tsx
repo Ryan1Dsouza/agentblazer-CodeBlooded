@@ -110,6 +110,9 @@ export default function EventBulletin({ isAdmin }: Props) {
       e.preventDefault();
       e.stopPropagation();
     }
+    if (!window.confirm('Are you sure you want to delete this bulletin post? This action cannot be undone.')) {
+      return;
+    }
     try {
       await deleteDoc(doc(db, 'bulletin_posts', id));
     } catch (err: any) {
