@@ -299,7 +299,7 @@ export default function EventDetailModal({ event, onClose, theme = 'violet' }: E
                     className="event-modal-main-img"
                     decoding="async"
                     loading="eager"
-                    fetchpriority="high"
+                    fetchPriority="high"
                     style={{
                       width: isZoomed ? '100%' : 'auto',
                       height: isZoomed ? '100%' : 'auto',
