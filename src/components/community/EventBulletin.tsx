@@ -345,7 +345,12 @@ export default function EventBulletin({ isAdmin }: Props) {
           {sortedPosts.map((post) => {
             const ytEmbed = getYouTubeEmbedUrl(post.videoUrl);
             return (
-              <div key={post.id} className="bulletin-card glass-panel">
+              <div 
+                key={post.id} 
+                className="bulletin-card glass-panel" 
+                onClick={() => post.imageUrl && setSelectedPost(post)}
+                style={{ cursor: post.imageUrl ? 'pointer' : 'default' }}
+              >
                 {/* Admin Controls - rendered first so it's on top */}
                 {isAdmin && (
                   <button
@@ -359,7 +364,7 @@ export default function EventBulletin({ isAdmin }: Props) {
                 )}
                 {/* Media */}
                 {post.imageUrl && (
-                  <div className="bulletin-media" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
+                  <div className="bulletin-media">
                     <img src={post.imageUrl} alt={post.title} loading="lazy" />
                   </div>
                 )}
