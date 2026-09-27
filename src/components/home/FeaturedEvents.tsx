@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
 
 // Using the optimized webp images Codex generated
-import promptopsImg from '../../assets/home/promptops.webp';
-import llmImg from '../../assets/home/llm-workshop.webp';
-import cyberImg from '../../assets/home/cybersecurity.webp';
+import promptopsImg from '../../../assets/home/promptops.webp';
+import llmImg from '../../../assets/home/llm-workshop.webp';
+import cyberImg from '../../../assets/home/cybersecurity.webp';
 
 const events = [
   {
