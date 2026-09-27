@@ -107,6 +107,7 @@ export default function Events3DCanvas({
         dpr={[1, 1.5]}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         style={{ width: '100%', height: '100%', display: 'block' }}
+        frameloop={gameState === 'HUD_OPEN' ? 'demand' : 'always'}
       >
         <Suspense fallback={null}>
           {theme === 'inferno' ? (

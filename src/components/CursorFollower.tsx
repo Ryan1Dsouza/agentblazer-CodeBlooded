@@ -102,8 +102,8 @@ export default function CursorFollower() {
     <>
       <style>{`
         @media (pointer: fine) { 
-          body:not(:has(dialog[open])) * { cursor: none !important; } 
-          body:has(dialog[open]) .custom-cursor-container { display: none !important; }
+          body:not(:has(dialog[open], .event-modal-overlay)) * { cursor: none !important; } 
+          body:has(dialog[open], .event-modal-overlay) .custom-cursor-container { display: none !important; }
         }
       `}</style>
       <div className="custom-cursor-container" aria-hidden="true" style={{ pointerEvents: 'none', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 999999 }}>
