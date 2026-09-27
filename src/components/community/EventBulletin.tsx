@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
@@ -139,11 +140,11 @@ export default function EventBulletin({ isAdmin }: Props) {
 
   return (
     <div className="bulletin-section">
-      {selectedPost && (
+      {selectedPost && createPortal(
         <div 
           className="bulletin-modal-overlay" 
           onClick={() => setSelectedPost(null)} 
-          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
         >
           <div 
             className="bulletin-modal-content glass-panel" 
@@ -162,7 +163,8 @@ export default function EventBulletin({ isAdmin }: Props) {
             </p>
             {selectedPost.description && <p style={{ lineHeight: 1.6, color: '#fff', whiteSpace: 'pre-wrap' }}>{selectedPost.description}</p>}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       <div className="bulletin-header">
         <div>

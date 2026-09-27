@@ -297,6 +297,8 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
           return;
         }
 
+        const expireDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
         const docRef = await addDoc(collection(db, 'chat_messages'), {
           author: displayName,
           authorUid: user.uid,
@@ -304,6 +306,7 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
           isBot: false,
           isSystem: false,
           timestamp: serverTimestamp(),
+          expireAt: expireDate,
         });
         
         // Run AI moderation in the background so it doesn't block the UI
@@ -322,6 +325,7 @@ export default function NexusChat({ isAdmin }: NexusChatProps) {
             isBot: true,
             isSystem: false,
             timestamp: serverTimestamp(),
+            expireAt: expireDate,
           });
         }
       } catch (err) { console.error('Send error:', err); }
