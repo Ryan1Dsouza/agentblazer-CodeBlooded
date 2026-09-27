@@ -1,4 +1,4 @@
-import { siteConfig } from '../data/config';
+import { siteConfig } from '../../data/config';
 
 export default function Footer() {
   return (

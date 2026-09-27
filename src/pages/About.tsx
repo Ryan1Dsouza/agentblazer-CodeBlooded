@@ -4,8 +4,8 @@ import { officers } from '../data/team';
 import { committeeMembers } from '../data/committee';
 import { siteConfig } from '../data/config';
 import { TeamMember } from '../types';
-import PortraitPopup from '../components/PortraitPopup';
-import AboutPortraitPreview from '../components/AboutPortraitPreview';
+import PortraitPopup from '../components/about/PortraitPopup';
+import AboutPortraitPreview from '../components/about/AboutPortraitPreview';
 import testcaseImg from '../../assets/Photos/testcase.jpg';
 import '../styles/about.css';
 

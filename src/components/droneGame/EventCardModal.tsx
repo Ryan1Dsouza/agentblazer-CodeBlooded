@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Event } from '../../types';
-import GalleryPreview from '../GalleryPreview';
+import GalleryPreview from '../events/GalleryPreview';
 import { useState } from 'react';
 
 interface Props {

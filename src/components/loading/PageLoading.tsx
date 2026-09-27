@@ -1,4 +1,4 @@
-import '../styles/pageLoading.css';
+import '../../styles/pageLoading.css';
 
 export default function PageLoading() {
   return (

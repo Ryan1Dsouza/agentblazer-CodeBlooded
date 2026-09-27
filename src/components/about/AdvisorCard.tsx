@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Advisor } from '../types';
+import { Advisor } from '../../types';
 
 interface AdvisorCardProps {
   advisor: Advisor;

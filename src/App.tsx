@@ -2,8 +2,8 @@ import { useState, lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { ThemeProvider } from './hooks/useTheme'
 import MainLayout from './layouts/MainLayout'
-import LoadingScreen from './components/LoadingScreen'
-import PageLoading from './components/PageLoading'
+import LoadingScreen from './components/loading/LoadingScreen'
+import PageLoading from './components/loading/PageLoading'
 
 const Home = lazy(() => import('./pages/Home'))
 const About = lazy(() => import('./pages/About'))

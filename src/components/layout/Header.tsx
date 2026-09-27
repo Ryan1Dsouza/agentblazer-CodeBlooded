@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { useTheme } from '../hooks/useTheme';
-import { Theme } from '../types';
-import { siteConfig } from '../data/config';
+import { useTheme } from '../../hooks/useTheme';
+import { Theme } from '../../types';
+import { siteConfig } from '../../data/config';
 
 const navItems = [
   { path: '/', label: 'Home' },

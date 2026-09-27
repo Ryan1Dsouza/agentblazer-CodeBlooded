@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { TeamMember } from '../types';
+import { TeamMember } from '../../types';
 
 interface Props {
   member: TeamMember;

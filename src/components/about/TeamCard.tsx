@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { TeamMember } from '../types';
+import { TeamMember } from '../../types';
 
 interface Props {
   member: TeamMember;

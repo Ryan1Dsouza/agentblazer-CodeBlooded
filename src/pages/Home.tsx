@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { siteConfig } from '../data/config';
-import StatPanel from '../components/StatPanel';
-import ParticleLogo from '../components/ParticleLogo';
-import OrbitingSocials from '../components/OrbitingSocials';
+import StatPanel from '../components/shared/StatPanel';
+import ParticleLogo from '../components/shared/ParticleLogo';
+import OrbitingSocials from '../components/shared/OrbitingSocials';
 import FeaturedEvents from '../components/home/FeaturedEvents';
 import '../styles/home.css';
 

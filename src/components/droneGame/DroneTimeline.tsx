@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Event } from '../types';
+import { Event } from '../../types';
 import DroneVehicle from './DroneVehicle';
 
 interface Props {

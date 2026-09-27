@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { useReducedMotion } from '../hooks/useReducedMotion';
-import { useAnimationActivity } from '../hooks/useAnimationActivity';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
+import { useAnimationActivity } from '../../hooks/useAnimationActivity';
 
 interface ParticleLogoProps {
   logoPath: string;

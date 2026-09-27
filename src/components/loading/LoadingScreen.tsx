@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Flame, Orbit, Snowflake } from 'lucide-react';
-import { useTheme } from '../hooks/useTheme';
-import type { Theme } from '../types';
-import { useBootCanvas } from './loading/useBootCanvas';
-import { BOOT_LOGO as LOGO, BOOT_RESOURCE_COUNT as RESOURCE_COUNT, startBootResourceChecks } from './loading/bootResources';
-import '../styles/loadingScreen.css';
+import { useTheme } from '../../hooks/useTheme';
+import type { Theme } from '../../types';
+import { useBootCanvas } from './useBootCanvas';
+import { BOOT_LOGO as LOGO, BOOT_RESOURCE_COUNT as RESOURCE_COUNT, startBootResourceChecks } from './bootResources';
+import '../../styles/loadingScreen.css';
 
 interface LoadingScreenProps { onComplete: () => void; }
 

@@ -1,7 +1,7 @@
 import { useTheme } from '../hooks/useTheme';
 import { siteConfig } from '../data/config';
-import ParticleLogo from '../components/ParticleLogo';
-import OrbitingSocials from '../components/OrbitingSocials';
+import ParticleLogo from '../components/shared/ParticleLogo';
+import OrbitingSocials from '../components/shared/OrbitingSocials';
 
 export default function Join() {
   const { theme } = useTheme();

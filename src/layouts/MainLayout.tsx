@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import CursorFollower from '../components/CursorFollower';
-import NexusFloatingChat from '../components/NexusFloatingChat';
+import Header from '../components/layout/Header';
+import Footer from '../components/layout/Footer';
+import CursorFollower from '../components/layout/CursorFollower';
+import NexusFloatingChat from '../components/community/NexusFloatingChat';
 
 import { lazy, Suspense } from 'react';
 const BackgroundScene = lazy(() => import('../three/BackgroundScene'));
