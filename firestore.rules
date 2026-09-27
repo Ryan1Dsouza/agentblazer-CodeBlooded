@@ -8,20 +8,25 @@ service cloud.firestore {
         && request.auth.token.email.matches('^[^@]+@sjec[.]ac[.]in$');
     }
 
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'superadmin@agentblazer.club';
+    }
+
     match /chat_messages/{messageId} {
-      allow read, create: if isCollegeGoogleUser();
+      allow read, create: if isCollegeGoogleUser() || isAdmin();
       allow update: if false;
-      allow delete: if true;
+      allow delete: if isAdmin();
     }
 
     match /bulletin_posts/{postId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Presence: each signed-in user can write their own doc; anyone signed in can read all
     match /presence/{userId} {
-      allow read: if isCollegeGoogleUser();
-      allow write: if isCollegeGoogleUser() && request.auth.uid == userId;
+      allow read: if isCollegeGoogleUser() || isAdmin();
+      allow write: if (isCollegeGoogleUser() || isAdmin()) && request.auth.uid == userId;
     }
   }
 }

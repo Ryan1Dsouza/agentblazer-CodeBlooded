@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
-
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'fallback_password';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AdminGate() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { user } = useAuth();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -22,28 +24,27 @@ export default function AdminGate() {
       ? 'rgba(14, 165, 233, 0.3)'
       : 'rgba(168, 85, 247, 0.3)';
 
-  // If already authenticated in this session, redirect immediately
+  // If already authenticated as admin, redirect immediately
   useEffect(() => {
-    if (sessionStorage.getItem('isAdmin') === 'true') {
+    if (user?.email === 'superadmin@agentblazer.club') {
       navigate('/community', { replace: true });
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsAuthenticating(true);
 
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticating(true);
-      sessionStorage.setItem('isAdmin', 'true');
-      setTimeout(() => {
-        navigate('/community', { replace: true });
-      }, 1200);
-    } else {
+    try {
+      await signInWithEmailAndPassword(auth, 'superadmin@agentblazer.club', password);
+      // Success will trigger the useEffect above to redirect
+    } catch (err: any) {
+      setIsAuthenticating(false);
       setShake(true);
       setError('ACCESS DENIED — Invalid credentials');
       setPassword('');

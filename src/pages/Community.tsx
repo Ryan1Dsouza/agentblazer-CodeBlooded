@@ -1,6 +1,9 @@
 import { useState, lazy, Suspense } from 'react';
 import EventBulletin from '../components/community/EventBulletin';
 import CommunityVoice from '../components/community/CommunityVoice';
+import { useAuth } from '../context/AuthContext';
+import { auth } from '../lib/firebase';
+import { signOut } from 'firebase/auth';
 
 const NexusChat = lazy(() => import('../components/community/NexusChat'));
 
@@ -8,7 +11,8 @@ type Tab = 'bulletin' | 'voice' | 'chat';
 
 export default function Community() {
   const [activeTab, setActiveTab] = useState<Tab>('bulletin');
-  const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+  const { user } = useAuth();
+  const isAdmin = user?.email === 'superadmin@agentblazer.club';
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: 'bulletin', label: 'Event Bulletin', icon: '📡' },
@@ -28,8 +32,8 @@ export default function Community() {
                   🔑 ADMIN
                   <button
                     className="admin-logout-btn"
-                    onClick={() => {
-                      sessionStorage.removeItem('isAdmin');
+                    onClick={async () => {
+                      await signOut(auth);
                       window.location.reload();
                     }}
                     title="Exit Admin Mode"
