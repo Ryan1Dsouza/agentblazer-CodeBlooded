@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { db, auth } from '../../lib/firebase';
 
 interface BulletinPost {
   id: string;
@@ -71,6 +71,12 @@ export default function EventBulletin({ isAdmin }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim() || !form.date.trim()) return;
+    
+    // The user must be authenticated with Firebase to write to Firestore
+    if (!auth.currentUser) {
+      alert("You must sign in with your SJEC email (via the 'SIGN IN' button in the navbar or Community chat) before you can post to the Bulletin Board.");
+      return;
+    }
 
     try {
       await addDoc(collection(db, 'bulletin_posts'), {
@@ -88,6 +94,10 @@ export default function EventBulletin({ isAdmin }: Props) {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
+    }
+    if (!auth.currentUser) {
+      alert("You must sign in with your SJEC email to delete posts.");
+      return;
     }
     try {
       await deleteDoc(doc(db, 'bulletin_posts', id));
